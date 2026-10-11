@@ -1,0 +1,74 @@
+{
+  "series": {
+    "state": "US",
+    "indicator": "Number of Drug Overdose Deaths",
+    "value_col": "Data Value",
+    "source": "CDC/NCHS VSRR Provisional Drug Overdose Death Counts (data.cdc.gov xkb8-kh2a), file data/raw/cdc_vsrr_overdose_national_state.csv, State='US', Indicator='Number of Drug Overdose Deaths', column='Data Value'; 12-month-ending totals",
+    "processed_file": "data/processed/us_all_drug_series.csv"
+  },
+  "n_months": 136,
+  "date_range": [
+    "2015-01",
+    "2026-04"
+  ],
+  "break_fit": {
+    "min_seg": 12,
+    "tau1_date": "2020-07",
+    "tau2_date": "2023-05",
+    "sse_flat": 29717659852.227158,
+    "sse_one_break": 3748162960.5651207,
+    "sse_two_break": 1531261248.8341482,
+    "one_break_date": "2023-08"
+  },
+  "peak": {
+    "date": "2023-06",
+    "value": 111466
+  },
+  "latest": {
+    "date": "2026-04",
+    "value": 65726
+  },
+  "pct_decline_from_peak": 41.0,
+  "nsduh_source": "SAMHSA NSDUH published estimates (2024 annual national report + 2021-2024 trend report), hard-coded; 2023 omitted (published only as 3.0-3.1 range)",
+  "nsduh_vs_deaths": [
+    {
+      "year": 2021,
+      "opioid_misuse_pct": 3.2,
+      "deaths": 107573,
+      "deaths_idx": 100.0,
+      "opioid_misuse_idx": 100.0
+    },
+    {
+      "year": 2022,
+      "opioid_misuse_pct": 3.0,
+      "deaths": 109413,
+      "deaths_idx": 101.7,
+      "opioid_misuse_idx": 93.8
+    },
+    {
+      "year": 2023,
+      "opioid_misuse_pct": null,
+      "deaths": 106881,
+      "deaths_idx": 99.4,
+      "opioid_misuse_idx": null
+    },
+    {
+      "year": 2024,
+      "opioid_misuse_pct": 2.7,
+      "deaths": 80860,
+      "deaths_idx": 75.2,
+      "opioid_misuse_idx": 84.4
+    }
+  ],
+  "nsduh_vs_deaths_change": {
+    "from_year": 2021,
+    "to_year": 2024,
+    "deaths_pct_change": -24.8,
+    "opioid_misuse_pct_change": -15.6
+  },
+  "charts": [
+    "outputs/all_drug_breakpoints.png",
+    "outputs/all_drug_netflow_proxy.png",
+    "outputs/all_drug_vs_nsduh.png"
+  ]
+}

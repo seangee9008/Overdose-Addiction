@@ -1,0 +1,74 @@
+{
+  "series": {
+    "state": "US",
+    "indicator": "Opioids (T40.0-T40.4,T40.6)",
+    "value_col": "Data Value",
+    "source": "CDC/NCHS VSRR Provisional Drug Overdose Death Counts (data.cdc.gov xkb8-kh2a), file data/raw/cdc_vsrr_overdose_national_state.csv, State='US', Indicator='Opioids (T40.0-T40.4,T40.6)', column='Data Value'; 12-month-ending totals",
+    "processed_file": "data/processed/us_opioids_series.csv"
+  },
+  "n_months": 136,
+  "date_range": [
+    "2015-01",
+    "2026-04"
+  ],
+  "break_fit": {
+    "min_seg": 12,
+    "tau1_date": "2020-07",
+    "tau2_date": "2023-06",
+    "sse_flat": 25943664296.6979,
+    "sse_one_break": 2620278854.513705,
+    "sse_two_break": 1006399771.1392002,
+    "one_break_date": "2023-07"
+  },
+  "peak": {
+    "date": "2023-06",
+    "value": 84972
+  },
+  "latest": {
+    "date": "2026-04",
+    "value": 41031
+  },
+  "pct_decline_from_peak": 51.7,
+  "nsduh_source": "SAMHSA NSDUH published estimates (2024 annual national report + 2021-2024 trend report), hard-coded; 2023 omitted (published only as 3.0-3.1 range)",
+  "nsduh_vs_deaths": [
+    {
+      "year": 2021,
+      "opioid_misuse_pct": 3.2,
+      "deaths": 80997,
+      "deaths_idx": 100.0,
+      "opioid_misuse_idx": 100.0
+    },
+    {
+      "year": 2022,
+      "opioid_misuse_pct": 3.0,
+      "deaths": 82851,
+      "deaths_idx": 102.3,
+      "opioid_misuse_idx": 93.8
+    },
+    {
+      "year": 2023,
+      "opioid_misuse_pct": null,
+      "deaths": 80719,
+      "deaths_idx": 99.7,
+      "opioid_misuse_idx": null
+    },
+    {
+      "year": 2024,
+      "opioid_misuse_pct": 2.7,
+      "deaths": 55007,
+      "deaths_idx": 67.9,
+      "opioid_misuse_idx": 84.4
+    }
+  ],
+  "nsduh_vs_deaths_change": {
+    "from_year": 2021,
+    "to_year": 2024,
+    "deaths_pct_change": -32.1,
+    "opioid_misuse_pct_change": -15.6
+  },
+  "charts": [
+    "outputs/opioids_breakpoints.png",
+    "outputs/opioids_netflow_proxy.png",
+    "outputs/opioids_vs_nsduh.png"
+  ]
+}
