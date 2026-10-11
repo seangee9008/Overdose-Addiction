@@ -11,9 +11,13 @@ Standard library only. Re-running skips files that already exist; use --force to
 
 STATUS OF EACH SOURCE
   cdc_state    VERIFIED  (national series from this dataset was pulled via the same API)
-  cdc_county   same Socrata platform/URL pattern, not individually fetched yet
-  nsduh_2023   URL from SAMHSA's own page; large zip (~hundreds of MB)
-  svi_2022     ArcGIS paging code is UNTESTED -- if it errors, use the manual link in DATA.md
+  cdc_county   VERIFIED 2026-10-10
+  nsduh_2023   VERIFIED 2026-10-10. Stata bundle (.dta). The SAS bundle on the same page is a
+               SAS CPORT (.stc) file that Python cannot read without SAS, so it is not used.
+  svi_2022     VERIFIED 2026-10-10. Official ATSDR CSV from svi.cdc.gov (no geometry; join on FIPS).
+  svi_2022_arcgis_geo  OPT-IN ONLY (--only svi_2022_arcgis_geo). Polygons from an ArcGIS Online
+               layer whose metadata credits CDC/ATSDR GRASP, but it is hosted in a shared public
+               org, so treat it as a mirror. Worked 2026-10-10 (3,144 features).
 Nothing here is parsed or cleaned; this script only fetches and records checksums.
 """
 import argparse, hashlib, json, os, sys, time, urllib.parse, urllib.request
@@ -26,10 +30,12 @@ FILES = {
                   "cdc_vsrr_overdose_national_state.csv"),
     "cdc_county": ("https://data.cdc.gov/api/views/gb4e-yj24/rows.csv?accessType=DOWNLOAD",
                    "cdc_vsrr_overdose_county.csv"),
-    "nsduh_2023": ("https://www.samhsa.gov/data/system/files/media-puf-file/nsduh-2023-ds0001-bndl-data-sas_v2.zip",
-                   "nsduh_2023_puf_sas.zip"),
+    "nsduh_2023": ("https://www.samhsa.gov/data/system/files/media-puf-file/nsduh-2023-ds0001-bndl-data-stata_v2.zip",
+                   "nsduh_2023_puf_stata.zip"),
     "nsduh_2023_codebook": ("https://www.samhsa.gov/data/system/files/media-puf-file/nsduh-2023-ds0001-info-codebook_v2.pdf",
                             "nsduh_2023_codebook.pdf"),
+    "svi_2022": ("https://svi.cdc.gov/Documents/Data/2022/csv/states_counties/SVI_2022_US_county.csv",
+                 "svi_2022_us_county.csv"),
 }
 SVI_LAYER = "https://services7.arcgis.com/arZnhQhtvIXpgVPD/ArcGIS/rest/services/SVI2022_US_county/FeatureServer/0/query"
 
@@ -66,7 +72,7 @@ def download(url, dest, force=False):
 
 
 def fetch_svi(dest, force=False):
-    """Page through the ArcGIS FeatureServer layer as GeoJSON. UNTESTED."""
+    """Page through the ArcGIS FeatureServer layer as GeoJSON (non-official mirror; opt-in)."""
     if os.path.exists(dest) and not force:
         print(f"  skip (exists): {dest}")
         return True
@@ -100,15 +106,16 @@ def main():
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--list", action="store_true")
     a = ap.parse_args()
-    names = list(FILES) + ["svi_2022"]
+    names = list(FILES)
+    optional = ["svi_2022_arcgis_geo"]
     if a.list:
-        print("\n".join(names)); return
+        print("\n".join(names + [f"{o} (opt-in)" for o in optional])); return
     todo = a.only or names
     os.makedirs(RAW, exist_ok=True)
     manifest = {}
     for name in todo:
         print(f"[{name}]")
-        if name == "svi_2022":
+        if name == "svi_2022_arcgis_geo":
             dest = os.path.join(RAW, "svi_2022_county.geojson")
             ok = fetch_svi(dest, a.force)
         elif name in FILES:
