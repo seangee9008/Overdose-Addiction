@@ -98,7 +98,7 @@ Source: data.cdc.gov dataset gb4e-yj24.
 
 - **No drug/indicator column.** This file is all-drug overdose deaths only; it cannot give opioid-specific county counts.
 - **Values are 12-month-ending totals**, like the state file. Check: summing every county for 2023-12
-  gives 99,743, versus 106,881 for `US` / `Number of Drug Overdose Deaths` / 2023-12 in the state file.
+  (one row per FIPS) gives 99,691, versus 106,881 for `US` / `Number of Drug Overdose Deaths` / 2023-12 in the state file.
   The shortfall is consistent with suppressed cells.
 - Suppressed/missing `Provisional Drug Overdose Deaths`: 47.0% of rows
   (footnote: counts 1–9 suppressed under NCHS confidentiality rules).

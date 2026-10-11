@@ -80,7 +80,8 @@ def profile_cdc_county(path, svi_fips):
     v = pd.to_numeric(df["Provisional Drug Overdose Deaths"], errors="coerce")
     fips5 = df["FIPS"].str.zfill(5)
     dates = pd.to_datetime(df["MonthEndingDate"], format="%m/%d/%Y")
-    dec23 = v[(df.Year == "2023") & (df.Month == "12")].sum()
+    dec23 = (df.assign(v=v)[(df.Year == "2023") & (df.Month == "12")]
+             .drop_duplicates("FIPS")["v"].sum())
     rows_per_month = df.groupby(["Year", "Month"]).size()
     code = df["CODE2013"].value_counts().sort_index().to_dict()
     one = df[(df.Year == "2023") & (df.Month == "12")]
@@ -105,7 +106,7 @@ Source: data.cdc.gov dataset gb4e-yj24.
 
 - **No drug/indicator column.** This file is all-drug overdose deaths only; it cannot give opioid-specific county counts.
 - **Values are 12-month-ending totals**, like the state file. Check: summing every county for 2023-12
-  gives {dec23:,.0f}, versus 106,881 for `US` / `Number of Drug Overdose Deaths` / 2023-12 in the state file.
+  (one row per FIPS) gives {dec23:,.0f}, versus 106,881 for `US` / `Number of Drug Overdose Deaths` / 2023-12 in the state file.
   The shortfall is consistent with suppressed cells.
 - Suppressed/missing `Provisional Drug Overdose Deaths`: {v.isna().mean():.1%} of rows
   (footnote: counts 1–9 suppressed under NCHS confidentiality rules).
