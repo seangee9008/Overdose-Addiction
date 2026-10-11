@@ -218,3 +218,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- Project-specific (Stats 199 overdose project) ---
+# Raw downloads are never committed (NSDUH zip alone is hundreds of MB); re-fetch with fetch_data.py
+data/raw/
+.venv/
+.salt
+.cache/
