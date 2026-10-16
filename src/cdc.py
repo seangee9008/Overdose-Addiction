@@ -17,9 +17,12 @@ SYNTHETIC_OPIOIDS = "Synthetic opioids, excl. methadone (T40.4)"
 VALUE_COLS = ("Data Value", "Predicted Value")
 
 
-def load_series(path=STATE_CSV, state="US", indicator=ALL_DRUG, value_col="Data Value"):
+def load_series(path=STATE_CSV, state="US", indicator=ALL_DRUG, value_col="Data Value",
+                allow_missing=False):
     """Return a DataFrame [date, year, month, deaths] for one state x indicator,
-    sorted by date. Raises if the indicator/state is not in the file or values are missing."""
+    sorted by date. Raises if the indicator/state is not in the file. Missing
+    (suppressed / low-quality) values raise unless allow_missing=True, in which case
+    they stay NaN -- never filled in -- and deaths is float."""
     if value_col not in VALUE_COLS:
         raise ValueError(f"value_col must be one of {VALUE_COLS}")
     raw = pd.read_csv(path, dtype=str)
@@ -32,12 +35,12 @@ def load_series(path=STATE_CSV, state="US", indicator=ALL_DRUG, value_col="Data 
     if not (sub["Period"] == "12 month-ending").all():
         raise ValueError("expected only 12 month-ending rows")
     vals = pd.to_numeric(sub[value_col].str.replace(",", ""), errors="coerce")
-    if vals.isna().any():
+    if vals.isna().any() and not allow_missing:
         missing = sub.loc[vals.isna(), ["Year", "Month"]].to_records(index=False).tolist()
         raise ValueError(f"{value_col} missing (suppressed/low quality) for {missing}")
     out = pd.DataFrame({
         "date": pd.to_datetime(sub["Year"] + "-" + sub["Month"], format="%Y-%B"),
-        "deaths": vals.astype(int),
+        "deaths": vals if allow_missing else vals.astype(int),
     }).sort_values("date").reset_index(drop=True)
     if out["date"].duplicated().any():
         raise ValueError("duplicate months in series")
