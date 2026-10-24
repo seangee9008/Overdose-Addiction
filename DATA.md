@@ -27,3 +27,51 @@ python fetch_data.py --only cdc_state cdc_county
 ```
 
 Then `unzip -o data/raw/nsduh_2023_puf_stata.zip -d data/raw/nsduh_2023` and `python -m src.profile_data`.
+
+## Data layer (raw -> Parquet -> dbt -> analysis)
+
+```mermaid
+flowchart LR
+    subgraph raw["data/raw/ (downloads, git-ignored, never modified)"]
+        R1["CDC national/state CSV"]
+        R2["CDC county CSV"]
+        R3["SVI 2022 county CSV"]
+        R4["NSDUH 2021-2024 .dta"]
+        R5["NSDUH 2024 .dta"]
+    end
+    subgraph interim["data/interim/ (Parquet)"]
+        I["cdc_state, cdc_county, svi_county,<br/>nsduh_2021_2024, nsduh_2024,<br/>nsduh_value_labels + MANIFEST"]
+    end
+    subgraph wh["data/warehouse/overdose.duckdb (dbt)"]
+        S["staging views<br/>stg_cdc_state, stg_cdc_county(_all),<br/>stg_svi, stg_nsduh(_2024), stg_nsduh_value_labels"]
+        M["marts<br/>state_deaths_long, national_deaths_monthly,<br/>county_deaths_svi, county_fips_audit,<br/>nsduh_respondent, nsduh_value_labels"]
+    end
+    subgraph out["analysis"]
+        A["analyze_real.py, src/nsduh_estimates.py,<br/>src/step_a..d.py"]
+        O["outputs/ + data/processed/"]
+        RES["results/RESULTS.md"]
+    end
+    raw -- "src/ingest.py<br/>(pandera checks)" --> interim
+    interim -- "dbt build<br/>(73 data tests)" --> S --> M
+    M -- "src/warehouse.py (SQL)" --> A --> O -- "src/build_results.py" --> RES
+```
+
+| Layer | Where | Built by | Checks |
+|---|---|---|---|
+| raw | `data/raw/` (git-ignored, never modified) | `fetch_data.py` | sha256 in `data/raw/MANIFEST.json` |
+| interim | `data/interim/*.parquet` (git-ignored) | `python -m src.ingest` | pandera schemas (`src/schemas.py`); rows + sha256 in `data/interim/MANIFEST.json` |
+| staging | DuckDB views `stg_*` | `dbt build` | dbt tests in `dbt/models/staging/schema.yml` |
+| marts | DuckDB tables | `dbt build` | dbt tests in `dbt/models/marts/schema.yml` + `dbt/tests/*.sql` |
+
+Marts (what the analysis reads):
+
+| Mart | Grain | Notes |
+|---|---|---|
+| `state_deaths_long` | state x indicator x month (complete grid) | `is_row_missing` (no row in the file, e.g. Louisiana has no drug-specific rows) and `is_data_value_missing` (blank, e.g. Florida's drug-specific months); nothing imputed |
+| `national_deaths_monthly` | indicator x month, `state = 'US'` | subset of the above |
+| `county_deaths_svi` | county x month | FIPS zero-padded; Virginia duplicate rows collapsed; `is_suppressed` with `deaths_reported` NULL and bounds [1, 9] (never 0); inner join to SVI 2022 |
+| `county_fips_audit` | one row per issue | counties lost in the CDC-SVI join (CT legacy counties, AK 02261 / 02063 / 02066, CT planning regions) and the duplicate-FIPS rows |
+| `nsduh_respondent` | respondent x year (2021-2024) | design variables, demographics, SAMHSA recodes, comparable `OPI_MISUSE` / `OPI_OUD`; -9 = NULL. Individual level: never join to area marts |
+| `nsduh_value_labels` | variable x code | Stata value labels |
+
+See README.md "Extension points" for where NFLIS-Drug or TEDS-A would plug in.
