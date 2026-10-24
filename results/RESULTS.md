@@ -645,3 +645,167 @@ Sources:
 | HERYR | adjusted | NEWRACE2[5] | -1.577457 | 0.431006 | 36 |
 | HERYR | adjusted | NEWRACE2[6] | 0.632274 | 0.209016 | 36 |
 | HERYR | adjusted | NEWRACE2[7] | -0.595378 | 0.235479 | 36 |
+
+## Step D: county change in overdose deaths by social vulnerability (CDC county + SVI only)
+
+Produced by `src/step_d.py` (model: `src/count_models.py`).
+
+> All-drug deaths (county file has no opioid split). Area-level associations only; they do not describe individuals (ecological fallacy).
+
+### Model (from the script)
+
+```
+negative binomial, interval-censored for suppressed cells (src/count_models.py):
+  log E[deaths] = log(pop) + b0 + g*1[2025] + sum_q a_q*1[SVI quartile q] + sum_q d_q*1[2025]*1[quartile q]
+  Quartiles of RPL_THEMES (Q1 = least vulnerable, reference). The 2025-vs-base rate ratio in
+  quartile q is exp(g + d_q); d_q compares that change with Q1. Joint Wald test of all d_q = 0.
+  SEs clustered by county (each county appears in both periods).
+For transparency, the same model is also fit with suppressed cells (a) set to 0 and (b) dropped.
+```
+
+![step_d_change_by_svi.png](../outputs/step_d_change_by_svi.png)
+
+### Change in death rate by SVI quartile (rate ratio end vs base)
+
+| quartile | counties | change_rate_ratio | ci_low | ci_high | pct_change | analysis | suppressed_handling | periods |
+|---|---|---|---|---|---|---|---|---|
+| Q1 (least vulnerable) | 784 | 0.589 | 0.555 | 0.624 | -41.102 | main | censored | 2022->2025 |
+| Q2 | 783 | 0.582 | 0.554 | 0.611 | -41.845 | main | censored | 2022->2025 |
+| Q3 | 781 | 0.626 | 0.598 | 0.655 | -37.386 | main | censored | 2022->2025 |
+| Q4 (most vulnerable) | 785 | 0.660 | 0.630 | 0.692 | -33.986 | main | censored | 2022->2025 |
+| Q1 (least vulnerable) | 784 | 0.450 | 0.406 | 0.499 | -54.996 | main | zero | 2022->2025 |
+| Q2 | 783 | 0.442 | 0.405 | 0.483 | -55.771 | main | zero | 2022->2025 |
+| Q3 | 781 | 0.523 | 0.483 | 0.566 | -47.727 | main | zero | 2022->2025 |
+| Q4 (most vulnerable) | 785 | 0.555 | 0.512 | 0.600 | -44.549 | main | zero | 2022->2025 |
+| Q1 (least vulnerable) | 392 | 0.550 | 0.514 | 0.588 | -45.036 | main | drop | 2022->2025 |
+| Q2 | 378 | 0.570 | 0.539 | 0.603 | -43.027 | main | drop | 2022->2025 |
+| Q3 | 372 | 0.589 | 0.556 | 0.623 | -41.114 | main | drop | 2022->2025 |
+| Q4 (most vulnerable) | 363 | 0.627 | 0.591 | 0.664 | -37.349 | main | drop | 2022->2025 |
+| Q1 (least vulnerable) | 784 | 0.648 | 0.612 | 0.687 | -35.172 | sensitivity | censored | 2023->2025 |
+| Q2 | 783 | 0.627 | 0.600 | 0.656 | -37.284 | sensitivity | censored | 2023->2025 |
+| Q3 | 781 | 0.627 | 0.599 | 0.655 | -37.326 | sensitivity | censored | 2023->2025 |
+| Q4 (most vulnerable) | 785 | 0.682 | 0.651 | 0.713 | -31.834 | sensitivity | censored | 2023->2025 |
+
+
+### Model information (Wald test: does the change differ across quartiles?)
+
+| analysis | suppressed_handling | periods | base | end | suppressed | wald_interactions | wald_df | wald_p | loglik | alpha | n | n_censored | clusters | converged |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| main | censored | 2022->2025 | 2022 | 2025 | censored | 16.4957 | 3 | 0.0009 | -12,150.3015 | 0.2586 | 6266 | 3039 | 3133 | True |
+| main | zero | 2022->2025 | 2022 | 2025 | zero | 19.1895 | 3 | 0.0002 | -14,715.5603 | 3.8635 | 6266 | 0 | 3133 | True |
+| main | drop | 2022->2025 | 2022 | 2025 | drop | 9.3949 | 3 | 0.0245 | -10,973.8239 | 0.2708 | 3227 | 0 | 2012 | True |
+| sensitivity | censored | 2023->2025 | 2023 | 2025 | censored | 8.7843 | 3 | 0.0323 | -12,008.9177 | 0.2481 | 6266 | 3052 | 3133 | True |
+
+
+### Counties: cleaning and join
+
+| item | value |
+|---|---|
+| cdc_fips_after_padding_and_dedup | 3142 |
+| virginia_duplicate_rows_collapsed | [{"FIPS": "51005", "ST_ABBREV": "VA", "COUNTYNAME": "Alleghany"}, {"FIPS": "51005", "ST_ABBREV": "VA", "COUNTYNAME": "Clifton Forge (city)"}, {"FIPS": "51019", "ST_ABBREV": "VA", "COUNTYNAME": "Bedford (city)"}, {"FIPS": "51019", "ST_ABBREV": "VA", "COUNTYNAME": "Bedford"}] |
+| counties_in_analysis | 3133 |
+| cdc_counties_lost_in_join | 9 |
+| svi_counties_unmatched | 11 |
+
+
+#### Counties lost in the CDC-SVI join
+
+| side | FIPS | ST_ABBREV | name |
+|---|---|---|---|
+| CDC county file, no SVI match | 2261 | AK | Valdez-Cordova (CA) |
+| CDC county file, no SVI match | 9001 | CT | Fairfield |
+| CDC county file, no SVI match | 9003 | CT | Hartford |
+| CDC county file, no SVI match | 9005 | CT | Litchfield |
+| CDC county file, no SVI match | 9007 | CT | Middlesex |
+| CDC county file, no SVI match | 9009 | CT | New Haven |
+| CDC county file, no SVI match | 9011 | CT | New London |
+| CDC county file, no SVI match | 9013 | CT | Tolland |
+| CDC county file, no SVI match | 9015 | CT | Windham |
+| SVI, no CDC match | 2063 | AK | Chugach Census Area, Alaska |
+| SVI, no CDC match | 2066 | AK | Copper River Census Area, Alaska |
+| SVI, no CDC match | 9110 | CT | Capitol Planning Region, Connecticut |
+| SVI, no CDC match | 9120 | CT | Greater Bridgeport Planning Region, Connecticut |
+| SVI, no CDC match | 9130 | CT | Lower Connecticut River Valley Planning Region, Connecticut |
+| SVI, no CDC match | 9140 | CT | Naugatuck Valley Planning Region, Connecticut |
+| SVI, no CDC match | 9150 | CT | Northeastern Connecticut Planning Region, Connecticut |
+| SVI, no CDC match | 9160 | CT | Northwest Hills Planning Region, Connecticut |
+| SVI, no CDC match | 9170 | CT | South Central Connecticut Planning Region, Connecticut |
+| SVI, no CDC match | 9180 | CT | Southeastern Connecticut Planning Region, Connecticut |
+| SVI, no CDC match | 9190 | CT | Western Connecticut Planning Region, Connecticut |
+
+
+### Descriptive totals by quartile and year (bounds: suppressed cells counted as 1 and as 9)
+
+| quartile | Year | counties | population | zero_cells | suppressed_cells | deaths_exact_sum | deaths_total_lower | deaths_total_upper | rate_per_100k_lower | rate_per_100k_upper |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Q1 (least vulnerable) | 2020 | 784.0 | 46,599,117 | 210.0 | 354.0 | 9,247.0 | 9,601.0 | 12,433.0 | 20.6 | 26.7 |
+| Q1 (least vulnerable) | 2021 | 784.0 | 46,599,117 | 210.0 | 340.0 | 9,877.0 | 10,217.0 | 12,937.0 | 21.9 | 27.8 |
+| Q1 (least vulnerable) | 2022 | 784.0 | 46,599,117 | 214.0 | 341.0 | 9,651.0 | 9,992.0 | 12,720.0 | 21.4 | 27.3 |
+| Q1 (least vulnerable) | 2023 | 784.0 | 46,599,117 | 210.0 | 354.0 | 8,552.0 | 8,906.0 | 11,738.0 | 19.1 | 25.2 |
+| Q1 (least vulnerable) | 2024 | 784.0 | 46,599,117 | 224.0 | 385.0 | 6,004.0 | 6,389.0 | 9,469.0 | 13.7 | 20.3 |
+| Q1 (least vulnerable) | 2025 | 784.0 | 46,599,117 | 235.0 | 392.0 | 4,980.0 | 5,372.0 | 8,508.0 | 11.5 | 18.3 |
+| Q2 | 2020 | 783.0 | 75,355,061 | 115.0 | 356.0 | 18,435.0 | 18,791.0 | 21,639.0 | 24.9 | 28.7 |
+| Q2 | 2021 | 783.0 | 75,355,061 | 101.0 | 329.0 | 21,424.0 | 21,753.0 | 24,385.0 | 28.9 | 32.4 |
+| Q2 | 2022 | 783.0 | 75,355,061 | 103.0 | 323.0 | 21,365.0 | 21,688.0 | 24,272.0 | 28.8 | 32.2 |
+| Q2 | 2023 | 783.0 | 75,355,061 | 108.0 | 331.0 | 21,014.0 | 21,345.0 | 23,993.0 | 28.3 | 31.8 |
+| Q2 | 2024 | 783.0 | 75,355,061 | 137.0 | 359.0 | 15,275.0 | 15,634.0 | 18,506.0 | 20.7 | 24.6 |
+| Q2 | 2025 | 783.0 | 75,355,061 | 127.0 | 405.0 | 12,921.0 | 13,326.0 | 16,566.0 | 17.7 | 22.0 |
+| Q3 | 2020 | 781.0 | 91,114,978 | 70.0 | 385.0 | 26,680.0 | 27,065.0 | 30,145.0 | 29.7 | 33.1 |
+| Q3 | 2021 | 781.0 | 91,114,978 | 59.0 | 354.0 | 31,989.0 | 32,343.0 | 35,175.0 | 35.5 | 38.6 |
+| Q3 | 2022 | 781.0 | 91,114,978 | 61.0 | 367.0 | 31,944.0 | 32,311.0 | 35,247.0 | 35.5 | 38.7 |
+| Q3 | 2023 | 781.0 | 91,114,978 | 53.0 | 367.0 | 31,382.0 | 31,749.0 | 34,685.0 | 34.8 | 38.1 |
+| Q3 | 2024 | 781.0 | 91,114,978 | 70.0 | 392.0 | 23,263.0 | 23,655.0 | 26,791.0 | 26.0 | 29.4 |
+| Q3 | 2025 | 781.0 | 91,114,978 | 83.0 | 409.0 | 19,773.0 | 20,182.0 | 23,454.0 | 22.2 | 25.7 |
+| Q4 (most vulnerable) | 2020 | 785.0 | 114,407,506 | 83.0 | 409.0 | 30,524.0 | 30,933.0 | 34,205.0 | 27.0 | 29.9 |
+| Q4 (most vulnerable) | 2021 | 785.0 | 114,407,506 | 76.0 | 375.0 | 36,537.0 | 36,912.0 | 39,912.0 | 32.3 | 34.9 |
+| Q4 (most vulnerable) | 2022 | 785.0 | 114,407,506 | 58.0 | 380.0 | 38,041.0 | 38,421.0 | 41,461.0 | 33.6 | 36.2 |
+| Q4 (most vulnerable) | 2023 | 785.0 | 114,407,506 | 66.0 | 372.0 | 37,425.0 | 37,797.0 | 40,773.0 | 33.0 | 35.6 |
+| Q4 (most vulnerable) | 2024 | 785.0 | 114,407,506 | 78.0 | 399.0 | 28,181.0 | 28,580.0 | 31,772.0 | 25.0 | 27.8 |
+| Q4 (most vulnerable) | 2025 | 785.0 | 114,407,506 | 81.0 | 422.0 | 24,308.0 | 24,730.0 | 28,106.0 | 21.6 | 24.6 |
+
+
+### All coefficients
+
+| term | coef | se | z | p | ci_low | ci_high | rate_ratio | rr_ci_low | rr_ci_high | analysis | suppressed_handling | periods |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| (Intercept) | -8.4288 | 0.0284 | -297.0711 | 0.0000 | -8.4844 | -8.3731 | 0.0002 | 0.0002 | 0.0002 | main | censored | 2022->2025 |
+| year_2025 | -0.5294 | 0.0299 | -17.7257 | 0.0000 | -0.5879 | -0.4708 | 0.5890 | 0.5555 | 0.6245 | main | censored | 2022->2025 |
+| SVI_Q2 | 0.3516 | 0.0377 | 9.3214 | 0.0000 | 0.2777 | 0.4256 | 1.4214 | 1.3201 | 1.5305 | main | censored | 2022->2025 |
+| SVI_Q3 | 0.4657 | 0.0375 | 12.4086 | 0.0000 | 0.3921 | 0.5392 | 1.5931 | 1.4801 | 1.7147 | main | censored | 2022->2025 |
+| SVI_Q4 | 0.4557 | 0.0389 | 11.7120 | 0.0000 | 0.3795 | 0.5320 | 1.5773 | 1.4615 | 1.7023 | main | censored | 2022->2025 |
+| year_2025:SVI_Q2 | -0.0127 | 0.0389 | -0.3266 | 0.7440 | -0.0889 | 0.0635 | 0.9874 | 0.9149 | 1.0656 | main | censored | 2022->2025 |
+| year_2025:SVI_Q3 | 0.0612 | 0.0378 | 1.6170 | 0.1059 | -0.0130 | 0.1353 | 1.0631 | 0.9871 | 1.1449 | main | censored | 2022->2025 |
+| year_2025:SVI_Q4 | 0.1141 | 0.0381 | 2.9904 | 0.0028 | 0.0393 | 0.1888 | 1.1208 | 1.0401 | 1.2078 | main | censored | 2022->2025 |
+| log_alpha | -1.3524 | 0.0438 | -30.8490 | 0.0000 | -1.4383 | -1.2665 | 0.2586 | 0.2373 | 0.2818 | main | censored | 2022->2025 |
+| (Intercept) | -9.1905 | 0.0550 | -166.9580 | 0.0000 | -9.2984 | -9.0826 | 0.0001 | 0.0001 | 0.0001 | main | zero | 2022->2025 |
+| year_2025 | -0.7984 | 0.0524 | -15.2266 | 0.0000 | -0.9012 | -0.6956 | 0.4500 | 0.4061 | 0.4988 | main | zero | 2022->2025 |
+| SVI_Q2 | 0.6204 | 0.0693 | 8.9506 | 0.0000 | 0.4845 | 0.7563 | 1.8597 | 1.6234 | 2.1303 | main | zero | 2022->2025 |
+| SVI_Q3 | 0.7246 | 0.0707 | 10.2538 | 0.0000 | 0.5861 | 0.8631 | 2.0640 | 1.7970 | 2.3706 | main | zero | 2022->2025 |
+| SVI_Q4 | 0.6911 | 0.0714 | 9.6817 | 0.0000 | 0.5512 | 0.8310 | 1.9958 | 1.7353 | 2.2955 | main | zero | 2022->2025 |
+| year_2025:SVI_Q2 | -0.0174 | 0.0691 | -0.2514 | 0.8015 | -0.1528 | 0.1180 | 0.9828 | 0.8583 | 1.1253 | main | zero | 2022->2025 |
+| year_2025:SVI_Q3 | 0.1497 | 0.0663 | 2.2570 | 0.0240 | 0.0197 | 0.2797 | 1.1615 | 1.0199 | 1.3228 | main | zero | 2022->2025 |
+| year_2025:SVI_Q4 | 0.2087 | 0.0660 | 3.1625 | 0.0016 | 0.0794 | 0.3381 | 1.2321 | 1.0826 | 1.4023 | main | zero | 2022->2025 |
+| log_alpha | 1.3516 | 0.0408 | 33.1092 | 0.0000 | 1.2716 | 1.4316 | 3.8635 | 3.5664 | 4.1853 | main | zero | 2022->2025 |
+| (Intercept) | -8.3859 | 0.0340 | -246.4122 | 0.0000 | -8.4526 | -8.3192 | 0.0002 | 0.0002 | 0.0002 | main | drop | 2022->2025 |
+| year_2025 | -0.5985 | 0.0346 | -17.2778 | 0.0000 | -0.6664 | -0.5306 | 0.5496 | 0.5136 | 0.5883 | main | drop | 2022->2025 |
+| SVI_Q2 | 0.4037 | 0.0438 | 9.2174 | 0.0000 | 0.3179 | 0.4896 | 1.4974 | 1.3742 | 1.6316 | main | drop | 2022->2025 |
+| SVI_Q3 | 0.5698 | 0.0442 | 12.8912 | 0.0000 | 0.4832 | 0.6564 | 1.7679 | 1.6212 | 1.9279 | main | drop | 2022->2025 |
+| SVI_Q4 | 0.5632 | 0.0458 | 12.2897 | 0.0000 | 0.4734 | 0.6530 | 1.7562 | 1.6054 | 1.9213 | main | drop | 2022->2025 |
+| year_2025:SVI_Q2 | 0.0359 | 0.0448 | 0.8009 | 0.4232 | -0.0519 | 0.1237 | 1.0365 | 0.9494 | 1.1317 | main | drop | 2022->2025 |
+| year_2025:SVI_Q3 | 0.0689 | 0.0451 | 1.5264 | 0.1269 | -0.0196 | 0.1574 | 1.0713 | 0.9806 | 1.1705 | main | drop | 2022->2025 |
+| year_2025:SVI_Q4 | 0.1309 | 0.0457 | 2.8620 | 0.0042 | 0.0413 | 0.2205 | 1.1399 | 1.0421 | 1.2468 | main | drop | 2022->2025 |
+| log_alpha | -1.3063 | 0.0558 | -23.4228 | 0.0000 | -1.4156 | -1.1970 | 0.2708 | 0.2428 | 0.3021 | main | drop | 2022->2025 |
+| (Intercept) | -8.5232 | 0.0265 | -321.6003 | 0.0000 | -8.5751 | -8.4712 | 0.0002 | 0.0002 | 0.0002 | sensitivity | censored | 2023->2025 |
+| year_2025 | -0.4334 | 0.0294 | -14.7667 | 0.0000 | -0.4910 | -0.3759 | 0.6483 | 0.6120 | 0.6867 | sensitivity | censored | 2023->2025 |
+| SVI_Q2 | 0.3720 | 0.0363 | 10.2363 | 0.0000 | 0.3008 | 0.4433 | 1.4507 | 1.3509 | 1.5578 | sensitivity | censored | 2023->2025 |
+| SVI_Q3 | 0.5605 | 0.0366 | 15.3177 | 0.0000 | 0.4888 | 0.6322 | 1.7516 | 1.6303 | 1.8818 | sensitivity | censored | 2023->2025 |
+| SVI_Q4 | 0.5195 | 0.0376 | 13.8155 | 0.0000 | 0.4458 | 0.5932 | 1.6813 | 1.5618 | 1.8099 | sensitivity | censored | 2023->2025 |
+| year_2025:SVI_Q2 | -0.0331 | 0.0371 | -0.8917 | 0.3725 | -0.1059 | 0.0397 | 0.9674 | 0.8995 | 1.0405 | sensitivity | censored | 2023->2025 |
+| year_2025:SVI_Q3 | -0.0338 | 0.0371 | -0.9099 | 0.3629 | -0.1065 | 0.0390 | 0.9668 | 0.8989 | 1.0398 | sensitivity | censored | 2023->2025 |
+| year_2025:SVI_Q4 | 0.0502 | 0.0374 | 1.3425 | 0.1794 | -0.0231 | 0.1235 | 1.0515 | 0.9772 | 1.1315 | sensitivity | censored | 2023->2025 |
+| log_alpha | -1.3938 | 0.0470 | -29.6808 | 0.0000 | -1.4859 | -1.3018 | 0.2481 | 0.2263 | 0.2720 | sensitivity | censored | 2023->2025 |
+
+
+Sources:
+
+- `source`: CDC VSRR county file gb4e-yj24 (all-drug, Dec 12-month-ending) x CDC/ATSDR SVI 2022 county CSV (RPL_THEMES, E_TOTPOP)

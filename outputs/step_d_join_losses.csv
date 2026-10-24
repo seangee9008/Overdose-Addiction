@@ -1,0 +1,21 @@
+side,FIPS,ST_ABBREV,name
+"CDC county file, no SVI match",02261,AK,Valdez-Cordova (CA)
+"CDC county file, no SVI match",09001,CT,Fairfield
+"CDC county file, no SVI match",09003,CT,Hartford
+"CDC county file, no SVI match",09005,CT,Litchfield
+"CDC county file, no SVI match",09007,CT,Middlesex
+"CDC county file, no SVI match",09009,CT,New Haven
+"CDC county file, no SVI match",09011,CT,New London
+"CDC county file, no SVI match",09013,CT,Tolland
+"CDC county file, no SVI match",09015,CT,Windham
+"SVI, no CDC match",02063,AK,"Chugach Census Area, Alaska"
+"SVI, no CDC match",02066,AK,"Copper River Census Area, Alaska"
+"SVI, no CDC match",09110,CT,"Capitol Planning Region, Connecticut"
+"SVI, no CDC match",09120,CT,"Greater Bridgeport Planning Region, Connecticut"
+"SVI, no CDC match",09130,CT,"Lower Connecticut River Valley Planning Region, Connecticut"
+"SVI, no CDC match",09140,CT,"Naugatuck Valley Planning Region, Connecticut"
+"SVI, no CDC match",09150,CT,"Northeastern Connecticut Planning Region, Connecticut"
+"SVI, no CDC match",09160,CT,"Northwest Hills Planning Region, Connecticut"
+"SVI, no CDC match",09170,CT,"South Central Connecticut Planning Region, Connecticut"
+"SVI, no CDC match",09180,CT,"Southeastern Connecticut Planning Region, Connecticut"
+"SVI, no CDC match",09190,CT,"Western Connecticut Planning Region, Connecticut"

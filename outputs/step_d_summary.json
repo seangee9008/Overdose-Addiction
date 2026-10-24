@@ -1,0 +1,43 @@
+{
+  "method": "negative binomial, interval-censored for suppressed cells (src/count_models.py):\n  log E[deaths] = log(pop) + b0 + g*1[2025] + sum_q a_q*1[SVI quartile q] + sum_q d_q*1[2025]*1[quartile q]\n  Quartiles of RPL_THEMES (Q1 = least vulnerable, reference). The 2025-vs-base rate ratio in\n  quartile q is exp(g + d_q); d_q compares that change with Q1. Joint Wald test of all d_q = 0.\n  SEs clustered by county (each county appears in both periods).\nFor transparency, the same model is also fit with suppressed cells (a) set to 0 and (b) dropped.",
+  "periods": {
+    "main": [
+      2022,
+      2025
+    ],
+    "sensitivity": [
+      2023,
+      2025
+    ]
+  },
+  "counts": {
+    "cdc_fips_after_padding_and_dedup": 3142,
+    "virginia_duplicate_rows_collapsed": [
+      {
+        "FIPS": "51005",
+        "ST_ABBREV": "VA",
+        "COUNTYNAME": "Alleghany"
+      },
+      {
+        "FIPS": "51005",
+        "ST_ABBREV": "VA",
+        "COUNTYNAME": "Clifton Forge (city)"
+      },
+      {
+        "FIPS": "51019",
+        "ST_ABBREV": "VA",
+        "COUNTYNAME": "Bedford (city)"
+      },
+      {
+        "FIPS": "51019",
+        "ST_ABBREV": "VA",
+        "COUNTYNAME": "Bedford"
+      }
+    ],
+    "counties_in_analysis": 3133,
+    "cdc_counties_lost_in_join": 9,
+    "svi_counties_unmatched": 11
+  },
+  "source": "CDC VSRR county file gb4e-yj24 (all-drug, Dec 12-month-ending) x CDC/ATSDR SVI 2022 county CSV (RPL_THEMES, E_TOTPOP)",
+  "note": "All-drug deaths (county file has no opioid split). Area-level associations only; they do not describe individuals (ecological fallacy)."
+}

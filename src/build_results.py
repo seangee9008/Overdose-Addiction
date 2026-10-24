@@ -197,7 +197,35 @@ def sec_step_c(used):
     return "\n".join(parts)
 
 
-SECTIONS = [sec_cdc_breaks, sec_nsduh, sec_step_a, sec_step_b, sec_step_c]
+def sec_step_d(used):
+    f = f"{OUT_DIR}/step_d_change_by_svi.csv"
+    if not os.path.exists(f):
+        return ""
+    names = ["step_d_change_by_svi.csv", "step_d_model_info.csv", "step_d_descriptive.csv",
+             "step_d_join_losses.csv", "step_d_coefficients.csv", "step_d_summary.json", "step_d_change_by_svi.png"]
+    used.update(names)
+    ch, info, desc, lost, coef = (pd.read_csv(f"{OUT_DIR}/{x}") for x in names[:5])
+    s = json.load(open(f"{OUT_DIR}/step_d_summary.json"))
+    counts = s["counts"]
+    parts = ["## Step D: county change in overdose deaths by social vulnerability (CDC county + SVI only)\n",
+             "Produced by `src/step_d.py` (model: `src/count_models.py`).\n",
+             f"> {s['note']}\n",
+             "### Model (from the script)\n", "```\n" + s["method"] + "\n```\n",
+             img("step_d_change_by_svi.png"),
+             "### Change in death rate by SVI quartile (rate ratio end vs base)\n", table(ch, 3, drop=("source",)),
+             "\n### Model information (Wald test: does the change differ across quartiles?)\n", table(info, 4),
+             "\n### Counties: cleaning and join\n",
+             table(pd.DataFrame([dict(item=k, value=json.dumps(v) if isinstance(v, list) else v)
+                                 for k, v in counts.items()])),
+             "\n#### Counties lost in the CDC-SVI join\n", table(lost),
+             "\n### Descriptive totals by quartile and year (bounds: suppressed cells counted as 1 and as 9)\n",
+             table(desc, 1, drop=("source",)),
+             "\n### All coefficients\n", table(coef, 4, drop=("source",)),
+             "\nSources:\n", sources(ch)]
+    return "\n".join(parts)
+
+
+SECTIONS = [sec_cdc_breaks, sec_nsduh, sec_step_a, sec_step_b, sec_step_c, sec_step_d]
 EXTRA_SECTIONS = []  # later steps register here
 
 
