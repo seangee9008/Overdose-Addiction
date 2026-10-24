@@ -16,6 +16,7 @@ STATUS OF EACH SOURCE
                SAS CPORT (.stc) file that Python cannot read without SAS, so it is not used.
   nsduh_2021_2024  Combined (concatenated) 2021-2024 PUF, Stata bundle, + its codebook. The SAS
                version of this file is CPORT (.stc) and unreadable in Python.
+  nsduh_2024   Single-year 2024 PUF (Stata) + codebook, to check 2024 opioid misuse / OUD definitions.
   svi_2022     VERIFIED 2026-10-10. Official ATSDR CSV from svi.cdc.gov (no geometry; join on FIPS).
   svi_2022_arcgis_geo  OPT-IN ONLY (--only svi_2022_arcgis_geo). Polygons from an ArcGIS Online
                layer whose metadata credits CDC/ATSDR GRASP, but it is hosted in a shared public
@@ -40,6 +41,10 @@ FILES = {
                         "nsduh_2021_2024_concat_puf_stata.zip"),
     "nsduh_2021_2024_codebook": ("https://www.samhsa.gov/data/system/files/media-puf-file/nsduh-2021_2024-ds0001-info-codebook_v1.pdf",
                                  "nsduh_2021_2024_concat_codebook.pdf"),
+    "nsduh_2024": ("https://www.samhsa.gov/data/system/files/media-puf-file/NSDUH-2024-DS0001-bndl-data-stata_v1.zip",
+                   "nsduh_2024_puf_stata.zip"),
+    "nsduh_2024_codebook": ("https://www.samhsa.gov/data/system/files/media-puf-file/nsduh-2024-ds0001-info-codebook_v1.pdf",
+                            "nsduh_2024_codebook.pdf"),
     "svi_2022": ("https://svi.cdc.gov/Documents/Data/2022/csv/states_counties/SVI_2022_US_county.csv",
                  "svi_2022_us_county.csv"),
 }
