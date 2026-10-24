@@ -9,7 +9,6 @@ geopandas
 jupyterlab
 pytest
 pypdf
-duckdb
 dbt-duckdb
 pandera
 pyarrow
