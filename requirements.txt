@@ -8,3 +8,4 @@ pyreadstat
 geopandas
 jupyterlab
 pytest
+pypdf
