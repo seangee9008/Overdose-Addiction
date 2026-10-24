@@ -167,8 +167,8 @@ def main():
     # NaN breaks the line, so no segment is drawn through the missing 2023 value.
     ax.plot(comp.year, comp.opioid_misuse_idx, "s-", color=ORANGE, lw=2, ms=8,
             label="Past-year opioid misuse % (NSDUH, published)")
-    ax.set_title(f"CDC deaths vs NSDUH opioid misuse, indexed 2021 = 100\n"
-                 f"(NSDUH 2023 omitted: published only as a range)", color=INK, fontsize=10, loc="left")
+    ax.set_title("CDC deaths vs NSDUH opioid misuse, indexed 2021 = 100\n"
+                 "(NSDUH 2023 omitted: published only as a range)", color=INK, fontsize=10, loc="left")
     ax.set_ylabel("Index (2021 = 100)", color=MUTED)
     ax.set_xticks(comp.year)
     ax.legend(fontsize=8.5, frameon=False)

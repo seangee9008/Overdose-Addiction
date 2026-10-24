@@ -23,7 +23,13 @@ STATUS OF EACH SOURCE
                org, so treat it as a mirror. Worked 2026-10-10 (3,144 features).
 Nothing here is parsed or cleaned; this script only fetches and records checksums.
 """
-import argparse, hashlib, json, os, sys, time, urllib.parse, urllib.request
+import argparse
+import hashlib
+import json
+import os
+import time
+import urllib.parse
+import urllib.request
 
 RAW = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "raw")
 UA = "UCLA-Stats199-research/0.1 (student project)"
@@ -120,7 +126,8 @@ def main():
     names = list(FILES)
     optional = ["svi_2022_arcgis_geo"]
     if a.list:
-        print("\n".join(names + [f"{o} (opt-in)" for o in optional])); return
+        print("\n".join(names + [f"{o} (opt-in)" for o in optional]))
+        return
     todo = a.only or names
     os.makedirs(RAW, exist_ok=True)
     manifest = {}
@@ -134,7 +141,8 @@ def main():
             dest = os.path.join(RAW, fn)
             ok = download(url, dest, a.force)
         else:
-            print("  unknown source"); continue
+            print("  unknown source")
+            continue
         if ok and os.path.exists(dest):
             manifest[name] = dict(file=os.path.basename(dest), bytes=os.path.getsize(dest), sha256=sha256(dest),
                                   fetched=time.strftime("%Y-%m-%d"))

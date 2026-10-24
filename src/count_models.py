@@ -49,7 +49,9 @@ def censored_nb(X, y, censored, lo, hi, offset=None, clusters=None, names=None):
     lo = np.asarray(lo, float)
     hi = np.asarray(hi, float)
     off = np.zeros(len(y)) if offset is None else np.asarray(offset, float)
-    f_obs = lambda p: _loglik_obs(p, X, y, lo, hi, cens, off)
+
+    def f_obs(p):
+        return _loglik_obs(p, X, y, lo, hi, cens, off)
 
     # start: Poisson on exact obs (censored at interval midpoint), alpha = 0.5
     ys = np.where(cens, (lo + hi) / 2, y)

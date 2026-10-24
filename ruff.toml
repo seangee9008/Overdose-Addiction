@@ -1,0 +1,6 @@
+# ruff: fast Python linter (style + likely bugs). `make lint` / CI run `ruff check .`
+line-length = 140
+extend-exclude = ["notebooks", "dbt", "data", "build"]
+
+[lint]
+select = ["E", "F", "W"]
