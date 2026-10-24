@@ -148,7 +148,31 @@ def sec_step_a(used):
     return "\n".join(parts)
 
 
-SECTIONS = [sec_cdc_breaks, sec_nsduh, sec_step_a]
+def sec_step_b(used):
+    f = f"{OUT_DIR}/step_b_tests.csv"
+    if not os.path.exists(f):
+        return ""
+    s = json.load(open(f"{OUT_DIR}/step_b_summary.json"))
+    used.update({"step_b_tests.csv", "step_b_break_ci.csv", "step_b_bic_naive.csv", "step_b_summary.json"})
+    tests, cis, bics = (pd.read_csv(f"{OUT_DIR}/{x}") for x in
+                        ("step_b_tests.csv", "step_b_break_ci.csv", "step_b_bic_naive.csv"))
+    parts = ["## Step B: break-point inference (moving block bootstrap)\n",
+             f"Produced by `src/step_b.py`. B = {s['B']} resamples per test, seed {s['seed']}, "
+             f"minimum segment {s['min_seg']} months, block lengths {s['block_lengths']} "
+             f"(first = main analysis).\n",
+             "### Method (from the script)\n", "```\n" + s["method"] + "\n```\n",
+             "### Model comparison (bootstrap p-values)\n", table(tests, 4, drop=("source",)),
+             "\n### Break dates with 95% bootstrap intervals\n", table(cis, 3, drop=("source",)),
+             "\n### Naive BIC (assumes independent errors; reference only)\n", table(bics, 1, drop=("source",)),
+             "\nSources:\n", sources(tests)]
+    for f in sorted(os.listdir(OUT_DIR)):
+        if f.startswith("step_b_bootstrap_") and f.endswith(".png"):
+            used.add(f)
+            parts.append(img(f))
+    return "\n".join(parts)
+
+
+SECTIONS = [sec_cdc_breaks, sec_nsduh, sec_step_a, sec_step_b]
 EXTRA_SECTIONS = []  # later steps register here
 
 

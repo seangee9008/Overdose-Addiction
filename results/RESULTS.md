@@ -380,3 +380,78 @@ Sources:
 - `source`: CDC VSRR xkb8-kh2a, US, Dec 12-month-ending: 'Synthetic opioids, excl. methadone (T40.4)' / 'Opioids (T40.0-T40.4,T40.6)'; categories overlap (multiple drugs per death)
 - `source`: NSDUH 2021-2024 combined PUF (+2024 single-year PUF for OUD), ANALWT2_C1, VESTR_C/VEREP, df=50; PNRNMYR=1 & HERYR=0 among OPI_MISUSE=1
 - `source`: NSDUH 2021-2024 combined PUF, IMFYR, ANALWT2_C1, VESTR_C/VEREP
+
+## Step B: break-point inference (moving block bootstrap)
+
+Produced by `src/step_b.py`. B = 2000 resamples per test, seed 20261023, minimum segment 12 months, block lengths [12, 6, 24] (first = main analysis).
+
+### Method (from the script)
+
+```
+moving block bootstrap (MBB) of residuals.
+  * Resample residuals in contiguous blocks of L months (main L = 12, the length of the overlap
+    window; sensitivity L = 6 and 24), so the autocorrelation inside a block is preserved.
+  * Model comparison (2 vs 1 break, 1 vs 0 breaks): statistic F = (SSE_simple - SSE_complex) / SSE_complex.
+    Null distribution: fit the simpler model, add block-resampled residuals of that fit to its
+    fitted values, refit both models, recompute F. p = (1 + #{F* >= F_obs}) / (B + 1).
+    (Under "0 breaks" the residuals still contain the trend changes, which inflates the null noise and
+    makes that test conservative.)
+  * Break-date confidence intervals: add block-resampled residuals of the 2-break fit to its fitted
+    values, re-estimate both break dates, take the 2.5% / 97.5% percentiles.
+  * Naive BIC (independent-errors assumption) is reported for reference only.
+
+Caveat for reading break dates: a sudden change in monthly deaths at month m shows up in a
+12-month rolling total as a bend spread over months m..m+11, so a break date in this series
+can lag the underlying change by up to about a year.
+```
+
+### Model comparison (bootstrap p-values)
+
+| series | block_len | B | F_2vs1 | p_2vs1 | F_1vs0 | p_1vs0 |
+|---|---|---|---|---|---|---|
+| all_drug | 12 | 2000 | 1.4478 | 0.0645 | 6.9286 | 0.0005 |
+| all_drug | 6 | 2000 | 1.4478 | 0.0035 | 6.9286 | 0.0005 |
+| all_drug | 24 | 2000 | 1.4478 | 0.2169 | 6.9286 | 0.0020 |
+| opioids | 12 | 2000 | 1.6036 | 0.0415 | 8.9011 | 0.0005 |
+| opioids | 6 | 2000 | 1.6036 | 0.0015 | 8.9011 | 0.0005 |
+| opioids | 24 | 2000 | 1.6036 | 0.1394 | 8.9011 | 0.0030 |
+
+
+### Break dates with 95% bootstrap intervals
+
+| series | block_len | B | break | estimate | ci_low | ci_high | ci_width_months | share_within_3_months |
+|---|---|---|---|---|---|---|---|---|
+| all_drug | 12 | 2000 | break_1 | 2020-07 | 2018-12 | 2020-07 | 19 | 0.912 |
+| all_drug | 12 | 2000 | break_2 | 2023-05 | 2022-12 | 2024-01 | 13 | 0.694 |
+| all_drug | 6 | 2000 | break_1 | 2020-07 | 2018-07 | 2020-07 | 24 | 0.892 |
+| all_drug | 6 | 2000 | break_2 | 2023-05 | 2022-12 | 2023-12 | 12 | 0.735 |
+| all_drug | 24 | 2000 | break_1 | 2020-07 | 2017-09 | 2020-07 | 34 | 0.872 |
+| all_drug | 24 | 2000 | break_2 | 2023-05 | 2022-11 | 2023-11 | 12 | 0.664 |
+| opioids | 12 | 2000 | break_1 | 2020-07 | 2020-05 | 2020-07 | 2 | 0.974 |
+| opioids | 12 | 2000 | break_2 | 2023-06 | 2023-01 | 2024-01 | 12 | 0.809 |
+| opioids | 6 | 2000 | break_1 | 2020-07 | 2019-07 | 2020-07 | 12 | 0.952 |
+| opioids | 6 | 2000 | break_2 | 2023-06 | 2023-01 | 2023-12 | 11 | 0.841 |
+| opioids | 24 | 2000 | break_1 | 2020-07 | 2019-01 | 2020-07 | 18 | 0.962 |
+| opioids | 24 | 2000 | break_2 | 2023-06 | 2023-01 | 2023-11 | 10 | 0.798 |
+
+
+### Naive BIC (assumes independent errors; reference only)
+
+| series | model | sse | params | bic_naive |
+|---|---|---|---|---|
+| all_drug | 0 breaks | 29,717,659,852 | 2 | 2,621.3 |
+| all_drug | 1 break | 3,748,162,961 | 5 | 2,354.5 |
+| all_drug | 2 breaks | 1,531,261,249 | 8 | 2,247.5 |
+| opioids | 0 breaks | 25,943,664,297 | 2 | 2,602.9 |
+| opioids | 1 break | 2,620,278,855 | 5 | 2,305.8 |
+| opioids | 2 breaks | 1,006,399,771 | 8 | 2,190.4 |
+
+
+Sources:
+
+- `source`: CDC VSRR xkb8-kh2a, US, 'Number of Drug Overdose Deaths', Data Value, 12-month-ending, 2015-01 to 2026-04
+- `source`: CDC VSRR xkb8-kh2a, US, 'Opioids (T40.0-T40.4,T40.6)', Data Value, 12-month-ending, 2015-01 to 2026-04
+
+![step_b_bootstrap_all_drug.png](../outputs/step_b_bootstrap_all_drug.png)
+
+![step_b_bootstrap_opioids.png](../outputs/step_b_bootstrap_opioids.png)

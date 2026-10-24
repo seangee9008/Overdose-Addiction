@@ -1,0 +1,13 @@
+series,block_len,B,break,estimate,ci_low,ci_high,ci_width_months,share_within_3_months,source
+all_drug,12,2000,break_1,2020-07,2018-12,2020-07,19,0.912,"CDC VSRR xkb8-kh2a, US, 'Number of Drug Overdose Deaths', Data Value, 12-month-ending, 2015-01 to 2026-04"
+all_drug,12,2000,break_2,2023-05,2022-12,2024-01,13,0.694,"CDC VSRR xkb8-kh2a, US, 'Number of Drug Overdose Deaths', Data Value, 12-month-ending, 2015-01 to 2026-04"
+all_drug,6,2000,break_1,2020-07,2018-07,2020-07,24,0.892,"CDC VSRR xkb8-kh2a, US, 'Number of Drug Overdose Deaths', Data Value, 12-month-ending, 2015-01 to 2026-04"
+all_drug,6,2000,break_2,2023-05,2022-12,2023-12,12,0.735,"CDC VSRR xkb8-kh2a, US, 'Number of Drug Overdose Deaths', Data Value, 12-month-ending, 2015-01 to 2026-04"
+all_drug,24,2000,break_1,2020-07,2017-09,2020-07,34,0.8715,"CDC VSRR xkb8-kh2a, US, 'Number of Drug Overdose Deaths', Data Value, 12-month-ending, 2015-01 to 2026-04"
+all_drug,24,2000,break_2,2023-05,2022-11,2023-11,12,0.6645,"CDC VSRR xkb8-kh2a, US, 'Number of Drug Overdose Deaths', Data Value, 12-month-ending, 2015-01 to 2026-04"
+opioids,12,2000,break_1,2020-07,2020-05,2020-07,2,0.9735,"CDC VSRR xkb8-kh2a, US, 'Opioids (T40.0-T40.4,T40.6)', Data Value, 12-month-ending, 2015-01 to 2026-04"
+opioids,12,2000,break_2,2023-06,2023-01,2024-01,12,0.809,"CDC VSRR xkb8-kh2a, US, 'Opioids (T40.0-T40.4,T40.6)', Data Value, 12-month-ending, 2015-01 to 2026-04"
+opioids,6,2000,break_1,2020-07,2019-07,2020-07,12,0.952,"CDC VSRR xkb8-kh2a, US, 'Opioids (T40.0-T40.4,T40.6)', Data Value, 12-month-ending, 2015-01 to 2026-04"
+opioids,6,2000,break_2,2023-06,2023-01,2023-12,11,0.841,"CDC VSRR xkb8-kh2a, US, 'Opioids (T40.0-T40.4,T40.6)', Data Value, 12-month-ending, 2015-01 to 2026-04"
+opioids,24,2000,break_1,2020-07,2019-01,2020-07,18,0.962,"CDC VSRR xkb8-kh2a, US, 'Opioids (T40.0-T40.4,T40.6)', Data Value, 12-month-ending, 2015-01 to 2026-04"
+opioids,24,2000,break_2,2023-06,2023-01,2023-11,10,0.7985,"CDC VSRR xkb8-kh2a, US, 'Opioids (T40.0-T40.4,T40.6)', Data Value, 12-month-ending, 2015-01 to 2026-04"

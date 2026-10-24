@@ -1,0 +1,18 @@
+{
+  "method": "moving block bootstrap (MBB) of residuals.\n  * Resample residuals in contiguous blocks of L months (main L = 12, the length of the overlap\n    window; sensitivity L = 6 and 24), so the autocorrelation inside a block is preserved.\n  * Model comparison (2 vs 1 break, 1 vs 0 breaks): statistic F = (SSE_simple - SSE_complex) / SSE_complex.\n    Null distribution: fit the simpler model, add block-resampled residuals of that fit to its\n    fitted values, refit both models, recompute F. p = (1 + #{F* >= F_obs}) / (B + 1).\n    (Under \"0 breaks\" the residuals still contain the trend changes, which inflates the null noise and\n    makes that test conservative.)\n  * Break-date confidence intervals: add block-resampled residuals of the 2-break fit to its fitted\n    values, re-estimate both break dates, take the 2.5% / 97.5% percentiles.\n  * Naive BIC (independent-errors assumption) is reported for reference only.\n\nCaveat for reading break dates: a sudden change in monthly deaths at month m shows up in a\n12-month rolling total as a bend spread over months m..m+11, so a break date in this series\ncan lag the underlying change by up to about a year.",
+  "seed": 20261023,
+  "B": 2000,
+  "min_seg": 12,
+  "block_lengths": [
+    12,
+    6,
+    24
+  ],
+  "files": [
+    "outputs/step_b_tests.csv",
+    "outputs/step_b_break_ci.csv",
+    "outputs/step_b_bic_naive.csv",
+    "outputs/step_b_bootstrap_all_drug.png",
+    "outputs/step_b_bootstrap_opioids.png"
+  ]
+}
