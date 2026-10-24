@@ -1,0 +1,241 @@
+State,Year,Month,Period,Indicator,Data Value,Percent Complete,Percent Pending Investigation,State Name,Footnote,Footnote Symbol,Predicted Value
+US,2021,January,12 month-ending,Number of Deaths,"2,700,034",100,0.095028,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,
+US,2021,January,12 month-ending,Number of Drug Overdose Deaths,90011,100,0.202876,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,90017
+US,2021,January,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",67539,100,0.099844,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,67568
+US,2021,January,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",58519,100,0.056020,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,58536
+US,2021,February,12 month-ending,Number of Deaths,2700069,100,0.201827,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,
+US,2021,February,12 month-ending,Number of Drug Overdose Deaths,90070,100,0.074474,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,90098
+US,2021,February,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",67585,100,0.200171,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,67613
+US,2021,February,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",58546,100,0.132552,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,58548
+US,2021,March,12 month-ending,Number of Deaths,2700083,100,0.209236,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,
+US,2021,March,12 month-ending,Number of Drug Overdose Deaths,90124,100,0.220178,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,90130
+US,2021,March,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",67596,100,0.024478,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,67619
+US,2021,March,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",58591,100,0.102030,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,58602
+US,2021,April,12 month-ending,Number of Deaths,2700127,100,0.139558,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,
+US,2021,April,12 month-ending,Number of Drug Overdose Deaths,90143,100,0.244733,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,90150
+US,2021,April,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",67644,100,0.038841,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,67649
+US,2021,April,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",58624,100,0.179570,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,58626
+US,2021,May,12 month-ending,Number of Deaths,2700200,100,0.180486,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,
+US,2021,May,12 month-ending,Number of Drug Overdose Deaths,90202,100,0.217434,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,90211
+US,2021,May,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",67706,100,0.278801,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,67728
+US,2021,May,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",58703,100,0.281302,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,58719
+US,2021,June,12 month-ending,Number of Deaths,2700227,100,0.148496,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,
+US,2021,June,12 month-ending,Number of Drug Overdose Deaths,90215,100,0.135534,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,90223
+US,2021,June,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",67728,100,0.099267,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,67747
+US,2021,June,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",58734,100,0.077122,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,58761
+US,2021,July,12 month-ending,Number of Deaths,2700254,100,0.077656,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,
+US,2021,July,12 month-ending,Number of Drug Overdose Deaths,90256,100,0.001507,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,90281
+US,2021,July,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",67757,100,0.084715,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,67757
+US,2021,July,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",58771,100,0.185049,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,58789
+US,2021,August,12 month-ending,Number of Deaths,2700283,100,0.052898,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,
+US,2021,August,12 month-ending,Number of Drug Overdose Deaths,90299,100,0.132266,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,90308
+US,2021,August,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",67812,100,0.065379,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,67816
+US,2021,August,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",58818,100,0.142911,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,58832
+US,2021,September,12 month-ending,Number of Deaths,2700346,100,0.089270,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,
+US,2021,September,12 month-ending,Number of Drug Overdose Deaths,90332,100,0.078174,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,90361
+US,2021,September,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",67833,100,0.063594,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,67858
+US,2021,September,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",58844,100,0.073878,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,58862
+US,2021,October,12 month-ending,Number of Deaths,2700384,100,0.251545,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,
+US,2021,October,12 month-ending,Number of Drug Overdose Deaths,90383,100,0.258647,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,90388
+US,2021,October,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",67885,100,0.225159,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,67890
+US,2021,October,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",58878,100,0.062747,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,58896
+US,2021,November,12 month-ending,Number of Deaths,2700442,100,0.074778,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,
+US,2021,November,12 month-ending,Number of Drug Overdose Deaths,90437,100,0.185417,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,90447
+US,2021,November,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",67904,100,0.190358,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,67927
+US,2021,November,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",58926,100,0.074449,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,58928
+US,2021,December,12 month-ending,Number of Deaths,2700448,100,0.205447,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,
+US,2021,December,12 month-ending,Number of Drug Overdose Deaths,90481,100,0.262522,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,90483
+US,2021,December,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",67974,100,0.185518,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,67986
+US,2021,December,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",58973,100,0.053689,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,58982
+US,2022,January,12 month-ending,Number of Deaths,2700492,100,0.063013,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,
+US,2022,January,12 month-ending,Number of Drug Overdose Deaths,90480,100,0.291849,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,90504
+US,2022,January,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",68023,100,0.113625,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,68041
+US,2022,January,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",59002,100,0.289831,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,59016
+US,2022,February,12 month-ending,Number of Deaths,2700533,100,0.017461,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,
+US,2022,February,12 month-ending,Number of Drug Overdose Deaths,90538,100,0.050589,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,90550
+US,2022,February,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",68028,100,0.234002,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,68035
+US,2022,February,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",59043,100,0.165615,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,59049
+US,2022,March,12 month-ending,Number of Deaths,2700606,100,0.152185,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,
+US,2022,March,12 month-ending,Number of Drug Overdose Deaths,90578,100,0.084817,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,90579
+US,2022,March,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",68076,100,0.025614,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,68079
+US,2022,March,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",59074,100,0.265003,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,59084
+US,2022,April,12 month-ending,Number of Deaths,2700624,100,0.284168,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,
+US,2022,April,12 month-ending,Number of Drug Overdose Deaths,90605,100,0.275326,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,90605
+US,2022,April,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",68140,100,0.224354,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,68143
+US,2022,April,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",59114,100,0.050379,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,59140
+US,2022,May,12 month-ending,Number of Deaths,2700668,100,0.113447,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,
+US,2022,May,12 month-ending,Number of Drug Overdose Deaths,90656,100,0.154877,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,90681
+US,2022,May,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",68157,100,0.126803,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,68169
+US,2022,May,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",59140,100,0.026222,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,59150
+US,2022,June,12 month-ending,Number of Deaths,2700723,100,0.145225,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,
+US,2022,June,12 month-ending,Number of Drug Overdose Deaths,90722,100,0.234771,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,90736
+US,2022,June,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",68193,100,0.212129,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,68221
+US,2022,June,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",59182,100,0.201034,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,59190
+US,2022,July,12 month-ending,Number of Deaths,2700721,100,0.230438,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,
+US,2022,July,12 month-ending,Number of Drug Overdose Deaths,90737,100,0.293260,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,90748
+US,2022,July,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",68253,100,0.013832,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,68265
+US,2022,July,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",59263,100,0.258717,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,59291
+US,2022,August,12 month-ending,Number of Deaths,2700774,100,0.180254,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,
+US,2022,August,12 month-ending,Number of Drug Overdose Deaths,90764,100,0.016681,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,90774
+US,2022,August,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",68289,100,0.000456,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,68311
+US,2022,August,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",59293,100,0.298051,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,59295
+US,2022,September,12 month-ending,Number of Deaths,2700848,100,0.260481,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,
+US,2022,September,12 month-ending,Number of Drug Overdose Deaths,90838,100,0.050655,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,90855
+US,2022,September,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",68323,100,0.127750,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,68326
+US,2022,September,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",59326,100,0.049763,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,59346
+US,2022,October,12 month-ending,Number of Deaths,2700848,100,0.077445,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,
+US,2022,October,12 month-ending,Number of Drug Overdose Deaths,90875,100,0.296042,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,90903
+US,2022,October,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",68345,100,0.216947,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,68366
+US,2022,October,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",59364,100,0.155219,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,59385
+US,2022,November,12 month-ending,Number of Deaths,2700900,100,0.263294,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,
+US,2022,November,12 month-ending,Number of Drug Overdose Deaths,90888,100,0.212860,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,90907
+US,2022,November,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",68424,100,0.293999,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,68450
+US,2022,November,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",59426,100,0.227271,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,59443
+US,2022,December,12 month-ending,Number of Deaths,2700945,100,0.184986,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,
+US,2022,December,12 month-ending,Number of Drug Overdose Deaths,90951,100,0.094797,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,90954
+US,2022,December,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",68456,100,0.266061,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,68458
+US,2022,December,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",59438,100,0.161186,United States,Numbers may differ from published reports using final data. See Technical Notes.,**,59438
+FL,2021,January,12 month-ending,Number of Deaths,210037,100,0.044098,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2021,January,12 month-ending,Number of Drug Overdose Deaths,7008,100,0.263086,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,7011
+FL,2021,January,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",,100,0.148341,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2021,January,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",,100,0.299763,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2021,February,12 month-ending,Number of Deaths,210057,100,0.163792,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2021,February,12 month-ending,Number of Drug Overdose Deaths,7056,100,0.111196,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,7065
+FL,2021,February,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",,100,0.036074,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2021,February,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",,100,0.227466,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2021,March,12 month-ending,Number of Deaths,210114,100,0.142539,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2021,March,12 month-ending,Number of Drug Overdose Deaths,7124,100,0.042934,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,7130
+FL,2021,March,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",,100,0.126823,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2021,March,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",,100,0.124195,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2021,April,12 month-ending,Number of Deaths,210158,100,0.185979,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2021,April,12 month-ending,Number of Drug Overdose Deaths,7169,100,0.065918,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,7170
+FL,2021,April,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",5417,100,0.294352,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5423
+FL,2021,April,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",4709,100,0.064596,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,4710
+FL,2021,May,12 month-ending,Number of Deaths,210207,100,0.191861,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2021,May,12 month-ending,Number of Drug Overdose Deaths,7161,100,0.103656,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,7171
+FL,2021,May,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",5442,100,0.130503,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5465
+FL,2021,May,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",4711,100,0.128017,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,4737
+FL,2021,June,12 month-ending,Number of Deaths,210208,100,0.111843,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2021,June,12 month-ending,Number of Drug Overdose Deaths,7237,100,0.252492,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,7243
+FL,2021,June,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",5477,100,0.141194,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5497
+FL,2021,June,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",4773,100,0.032712,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,4784
+FL,2021,July,12 month-ending,Number of Deaths,210288,100,0.151246,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2021,July,12 month-ending,Number of Drug Overdose Deaths,7270,100,0.290673,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,7287
+FL,2021,July,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",5535,100,0.260009,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5538
+FL,2021,July,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",4830,100,0.112135,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,4838
+FL,2021,August,12 month-ending,Number of Deaths,210304,100,0.143697,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2021,August,12 month-ending,Number of Drug Overdose Deaths,7322,100,0.245309,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,7337
+FL,2021,August,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",5534,100,0.180168,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5538
+FL,2021,August,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",4847,100,0.066739,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,4874
+FL,2021,September,12 month-ending,Number of Deaths,210344,100,0.252664,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2021,September,12 month-ending,Number of Drug Overdose Deaths,7334,100,0.289639,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,7355
+FL,2021,September,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",5602,100,0.284800,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5620
+FL,2021,September,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",4902,100,0.202400,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,4912
+FL,2021,October,12 month-ending,Number of Deaths,210401,100,0.056996,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2021,October,12 month-ending,Number of Drug Overdose Deaths,7365,100,0.258909,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,7371
+FL,2021,October,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",5628,100,0.205931,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5638
+FL,2021,October,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",4959,100,0.137805,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,4972
+FL,2021,November,12 month-ending,Number of Deaths,210404,100,0.246697,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2021,November,12 month-ending,Number of Drug Overdose Deaths,7400,100,0.101140,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,7404
+FL,2021,November,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",5665,100,0.187388,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5670
+FL,2021,November,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",4953,100,0.153312,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,4965
+FL,2021,December,12 month-ending,Number of Deaths,210478,100,0.143313,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2021,December,12 month-ending,Number of Drug Overdose Deaths,7469,100,0.029017,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,7492
+FL,2021,December,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",5692,100,0.224665,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5708
+FL,2021,December,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",5012,100,0.262839,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5022
+FL,2022,January,12 month-ending,Number of Deaths,210481,100,0.034769,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2022,January,12 month-ending,Number of Drug Overdose Deaths,7502,100,0.136770,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,7530
+FL,2022,January,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",5778,100,0.023476,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5781
+FL,2022,January,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",5067,100,0.045600,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5085
+FL,2022,February,12 month-ending,Number of Deaths,210560,100,0.037487,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2022,February,12 month-ending,Number of Drug Overdose Deaths,7546,100,0.127412,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,7554
+FL,2022,February,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",5793,100,0.128488,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5807
+FL,2022,February,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",5094,100,0.179109,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5095
+FL,2022,March,12 month-ending,Number of Deaths,210562,100,0.293626,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2022,March,12 month-ending,Number of Drug Overdose Deaths,7597,100,0.279561,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,7625
+FL,2022,March,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",5837,100,0.063719,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5844
+FL,2022,March,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",5157,100,0.050899,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5158
+FL,2022,April,12 month-ending,Number of Deaths,210603,100,0.223330,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2022,April,12 month-ending,Number of Drug Overdose Deaths,7636,100,0.033671,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,7643
+FL,2022,April,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",5866,100,0.205077,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5894
+FL,2022,April,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",5170,100,0.098853,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5198
+FL,2022,May,12 month-ending,Number of Deaths,210673,100,0.041037,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2022,May,12 month-ending,Number of Drug Overdose Deaths,7649,100,0.049250,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,7667
+FL,2022,May,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",5937,100,0.063505,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5964
+FL,2022,May,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",5230,100,0.017002,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5234
+FL,2022,June,12 month-ending,Number of Deaths,210723,100,0.114425,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2022,June,12 month-ending,Number of Drug Overdose Deaths,7727,100,0.292873,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,7739
+FL,2022,June,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",5950,100,0.115336,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5976
+FL,2022,June,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",5235,100,0.214544,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5247
+FL,2022,July,12 month-ending,Number of Deaths,210720,100,0.268246,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2022,July,12 month-ending,Number of Drug Overdose Deaths,7752,100,0.154594,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,7777
+FL,2022,July,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",6004,100,0.099298,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,6029
+FL,2022,July,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",5315,100,0.105430,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5329
+FL,2022,August,12 month-ending,Number of Deaths,210778,100,0.146854,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2022,August,12 month-ending,Number of Drug Overdose Deaths,7787,100,0.135872,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,7788
+FL,2022,August,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",6058,100,0.072956,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,6067
+FL,2022,August,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",5335,100,0.239263,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5342
+FL,2022,September,12 month-ending,Number of Deaths,210825,100,0.294223,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2022,September,12 month-ending,Number of Drug Overdose Deaths,7819,100,0.209312,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,7835
+FL,2022,September,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",6070,100,0.247949,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,6079
+FL,2022,September,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",5365,100,0.082556,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5375
+FL,2022,October,12 month-ending,Number of Deaths,210850,100,0.087756,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2022,October,12 month-ending,Number of Drug Overdose Deaths,7887,100,0.225179,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,7890
+FL,2022,October,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",6099,100,0.037784,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,6111
+FL,2022,October,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",5419,100,0.146497,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5435
+FL,2022,November,12 month-ending,Number of Deaths,210918,100,0.213750,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2022,November,12 month-ending,Number of Drug Overdose Deaths,7905,100,0.147583,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,7926
+FL,2022,November,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",6133,100,0.292828,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,6151
+FL,2022,November,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",5432,100,0.050756,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5434
+FL,2022,December,12 month-ending,Number of Deaths,210952,100,0.275869,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,
+FL,2022,December,12 month-ending,Number of Drug Overdose Deaths,7943,100,0.106377,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,7948
+FL,2022,December,12 month-ending,"Opioids (T40.0-T40.4,T40.6)",6214,100,0.111379,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,6215
+FL,2022,December,12 month-ending,"Synthetic opioids, excl. methadone (T40.4)",5478,100,0.036561,Florida,Numbers may differ from published reports using final data. See Technical Notes.,**,5499
+LA,2021,January,12 month-ending,Number of Deaths,60049,100,0.128125,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,
+LA,2021,January,12 month-ending,Number of Drug Overdose Deaths,2038,100,0.052178,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,2055
+LA,2021,February,12 month-ending,Number of Deaths,60080,100,0.270704,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,
+LA,2021,February,12 month-ending,Number of Drug Overdose Deaths,2062,100,0.014466,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,2083
+LA,2021,March,12 month-ending,Number of Deaths,60096,100,0.019659,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,
+LA,2021,March,12 month-ending,Number of Drug Overdose Deaths,2103,100,0.108978,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,2116
+LA,2021,April,12 month-ending,Number of Deaths,60156,100,0.232246,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,
+LA,2021,April,12 month-ending,Number of Drug Overdose Deaths,2135,100,0.052909,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,2161
+LA,2021,May,12 month-ending,Number of Deaths,60172,100,0.115729,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,
+LA,2021,May,12 month-ending,Number of Drug Overdose Deaths,2200,100,0.196297,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,2223
+LA,2021,June,12 month-ending,Number of Deaths,60219,100,0.292238,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,
+LA,2021,June,12 month-ending,Number of Drug Overdose Deaths,2230,100,0.066319,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,2250
+LA,2021,July,12 month-ending,Number of Deaths,60270,100,0.033418,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,
+LA,2021,July,12 month-ending,Number of Drug Overdose Deaths,2240,100,0.020679,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,2245
+LA,2021,August,12 month-ending,Number of Deaths,60294,100,0.019892,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,
+LA,2021,August,12 month-ending,Number of Drug Overdose Deaths,2300,100,0.045501,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,2328
+LA,2021,September,12 month-ending,Number of Deaths,60352,100,0.289748,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,
+LA,2021,September,12 month-ending,Number of Drug Overdose Deaths,2336,100,0.207805,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,2338
+LA,2021,October,12 month-ending,Number of Deaths,60386,100,0.086279,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,
+LA,2021,October,12 month-ending,Number of Drug Overdose Deaths,2393,100,0.048917,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,2412
+LA,2021,November,12 month-ending,Number of Deaths,60437,100,0.271983,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,
+LA,2021,November,12 month-ending,Number of Drug Overdose Deaths,2417,100,0.138667,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,2431
+LA,2021,December,12 month-ending,Number of Deaths,60476,100,0.137367,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,
+LA,2021,December,12 month-ending,Number of Drug Overdose Deaths,2468,100,0.119356,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,2490
+LA,2022,January,12 month-ending,Number of Deaths,60484,100,0.170313,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,
+LA,2022,January,12 month-ending,Number of Drug Overdose Deaths,2501,100,0.138131,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,2507
+LA,2022,February,12 month-ending,Number of Deaths,60547,100,0.181349,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,
+LA,2022,February,12 month-ending,Number of Drug Overdose Deaths,2559,100,0.221672,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,2563
+LA,2022,March,12 month-ending,Number of Deaths,60579,100,0.242578,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,
+LA,2022,March,12 month-ending,Number of Drug Overdose Deaths,2568,100,0.280746,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,2569
+LA,2022,April,12 month-ending,Number of Deaths,60628,100,0.125207,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,
+LA,2022,April,12 month-ending,Number of Drug Overdose Deaths,2638,100,0.022038,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,2657
+LA,2022,May,12 month-ending,Number of Deaths,60668,100,0.048663,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,
+LA,2022,May,12 month-ending,Number of Drug Overdose Deaths,2655,100,0.036328,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,2668
+LA,2022,June,12 month-ending,Number of Deaths,60713,100,0.149547,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,
+LA,2022,June,12 month-ending,Number of Drug Overdose Deaths,2682,100,0.050351,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,2689
+LA,2022,July,12 month-ending,Number of Deaths,60725,100,0.073147,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,
+LA,2022,July,12 month-ending,Number of Drug Overdose Deaths,2760,100,0.117727,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,2774
+LA,2022,August,12 month-ending,Number of Deaths,60763,100,0.063215,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,
+LA,2022,August,12 month-ending,Number of Drug Overdose Deaths,2793,100,0.185610,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,2814
+LA,2022,September,12 month-ending,Number of Deaths,60840,100,0.255403,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,
+LA,2022,September,12 month-ending,Number of Drug Overdose Deaths,2847,100,0.258295,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,2850
+LA,2022,October,12 month-ending,Number of Deaths,60855,100,0.075897,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,
+LA,2022,October,12 month-ending,Number of Drug Overdose Deaths,2861,100,0.043500,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,2886
+LA,2022,November,12 month-ending,Number of Deaths,60915,100,0.169334,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,
+LA,2022,November,12 month-ending,Number of Drug Overdose Deaths,2926,100,0.120884,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,2938
+LA,2022,December,12 month-ending,Number of Deaths,60942,100,0.113242,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,
+LA,2022,December,12 month-ending,Number of Drug Overdose Deaths,2961,100,0.189361,Louisiana,Numbers may differ from published reports using final data. See Technical Notes.,**,2965

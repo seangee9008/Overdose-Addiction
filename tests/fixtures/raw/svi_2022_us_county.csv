@@ -1,0 +1,6 @@
+ST,STATE,ST_ABBR,STCNTY,FIPS,COUNTY,E_TOTPOP,RPL_THEMES,LOCATION,EP_POV150
+01,Alabama,AL,01001,01001,Autauga County,58761,0.2663,"Autauga County, Alabama",20.2
+01,Alabama,AL,01003,01003,Baldwin County,233420,0.4,"Baldwin County, Alabama",18.0
+51,Virginia,VA,51005,51005,Alleghany County,15174,0.75,"Alleghany County, Virginia",30.1
+09,Connecticut,CT,09110,09110,Capitol Planning Region,976248,0.51,"Capitol Planning Region, Connecticut",15.5
+02,Alaska,AK,02063,02063,Chugach Census Area,7019,0.15,"Chugach Census Area, Alaska",22.0
