@@ -172,7 +172,32 @@ def sec_step_b(used):
     return "\n".join(parts)
 
 
-SECTIONS = [sec_cdc_breaks, sec_nsduh, sec_step_a, sec_step_b]
+def sec_step_c(used):
+    f = f"{OUT_DIR}/step_c_year_effects.csv"
+    if not os.path.exists(f):
+        return ""
+    names = ["step_c_year_effects.csv", "step_c_coefficients.csv", "step_c_composition.csv",
+             "step_c_hand_check.csv", "step_c_r_check.csv", "step_c_r_comparison.csv"]
+    used.update(names)
+    eff, coef, comp, hand = (pd.read_csv(f"{OUT_DIR}/{x}") for x in names[:4])
+    parts = ["## Step C: survey-weighted logistic regression (NSDUH only)\n",
+             "Produced by `src/step_c.py` (models: `src/survey_glm.py`; R cross-check: `R/step_c_svyglm.R`). "
+             "Crude = outcome ~ year; adjusted = + age group, sex, race/ethnicity. Reference: 2021, 12-17, male, "
+             "NH White. Odds ratios with 95% CI.\n",
+             "### Year effects (odds ratio vs 2021), crude vs adjusted\n", table(eff, 4, drop=("label", "source")),
+             "\n### Demographic composition, 2021 vs 2024 (weighted %)\n", table(comp, 2, drop=("source",)),
+             "\n### Hand-calculation check (crude 2024 coefficient)\n", table(hand, 6)]
+    if os.path.exists(f"{OUT_DIR}/step_c_r_comparison.csv"):
+        parts += ["\n### Cross-check against R survey::svyglm\n",
+                  table(pd.read_csv(f"{OUT_DIR}/step_c_r_comparison.csv"), 10)]
+    parts += ["\n### All coefficients\n", table(coef, 4, drop=("source",)), "\nSources:\n", sources(eff)]
+    rcheck = pd.read_csv(f"{OUT_DIR}/step_c_r_check.csv") if os.path.exists(f"{OUT_DIR}/step_c_r_check.csv") else None
+    if rcheck is not None:
+        parts += ["\n### R svyglm coefficients (raw)\n", table(rcheck, 6)]
+    return "\n".join(parts)
+
+
+SECTIONS = [sec_cdc_breaks, sec_nsduh, sec_step_a, sec_step_b, sec_step_c]
 EXTRA_SECTIONS = []  # later steps register here
 
 
