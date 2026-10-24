@@ -42,9 +42,21 @@ unzip -o data/raw/nsduh_2023_puf_stata.zip -d data/raw/nsduh_2023
 .venv/bin/python analyze_real.py --indicator "Opioids (T40.0-T40.4,T40.6)" --tag opioids
 #   options: --state (default US), --value-col "Data Value"|"Predicted Value", --min-seg (default 12)
 
-# 4. Tests
+# 4. NSDUH 2021-2024 and the step-by-step analyses (after fetch_data.py has run)
+unzip -o data/raw/nsduh_2021_2024_concat_puf_stata.zip -d data/raw/nsduh_2021_2024
+unzip -o data/raw/nsduh_2024_puf_stata.zip -d data/raw/nsduh_2024
+.venv/bin/python -m src.nsduh_estimates   # Step 1: weighted % with SEs/CIs by year, age, sex
+.venv/bin/python -m src.step_a            # Step A: opioid deaths vs NSDUH misuse / OUD / heroin
+.venv/bin/python -m src.step_b            # Step B: block-bootstrap break-point inference
+.venv/bin/python -m src.step_c            # Step C: survey-weighted logistic regression (+ R svyglm check)
+.venv/bin/python -m src.step_d            # Step D: county change by SVI quartile (censored NB)
+.venv/bin/python -m src.build_results     # collect everything into results/RESULTS.md
+
+# 5. Tests
 .venv/bin/python -m pytest
 ```
+
+Step C's cross-check needs R with the `survey` package (`Rscript R/step_c_svyglm.R`); without R it is skipped.
 
 `analyze_real.py` writes the extracted series to `data/processed/<state>_<tag>_series.csv` and
 charts plus a JSON summary to `outputs/<tag>_*`.
@@ -56,6 +68,8 @@ charts plus a JSON summary to `outputs/<tag>_*`.
 | CDC/NCHS VSRR Provisional Drug Overdose Death Counts, national + state (12-month-ending, 12 drug indicators, 2015-01 onward) | state × month | `cdc_vsrr_overdose_national_state.csv` | https://data.cdc.gov/api/views/xkb8-kh2a/rows.csv?accessType=DOWNLOAD |
 | CDC/NCHS VSRR provisional county overdose deaths (12-month-ending, all-drug only, 2020-01 onward) | county × month | `cdc_vsrr_overdose_county.csv` | https://data.cdc.gov/api/views/gb4e-yj24/rows.csv?accessType=DOWNLOAD |
 | SAMHSA NSDUH 2023 public-use file, Stata format (no geography) | individual | `nsduh_2023_puf_stata.zip` | https://www.samhsa.gov/data/system/files/media-puf-file/nsduh-2023-ds0001-bndl-data-stata_v2.zip |
+| SAMHSA NSDUH combined 2021–2024 public-use file, Stata (+ codebook) | individual | `nsduh_2021_2024_concat_puf_stata.zip` | https://www.samhsa.gov/data/system/files/media-puf-file/NSDUH-2021_2024-DS0001-bndl-data-stata_v1.zip |
+| SAMHSA NSDUH 2024 single-year public-use file, Stata (+ codebook) | individual | `nsduh_2024_puf_stata.zip` | https://www.samhsa.gov/data/system/files/media-puf-file/NSDUH-2024-DS0001-bndl-data-stata_v1.zip |
 | NSDUH 2023 codebook | — | `nsduh_2023_codebook.pdf` | https://www.samhsa.gov/data/system/files/media-puf-file/nsduh-2023-ds0001-info-codebook_v2.pdf |
 | CDC/ATSDR Social Vulnerability Index 2022, county | county | `svi_2022_us_county.csv` | https://svi.cdc.gov/Documents/Data/2022/csv/states_counties/SVI_2022_US_county.csv |
 | SVI 2022 county polygons (ArcGIS mirror, opt-in: `--only svi_2022_arcgis_geo`) | county | `svi_2022_county.geojson` | ArcGIS Online layer `SVI2022_US_county` |
@@ -71,8 +85,12 @@ combined in one model.
 
 ```
 fetch_data.py         analyze_real.py        requirements.txt     pytest.ini
-src/                  breaks.py, cdc.py, profile_data.py
-tests/                test_breaks.py
+src/                  breaks.py, cdc.py, profile_data.py, nsduh.py, survey.py, survey_glm.py,
+                      count_models.py, nsduh_estimates.py, step_a.py ... step_d.py, build_results.py
+R/                    step_c_svyglm.R (cross-check)
+tests/                test_breaks.py, test_survey.py, test_survey_glm.py, test_count_models.py,
+                      test_nsduh_rebuild.py
+results/              RESULTS.md (generated)
 notebooks/            exploratory notebooks
 data/raw/             downloads (git-ignored)
 data/processed/       small derived series
