@@ -1,0 +1,146 @@
+{
+  "reminder": "NSDUH mostly captures prescription pain-reliever (pill) misuse, while opioid overdose deaths are mostly illicitly made fentanyl (synthetic opioids, T40.4). The two series measure different behaviors in different populations; a household survey also misses many people at highest risk (e.g. unhoused, incarcerated).",
+  "method": "* Each change is a log ratio, L = ln(value_2024 / value_2021); % change = 100*(e^L - 1).\n  * NSDUH log ratios and their SEs come from survey.contrast(): Taylor linearization of\n    ln(p_2024) - ln(p_2021) on the shared NSDUH design (VESTR_C/VEREP), so the covariance between\n    years that share PSUs is included. 50 design degrees of freedom.\n  * Deaths are a complete count (not a sample), so the main test treats the deaths log ratio as\n    fixed. Sensitivity: add Poisson count variance 1/D_2021 + 1/D_2024.\n  * Test statistic: t = (L_nsduh - L_deaths) / SE, compared to t(50). Three measures are tested;\n    p-values are not adjusted for multiple comparisons.\n  * No measure is designated as \"addiction\"; all three are reported side by side.",
+  "deaths_source": "CDC VSRR xkb8-kh2a, US, 'Opioids (T40.0-T40.4,T40.6)', Data Value, Dec 12-month-ending (= calendar year)",
+  "nsduh_source": "NSDUH 2021-2024 combined PUF (+2024 single-year PUF for OUD), ANALWT2_C1, VESTR_C/VEREP, df=50",
+  "tests": [
+    {
+      "measure": "OPI_MISUSE",
+      "label": "Opioid misuse, past year (heroin use or Rx pain-reliever misuse; 2021-23 definition)",
+      "nsduh_pct_2021": 3.3935366753,
+      "nsduh_pct_2024": 2.7717998181,
+      "nsduh_pct_change": -18.3212063581,
+      "nsduh_pct_change_ci_low": -27.9899045976,
+      "nsduh_pct_change_ci_high": -7.3543050662,
+      "nsduh_change_pvalue_vs_zero": 0.0022134606,
+      "deaths_2021": 80997,
+      "deaths_2024": 55007,
+      "deaths_pct_change": -32.087608183,
+      "log_ratio_nsduh": -0.2023757816,
+      "log_ratio_se": 0.0627256029,
+      "log_ratio_deaths": -0.3869516671,
+      "difference_in_log_ratios": 0.1845758855,
+      "difference_ci_low": 0.0585878042,
+      "difference_ci_high": 0.3105639668,
+      "t_deaths_fixed": 2.942592449,
+      "p_deaths_fixed": 0.0049233504,
+      "t_deaths_poisson": 2.9312434627,
+      "p_deaths_poisson": 0.0050790437,
+      "deaths_per_case_ratio_2024_vs_2021": 0.831456842,
+      "df": 50,
+      "nsduh_source": "NSDUH 2021-2024 combined PUF (+2024 single-year PUF for OUD), ANALWT2_C1, VESTR_C/VEREP, df=50",
+      "deaths_source": "CDC VSRR xkb8-kh2a, US, 'Opioids (T40.0-T40.4,T40.6)', Data Value, Dec 12-month-ending (= calendar year)"
+    },
+    {
+      "measure": "OPI_OUD",
+      "label": "Opioid use disorder, past year (heroin or Rx pain-reliever use disorder; 2021-23 definition)",
+      "nsduh_pct_2021": 2.0044584835,
+      "nsduh_pct_2024": 1.7787286343,
+      "nsduh_pct_change": -11.2613881014,
+      "nsduh_pct_change_ci_low": -25.9024198092,
+      "nsduh_pct_change_ci_high": 6.2725830104,
+      "nsduh_change_pvalue_vs_zero": 0.1892680062,
+      "deaths_2021": 80997,
+      "deaths_2024": 55007,
+      "deaths_pct_change": -32.087608183,
+      "log_ratio_nsduh": -0.1194750825,
+      "log_ratio_se": 0.0897719299,
+      "log_ratio_deaths": -0.3869516671,
+      "difference_in_log_ratios": 0.2674765846,
+      "difference_ci_low": 0.0871643569,
+      "difference_ci_high": 0.4477888123,
+      "t_deaths_fixed": 2.9795124716,
+      "p_deaths_fixed": 0.0044470816,
+      "t_deaths_poisson": 2.9738855967,
+      "p_deaths_poisson": 0.0045167795,
+      "deaths_per_case_ratio_2024_vs_2021": 0.7653082504,
+      "df": 50,
+      "nsduh_source": "NSDUH 2021-2024 combined PUF (+2024 single-year PUF for OUD), ANALWT2_C1, VESTR_C/VEREP, df=50",
+      "deaths_source": "CDC VSRR xkb8-kh2a, US, 'Opioids (T40.0-T40.4,T40.6)', Data Value, Dec 12-month-ending (= calendar year)"
+    },
+    {
+      "measure": "HERYR",
+      "label": "Heroin use, past year",
+      "nsduh_pct_2021": 0.385371937,
+      "nsduh_pct_2024": 0.1936584062,
+      "nsduh_pct_change": -49.7476625532,
+      "nsduh_pct_change_ci_low": -67.6705371145,
+      "nsduh_pct_change_ci_high": -21.8886676895,
+      "nsduh_change_pvalue_vs_zero": 0.0028878829,
+      "deaths_2021": 80997,
+      "deaths_2024": 55007,
+      "deaths_pct_change": -32.087608183,
+      "log_ratio_nsduh": -0.6881131238,
+      "log_ratio_se": 0.2195992547,
+      "log_ratio_deaths": -0.3869516671,
+      "difference_in_log_ratios": -0.3011614567,
+      "difference_ci_low": -0.7422395408,
+      "difference_ci_high": 0.1399166274,
+      "t_deaths_fixed": -1.3714138377,
+      "p_deaths_fixed": 0.1763695349,
+      "t_deaths_poisson": -1.3709799918,
+      "p_deaths_poisson": 0.1765039047,
+      "deaths_per_case_ratio_2024_vs_2021": 1.3514275209,
+      "df": 50,
+      "nsduh_source": "NSDUH 2021-2024 combined PUF (+2024 single-year PUF for OUD), ANALWT2_C1, VESTR_C/VEREP, df=50",
+      "deaths_source": "CDC VSRR xkb8-kh2a, US, 'Opioids (T40.0-T40.4,T40.6)', Data Value, Dec 12-month-ending (= calendar year)"
+    }
+  ],
+  "context": [
+    {
+      "item": "Share of opioid overdose deaths involving synthetic opioids (T40.4)",
+      "year": 2021,
+      "value_pct": 87.834117313,
+      "se": null,
+      "source": "CDC VSRR xkb8-kh2a, US, Dec 12-month-ending: 'Synthetic opioids, excl. methadone (T40.4)' / 'Opioids (T40.0-T40.4,T40.6)'; categories overlap (multiple drugs per death)"
+    },
+    {
+      "item": "Share of opioid overdose deaths involving synthetic opioids (T40.4)",
+      "year": 2024,
+      "value_pct": 88.4651044413,
+      "se": null,
+      "source": "CDC VSRR xkb8-kh2a, US, Dec 12-month-ending: 'Synthetic opioids, excl. methadone (T40.4)' / 'Opioids (T40.0-T40.4,T40.6)'; categories overlap (multiple drugs per death)"
+    },
+    {
+      "item": "Share of NSDUH opioid misusers who misused Rx pain relievers but did not use heroin",
+      "year": 2021,
+      "value_pct": 88.6439436538,
+      "se": 1.6451341655,
+      "source": "NSDUH 2021-2024 combined PUF (+2024 single-year PUF for OUD), ANALWT2_C1, VESTR_C/VEREP, df=50; PNRNMYR=1 & HERYR=0 among OPI_MISUSE=1"
+    },
+    {
+      "item": "Share of NSDUH opioid misusers who misused Rx pain relievers but did not use heroin",
+      "year": 2024,
+      "value_pct": 93.0132614583,
+      "se": 1.0018826412,
+      "source": "NSDUH 2021-2024 combined PUF (+2024 single-year PUF for OUD), ANALWT2_C1, VESTR_C/VEREP, df=50; PNRNMYR=1 & HERYR=0 among OPI_MISUSE=1"
+    },
+    {
+      "item": "Past-year use of illegally made fentanyl, people 12+ (IMFYR; not asked in 2021)",
+      "year": 2022,
+      "value_pct": 0.226449947,
+      "se": 0.0338506315,
+      "source": "NSDUH 2021-2024 combined PUF, IMFYR, ANALWT2_C1, VESTR_C/VEREP"
+    },
+    {
+      "item": "Past-year use of illegally made fentanyl, people 12+ (IMFYR; not asked in 2021)",
+      "year": 2023,
+      "value_pct": 0.2319560439,
+      "se": 0.0286851887,
+      "source": "NSDUH 2021-2024 combined PUF, IMFYR, ANALWT2_C1, VESTR_C/VEREP"
+    },
+    {
+      "item": "Past-year use of illegally made fentanyl, people 12+ (IMFYR; not asked in 2021)",
+      "year": 2024,
+      "value_pct": 0.2489296594,
+      "se": 0.0322519632,
+      "source": "NSDUH 2021-2024 combined PUF, IMFYR, ANALWT2_C1, VESTR_C/VEREP"
+    }
+  ],
+  "files": [
+    "outputs/step_a_comparison.csv",
+    "outputs/step_a_tests.csv",
+    "outputs/step_a_context.csv",
+    "outputs/step_a_index.png"
+  ]
+}

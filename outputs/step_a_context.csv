@@ -1,0 +1,8 @@
+item,year,value_pct,se,source
+Share of opioid overdose deaths involving synthetic opioids (T40.4),2021,87.8341,,"CDC VSRR xkb8-kh2a, US, Dec 12-month-ending: 'Synthetic opioids, excl. methadone (T40.4)' / 'Opioids (T40.0-T40.4,T40.6)'; categories overlap (multiple drugs per death)"
+Share of opioid overdose deaths involving synthetic opioids (T40.4),2024,88.4651,,"CDC VSRR xkb8-kh2a, US, Dec 12-month-ending: 'Synthetic opioids, excl. methadone (T40.4)' / 'Opioids (T40.0-T40.4,T40.6)'; categories overlap (multiple drugs per death)"
+Share of NSDUH opioid misusers who misused Rx pain relievers but did not use heroin,2021,88.6439,1.6451,"NSDUH 2021-2024 combined PUF (+2024 single-year PUF for OUD), ANALWT2_C1, VESTR_C/VEREP, df=50; PNRNMYR=1 & HERYR=0 among OPI_MISUSE=1"
+Share of NSDUH opioid misusers who misused Rx pain relievers but did not use heroin,2024,93.0133,1.0019,"NSDUH 2021-2024 combined PUF (+2024 single-year PUF for OUD), ANALWT2_C1, VESTR_C/VEREP, df=50; PNRNMYR=1 & HERYR=0 among OPI_MISUSE=1"
+"Past-year use of illegally made fentanyl, people 12+ (IMFYR; not asked in 2021)",2022,0.2264,0.0339,"NSDUH 2021-2024 combined PUF, IMFYR, ANALWT2_C1, VESTR_C/VEREP"
+"Past-year use of illegally made fentanyl, people 12+ (IMFYR; not asked in 2021)",2023,0.232,0.0287,"NSDUH 2021-2024 combined PUF, IMFYR, ANALWT2_C1, VESTR_C/VEREP"
+"Past-year use of illegally made fentanyl, people 12+ (IMFYR; not asked in 2021)",2024,0.2489,0.0323,"NSDUH 2021-2024 combined PUF, IMFYR, ANALWT2_C1, VESTR_C/VEREP"
