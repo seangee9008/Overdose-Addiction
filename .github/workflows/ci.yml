@@ -1,0 +1,21 @@
+# GitHub Actions: on every push / pull request, lint the code and build + test the data layer on
+# the SYNTHETIC fixtures in tests/fixtures/raw (real raw data is git-ignored and never used here).
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v6
+      - name: Install pinned dependencies
+        run: uv pip install --system -r requirements.lock
+      - name: Lint, build data layer on fixtures, pytest
+        run: make ci PY=python DBT=dbt
