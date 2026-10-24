@@ -46,3 +46,16 @@ def test_one_break_recovered_and_sse_ordering():
     *_, sse2 = fit_two_breaks(y, min_seg=12)
     # Nested models: more breaks can never fit worse.
     assert sse2 <= sse1 <= sse0
+
+
+def test_fast_fit_matches_slow_grid_search():
+    from src.breaks import fast_fit
+    rng = np.random.default_rng(7)
+    for _ in range(3):
+        y = np.cumsum(rng.normal(0, 50, 90)) + rng.normal(0, 20, 90)
+        f = fast_fit(y, min_seg=12)
+        t1, t2, _, sse2 = fit_two_breaks(y, min_seg=12)
+        tau, _, sse1 = fit_one_break(y, min_seg=12)
+        _, sse0 = fit_no_break(y)
+        assert f["tau2"] == (t1, t2) and f["tau1"] == tau
+        assert np.allclose([f["sse0"], f["sse1"], f["sse2"]], [sse0, sse1, sse2], rtol=1e-6)
