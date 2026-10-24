@@ -1,0 +1,82 @@
+version: 2
+
+models:
+  - name: stg_cdc_state
+    description: CDC national/state file, typed; one row per state x indicator x month as delivered.
+    columns:
+      - name: row_key
+        data_tests: [unique, not_null]
+      - name: state
+        data_tests: [not_null]
+      - name: indicator
+        data_tests: [not_null]
+      - name: month_date
+        data_tests: [not_null]
+      - name: period
+        data_tests:
+          - accepted_values:
+              arguments: {values: ["12 month-ending"]}
+      - name: data_value
+        data_tests: [non_negative]
+      - name: predicted_value
+        data_tests: [non_negative]
+
+  - name: stg_cdc_county_all
+    description: Every raw county row, typed, with duplicate-FIPS bookkeeping.
+    columns:
+      - name: fips
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_svi')
+                field: fips
+              config:
+                # documented exceptions: CT legacy counties vs 2022 planning regions; AK 02261 split
+                where: "fips not in ('09001','09003','09005','09007','09009','09011','09013','09015','02261')"
+      - name: deaths_reported
+        data_tests: [non_negative]
+
+  - name: stg_cdc_county
+    description: One row per county x month (Virginia duplicates collapsed).
+    columns:
+      - name: row_key
+        data_tests: [unique, not_null]
+      - name: is_suppressed
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments: {values: [true, false], quote: false}
+      - name: deaths_lower
+        data_tests: [not_null, non_negative]
+      - name: deaths_upper
+        data_tests: [not_null, non_negative]
+
+  - name: stg_svi
+    columns:
+      - name: fips
+        data_tests: [unique, not_null]
+      - name: e_totpop
+        data_tests: [not_null, non_negative]
+      - name: rpl_themes
+        data_tests:
+          - in_range:
+              arguments: {min_value: 0, max_value: 1}
+
+  - name: stg_nsduh
+    columns:
+      - name: '"YEAR"'
+        data_tests:
+          - accepted_values:
+              arguments: {values: [2021, 2022, 2023, 2024], quote: false}
+      - name: '"ANALWT2_C1"'
+        data_tests: [not_null]
+      - name: '"VEREP"'
+        data_tests:
+          - accepted_values:
+              arguments: {values: [1, 2], quote: false}
+
+  - name: stg_nsduh_2024
+    columns:
+      - name: '"QUESTID2"'
+        data_tests: [unique, not_null]

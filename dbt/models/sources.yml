@@ -1,0 +1,22 @@
+version: 2
+
+sources:
+  - name: interim
+    description: >
+      Validated Parquet copies of the raw sources, written by `python -m src.ingest`
+      (pandera-checked; `src_row` = row position in the raw file).
+    meta:
+      external_location: "{{ env_var('INTERIM_DIR', 'data/interim') }}/{name}.parquet"
+    tables:
+      - name: cdc_state
+        description: CDC/NCHS VSRR provisional overdose deaths, national + state (data.cdc.gov xkb8-kh2a). All columns text, as read.
+      - name: cdc_county
+        description: CDC/NCHS VSRR provisional county overdose deaths (data.cdc.gov gb4e-yj24). All-drug only.
+      - name: svi_county
+        description: CDC/ATSDR Social Vulnerability Index 2022, county CSV (svi.cdc.gov).
+      - name: nsduh_2021_2024
+        description: NSDUH combined 2021-2024 PUF (Stata), the 15 variables the pipeline uses.
+      - name: nsduh_2024
+        description: NSDUH 2024 single-year PUF, QUESTID2 + UDYR5PNRANY2 (2024 pain-reliever use disorder).
+      - name: nsduh_value_labels
+        description: Value labels for the NSDUH variables, from the Stata metadata.

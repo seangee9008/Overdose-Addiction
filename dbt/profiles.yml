@@ -1,0 +1,9 @@
+# Paths are relative to the directory dbt is run from (the repo root, via the Makefile).
+# CI overrides DUCKDB_PATH / INTERIM_DIR to build on synthetic fixtures.
+overdose:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('DUCKDB_PATH', 'data/warehouse/overdose.duckdb') }}"
+      threads: 4

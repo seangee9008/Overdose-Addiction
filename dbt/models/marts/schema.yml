@@ -1,0 +1,111 @@
+version: 2
+
+models:
+  - name: state_deaths_long
+    description: >
+      Complete state x indicator x month grid of CDC 12-month-ending overdose death totals with
+      explicit missing flags. Nothing is imputed.
+    columns:
+      - name: row_key
+        data_tests: [unique, not_null]
+      - name: state
+        data_tests: [not_null]
+      - name: indicator
+        data_tests: [not_null]
+      - name: month_date
+        data_tests: [not_null]
+      - name: data_value
+        data_tests: [non_negative]
+      - name: is_row_missing
+        data_tests: [not_null]
+      - name: is_data_value_missing
+        data_tests: [not_null]
+
+  - name: national_deaths_monthly
+    description: The US rows of state_deaths_long.
+    columns:
+      - name: row_key
+        data_tests: [unique, not_null]
+      - name: state
+        data_tests:
+          - accepted_values:
+              arguments: {values: ["US"]}
+
+  - name: county_deaths_svi
+    description: County x month all-drug overdose deaths with suppression flags and bounds, joined to SVI 2022.
+    columns:
+      - name: row_key
+        data_tests: [unique, not_null]
+      - name: fips
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_svi')
+                field: fips
+      - name: deaths_reported
+        data_tests: [non_negative]
+      - name: deaths_lower
+        data_tests: [not_null, non_negative]
+      - name: deaths_upper
+        data_tests: [not_null, non_negative]
+      - name: is_suppressed
+        data_tests: [not_null]
+      - name: e_totpop
+        data_tests: [not_null, non_negative]
+      - name: rpl_themes
+        data_tests:
+          - in_range:
+              arguments: {min_value: 0, max_value: 1}
+
+  - name: county_fips_audit
+    description: Counties lost in the CDC-SVI join and duplicate-FIPS rows, in raw-file order.
+    columns:
+      - name: side
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["CDC county file, no SVI match", "SVI, no CDC match", "Duplicate FIPS rows in CDC county file"]
+
+  - name: nsduh_respondent
+    description: One row per NSDUH respondent-year (2021-2024) with design variables and comparable outcomes.
+    columns:
+      - name: row_key
+        data_tests: [unique, not_null]
+      - name: '"ANALWT2_C1"'
+        data_tests: [not_null, non_negative]
+      - name: '"VESTR_C"'
+        data_tests: [not_null]
+      - name: '"VEREP"'
+        data_tests: [not_null]
+      - name: '"PNR_USE_DISORDER"'
+        description: Pain-reliever use disorder used in OPI_OUD; must exist for every respondent.
+        data_tests: [not_null]
+      - name: '"OPI_MISUSE"'
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments: {values: [0, 1], quote: false}
+      - name: '"OPI_OUD"'
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments: {values: [0, 1], quote: false}
+      - name: '"CATAG3"'
+        data_tests:
+          - accepted_values:
+              arguments: {values: [1, 2, 3, 4, 5], quote: false}
+      - name: '"IRSEX"'
+        data_tests:
+          - accepted_values:
+              arguments: {values: [1, 2], quote: false}
+      - name: '"NEWRACE2"'
+        data_tests:
+          - accepted_values:
+              arguments: {values: [1, 2, 3, 4, 5, 6, 7], quote: false}
+
+  - name: nsduh_value_labels
+    columns:
+      - name: label
+        data_tests: [not_null]
