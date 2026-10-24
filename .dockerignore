@@ -1,0 +1,13 @@
+.git
+.venv
+data/raw
+data/interim
+data/warehouse
+build
+dbt/target
+dbt/logs
+dbt/.user.yml
+.pytest_cache
+.ruff_cache
+**/__pycache__
+notebooks
