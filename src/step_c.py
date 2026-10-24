@@ -32,7 +32,7 @@ from src import survey as sv
 from src.survey_glm import design_matrix, svy_logit
 
 OUT = "outputs"
-EXTRACT = "data/raw/derived/nsduh_step_c_extract.csv"   # microdata extract, git-ignored
+EXTRACT = "data/interim/nsduh_step_c_extract.csv"       # microdata extract for R, git-ignored
 DEMOG = {"CATAG3": 1, "IRSEX": 1, "NEWRACE2": 1}
 YEARS = [2021, 2022, 2023, 2024]
 SOURCE = (f"NSDUH 2021-2024 combined PUF (+2024 single-year PUF for OUD), {nsduh.WEIGHT}, "

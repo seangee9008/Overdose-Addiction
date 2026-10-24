@@ -2,7 +2,7 @@
 # R survey::svyglm. Reads the extract written by step_c.py; writes outputs/step_c_r_check.csv.
 #   Rscript R/step_c_svyglm.R
 suppressPackageStartupMessages(library(survey))
-d <- read.csv("data/raw/derived/nsduh_step_c_extract.csv")
+d <- read.csv("data/interim/nsduh_step_c_extract.csv")
 for (v in c("YEAR", "CATAG3", "IRSEX", "NEWRACE2")) d[[v]] <- factor(d[[v]])
 des <- svydesign(ids = ~VEREP, strata = ~VESTR_C, weights = ~ANALWT2_C1, data = d, nest = TRUE)
 out <- list()

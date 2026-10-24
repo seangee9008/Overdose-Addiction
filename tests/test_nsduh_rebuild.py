@@ -5,8 +5,10 @@ import pytest
 
 from src import nsduh
 
-pytestmark = pytest.mark.skipif(not (os.path.exists(nsduh.DTA) and os.path.exists(nsduh.DTA_2024)),
-                                reason="NSDUH data not downloaded (run fetch_data.py and unzip)")
+from src import warehouse
+
+pytestmark = pytest.mark.skipif(not os.path.exists(warehouse.DB) or os.environ.get("SYNTHETIC_FIXTURES") == "1",
+                                reason="real-data warehouse not built (run `make data`)")
 
 
 @pytest.fixture(scope="module")

@@ -2,7 +2,7 @@
 """
 analyze_real.py -- break-point detection and NSDUH-vs-deaths comparison on a real CDC series.
 
-Input: data/raw/cdc_vsrr_overdose_national_state.csv
+Input: dbt mart state_deaths_long (DuckDB warehouse), built from data/raw/cdc_vsrr_overdose_national_state.csv
   CDC/NCHS "Provisional Drug Overdose Death Counts" (data.cdc.gov dataset xkb8-kh2a),
   downloaded by fetch_data.py. Each value is a 12-MONTH-ENDING total (deaths in the
   12 months ending in that calendar month) -- NOT the count of deaths in that single month.
@@ -74,7 +74,6 @@ def style(ax):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--csv", default=os.path.join(ROOT, STATE_CSV))
     ap.add_argument("--state", default="US")
     ap.add_argument("--indicator", default=ALL_DRUG)
     ap.add_argument("--value-col", default="Data Value", choices=VALUE_COLS)
@@ -85,11 +84,11 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     os.makedirs(PROCESSED, exist_ok=True)
     provenance = (f"CDC/NCHS VSRR Provisional Drug Overdose Death Counts (data.cdc.gov xkb8-kh2a), "
-                  f"file {os.path.relpath(a.csv, ROOT)}, State={a.state!r}, Indicator={a.indicator!r}, "
+                  f"file {STATE_CSV}, State={a.state!r}, Indicator={a.indicator!r}, "
                   f"column={a.value_col!r}; 12-month-ending totals")
 
     # ------------------------------------------------------------ load
-    df = load_series(a.csv, state=a.state, indicator=a.indicator, value_col=a.value_col)
+    df = load_series(state=a.state, indicator=a.indicator, value_col=a.value_col)
     n = len(df)
     series_path = os.path.join(PROCESSED, f"{a.state.lower()}_{a.tag}_series.csv")
     df.assign(source=provenance).to_csv(series_path, index=False)

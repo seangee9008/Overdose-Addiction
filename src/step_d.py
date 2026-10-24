@@ -12,7 +12,8 @@ Data
   * CDC/ATSDR SVI 2022 county CSV: RPL_THEMES (overall national percentile, 0-1) and E_TOTPOP
     (ACS 2018-2022 population, used as the exposure for every period).
 
-Cleaning (see data/DATA_PROFILE.md)
+Data are read from the dbt marts county_deaths_svi and county_fips_audit (DuckDB warehouse, built by
+`make data` from the raw files above). Cleaning is done in dbt staging (see data/DATA_PROFILE.md):
   * FIPS zero-padded to 5 characters.
   * Two Virginia FIPS (51005, 51019) appear twice per month (independent cities folded into their
     counties) with identical values; one row per FIPS is kept.
@@ -41,11 +42,10 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
+from src import warehouse
 from src.count_models import censored_nb
 
 OUT = "outputs"
-COUNTY = "data/raw/cdc_vsrr_overdose_county.csv"
-SVI = "data/raw/svi_2022_us_county.csv"
 COL = "Provisional Drug Overdose Deaths"
 PERIODS = {"main": (2022, 2025), "sensitivity": (2023, 2025)}
 QLAB = {1: "Q1 (least vulnerable)", 2: "Q2", 3: "Q3", 4: "Q4 (most vulnerable)"}
@@ -54,25 +54,20 @@ SRC = ("CDC VSRR county file gb4e-yj24 (all-drug, Dec 12-month-ending) x CDC/ATS
 
 
 def load():
-    c = pd.read_csv(COUNTY, dtype={"FIPS": str})
-    c["FIPS"] = c["FIPS"].str.zfill(5)
-    c = c[c.Month == 12].copy()
-    dup = c[c.duplicated(["FIPS", "Year"], keep=False)]
-    if (dup.groupby(["FIPS", "Year"])[COL].nunique(dropna=False) > 1).any():
-        raise ValueError("duplicated FIPS rows disagree")
-    dup_names = dup.drop_duplicates(["FIPS", "COUNTYNAME"])[["FIPS", "ST_ABBREV", "COUNTYNAME"]]
-    c = c.drop_duplicates(["FIPS", "Year"])
-    svi = pd.read_csv(SVI, dtype={"FIPS": str})
-    svi = svi[svi.RPL_THEMES >= 0].copy()                   # -999 = missing (none in 2022 file)
-    cf, sf = set(c.FIPS), set(svi.FIPS)
-    lost = pd.concat([
-        c[~c.FIPS.isin(sf)].drop_duplicates("FIPS")[["FIPS", "ST_ABBREV", "COUNTYNAME"]].assign(
-            side="CDC county file, no SVI match", name=lambda d: d.COUNTYNAME),
-        svi[~svi.FIPS.isin(cf)][["FIPS", "ST_ABBR", "LOCATION"]].rename(columns={"ST_ABBR": "ST_ABBREV"}).assign(
-            side="SVI, no CDC match", name=lambda d: d.LOCATION),
-    ])[["side", "FIPS", "ST_ABBREV", "name"]]
-    svi["quartile"] = np.minimum(np.floor(svi.RPL_THEMES * 4).astype(int) + 1, 4)
-    m = c.merge(svi[["FIPS", "RPL_THEMES", "E_TOTPOP", "quartile"]], on="FIPS", how="inner")
+    """December (= calendar-year) county rows joined to SVI, the join losses, and the collapsed
+    duplicate-FIPS rows -- all from the dbt marts (cleaning rules: dbt/models/staging/)."""
+    m = warehouse.query(f"""
+        select fips as "FIPS", st_abbrev as "ST_ABBREV", county_name as "COUNTYNAME", year as "Year",
+               month as "Month", deaths_reported as "{COL}", rpl_themes as "RPL_THEMES", e_totpop as "E_TOTPOP"
+        from county_deaths_svi
+        where month = 12 and rpl_themes is not null          -- SVI -999 (missing) is NULL in staging
+        order by src_row""")
+    audit = warehouse.query("select side, fips as \"FIPS\", st_abbrev as \"ST_ABBREV\", name "
+                            "from county_fips_audit order by side_order, order_key")
+    lost = audit[audit.side != "Duplicate FIPS rows in CDC county file"].reset_index(drop=True)
+    dup_names = (audit[audit.side == "Duplicate FIPS rows in CDC county file"]
+                 .rename(columns={"name": "COUNTYNAME"})[["FIPS", "ST_ABBREV", "COUNTYNAME"]])
+    m["quartile"] = np.minimum(np.floor(m.RPL_THEMES * 4).astype(int) + 1, 4)
     m["censored"] = m[COL].isna()
     return m, lost, dup_names
 
@@ -153,7 +148,8 @@ def main():
     metas.to_csv(f"{OUT}/step_d_model_info.csv", index=False)
 
     n_join = m.FIPS.nunique()
-    counts = dict(cdc_fips_after_padding_and_dedup=int(pd.read_csv(COUNTY, dtype={"FIPS": str}).FIPS.str.zfill(5).nunique()),
+    n_fips = warehouse.query("select count(distinct fips) as n from stg_cdc_county_all").n.iloc[0]
+    counts = dict(cdc_fips_after_padding_and_dedup=int(n_fips),
                   virginia_duplicate_rows_collapsed=json.loads(dup_names.to_json(orient="records")),
                   counties_in_analysis=int(n_join),
                   cdc_counties_lost_in_join=int((lost.side == "CDC county file, no SVI match").sum()),

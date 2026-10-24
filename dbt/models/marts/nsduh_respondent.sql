@@ -10,10 +10,10 @@ select
     case when n."YEAR" = 2024 then y."UDYR5PNRANY2" else n."UDYR5PNRANY" end as "PNR_USE_DISORDER",
     n."OPINMYR", n."UD5OPIANY", n."IMFYR",
     n."CATAG3", n."IRSEX", n."NEWRACE2",
-    case when n."HERYR" = 1 or n."PNRNMYR" = 1 then 1.0 else 0.0 end           as "OPI_MISUSE",
+    case when n."HERYR" = 1 or n."PNRNMYR" = 1 then 1.0::double else 0.0::double end as "OPI_MISUSE",
     case when n."IRPYUD5HER" = 1
            or (case when n."YEAR" = 2024 then y."UDYR5PNRANY2" else n."UDYR5PNRANY" end) = 1
-         then 1.0 else 0.0 end                                                   as "OPI_OUD",
+         then 1.0::double else 0.0::double end                                   as "OPI_OUD",
     cast(n."YEAR" as varchar) || '|' || cast(n."QUESTID2" as varchar)          as row_key
 from {{ ref('stg_nsduh') }} n
 left join {{ ref('stg_nsduh_2024') }} y
