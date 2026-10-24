@@ -1,8 +1,10 @@
 variable,label,2021,2022,2023,2024
-OPINMYR,"Opioid misuse, past year (heroin use or Rx pain-reliever misuse)",58034,59069,56705,0
-UD5OPIANY,"Opioid use disorder, past year (DSM-5)",58034,59069,56705,0
+OPI_MISUSE,"Opioid misuse, past year (heroin use or Rx pain-reliever misuse; 2021-23 definition)",58034,59069,56705,58633
+OPI_OUD,"Opioid use disorder, past year (heroin or Rx pain-reliever use disorder; 2021-23 definition)",58034,59069,56705,58633
 HERYR,"Heroin use, past year",58034,59069,56705,58633
 PNRNMYR,"Rx pain-reliever misuse, past year",58034,59069,56705,58633
+OPINMYR,"Opioid misuse, past year (heroin use or Rx pain-reliever misuse)",58034,59069,56705,0
+UD5OPIANY,"Opioid use disorder, past year (DSM-5)",58034,59069,56705,0
 ANALWT2_C1,,58034,59069,56705,58633
 VESTR_C,,58034,59069,56705,58633
 VEREP,,58034,59069,56705,58633

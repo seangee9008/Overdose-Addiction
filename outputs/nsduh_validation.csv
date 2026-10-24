@@ -1,9 +1,9 @@
 year,variable,ours_pct,published,abs_gap_pp,published_source
-2021,OPINMYR,3.39,3.2,0.19,"SAMHSA NSDUH reports, hand-entered in analyze_real.py (not re-verified)"
+2021,OPI_MISUSE,3.39,3.2,0.19,"SAMHSA NSDUH reports, hand-entered in analyze_real.py (not re-verified)"
 2021,PNRNMYR,3.21,3.2,0.01,"SAMHSA NSDUH reports, hand-entered in analyze_real.py (not re-verified)"
-2022,OPINMYR,3.14,3.0,0.14,"SAMHSA NSDUH reports, hand-entered in analyze_real.py (not re-verified)"
+2022,OPI_MISUSE,3.14,3.0,0.14,"SAMHSA NSDUH reports, hand-entered in analyze_real.py (not re-verified)"
 2022,PNRNMYR,2.97,3.0,0.03,"SAMHSA NSDUH reports, hand-entered in analyze_real.py (not re-verified)"
-2023,OPINMYR,3.18,"(3.0, 3.1)",0.08,"SAMHSA NSDUH reports, hand-entered in analyze_real.py (not re-verified)"
+2023,OPI_MISUSE,3.18,"(3.0, 3.1)",0.08,"SAMHSA NSDUH reports, hand-entered in analyze_real.py (not re-verified)"
 2023,PNRNMYR,3.08,"(3.0, 3.1)",0.0,"SAMHSA NSDUH reports, hand-entered in analyze_real.py (not re-verified)"
-2024,OPINMYR,,2.7,,"SAMHSA NSDUH reports, hand-entered in analyze_real.py (not re-verified)"
+2024,OPI_MISUSE,2.77,2.7,0.07,"SAMHSA NSDUH reports, hand-entered in analyze_real.py (not re-verified)"
 2024,PNRNMYR,2.7,2.7,0.0,"SAMHSA NSDUH reports, hand-entered in analyze_real.py (not re-verified)"
