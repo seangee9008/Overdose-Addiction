@@ -14,7 +14,24 @@ This repository holds the data pipeline and exploratory analysis tooling. It cur
   (all-drug or any drug-specific indicator), and
 - compares national death trends with published NSDUH opioid-misuse percentages, indexed to 2021.
 
-It does not contain conclusions. Results so far are exploratory, and have known caveats.
+It does not contain conclusions. Results so far are exploratory, with the known caveats below.
+
+## Known caveats
+
+1. The CDC VSRR series (state and county files) are **12-month-ending totals**, not monthly counts;
+   a month-to-month difference is D_t - D_(t-12), not D_t.
+2. NSDUH opioid misuse (self-reported, mostly prescription pain relievers) and opioid deaths on death
+   certificates (mostly illicitly made fentanyl, T40.4) measure different behaviors in different
+   populations; a household survey also misses many people at highest risk.
+3. SAMHSA redefined its 2024 opioid misuse / OUD variables and calls them not comparable with
+   2021-2023; the comparable 2021-2023 definitions are rebuilt from codebook components (`src/nsduh.py`).
+4. No confounders are controlled.
+5. County file: all-drug only (no opioid split), about half of cells suppressed (1-9 deaths), FIPS
+   without leading zeros, two Virginia FIPS duplicated each month, and Connecticut legacy counties that
+   do not match SVI 2022 planning regions. See `data/DATA_PROFILE.md`.
+
+Ground rules: real data only (nothing estimated or filled in), every number labelled with its source,
+and individual-level (NSDUH) and area-level (CDC county + SVI) analyses kept separate.
 
 ## How the pipeline fits together
 
