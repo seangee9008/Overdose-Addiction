@@ -39,8 +39,11 @@ from scipy import stats
 
 from src import nsduh, warehouse
 from src import survey as sv
-from src.cdc import OPIOIDS, load_series
+from src import segmented as seg
+from src.breaks import fast_fit, fit_no_break, fit_one_break, fit_two_breaks
+from src.cdc import ALL_DRUG, OPIOIDS, SYNTHETIC_OPIOIDS, load_series
 from src.count_models import censored_nb, censored_poisson
+from src.step_b import mbb, stat10, stat21
 
 OUT = "outputs/robustness"
 SEED = 20261103
@@ -55,8 +58,8 @@ NSDUH_SRC = (f"NSDUH 2021-2024 combined PUF (+2024 single-year PUF for OUD), {ns
              f"{nsduh.STRATA}/{nsduh.PSU}, df={DF}")
 
 
-def annual_deaths(indicator):
-    s = load_series(indicator=indicator)
+def annual_deaths(indicator, value_col="Data Value"):
+    s = load_series(indicator=indicator, value_col=value_col)
     return s[s.month == 12].set_index("year")["deaths"]
 
 
@@ -77,9 +80,9 @@ def _row(measure, start, scale, method, L_death, L_surv, se, deaths, pop, extra)
                 ci_low=d - tcrit * se, ci_high=d + tcrit * se, t=t, p=2 * stats.t.sf(abs(t), DF), df=DF, **extra)
 
 
-def r12(indicator=OPIOIDS, tag="opioids"):
+def r12(indicator=OPIOIDS, tag="opioids", value_col="Data Value"):
     """R1 + R2 for one death indicator. Returns the results DataFrame (also written to CSV)."""
-    deaths = annual_deaths(indicator)
+    deaths = annual_deaths(indicator, value_col)
     pop = national_population()
     df, _ = nsduh.load_analysis(demographics=())
     W, H, J = nsduh.WEIGHT, nsduh.STRATA, nsduh.PSU
@@ -115,7 +118,8 @@ def r12(indicator=OPIOIDS, tag="opioids"):
     for _, g in out.groupby(["start", "death_scale", "variance_method"]):
         out.loc[g.index, "p_holm"] = sv.holm(g.p.to_numpy())
     out.insert(0, "death_indicator", indicator)
-    out["deaths_source"] = DEATHS_SRC.format(ind=indicator)
+    out.insert(1, "death_value_col", value_col)
+    out["deaths_source"] = DEATHS_SRC.format(ind=indicator).replace("Data Value", value_col)
     out["population_source"] = POP_SRC
     out["survey_source"] = NSDUH_SRC
     os.makedirs(OUT, exist_ok=True)
@@ -290,9 +294,136 @@ def check_r3_against_step_d(r):
     return chk
 
 
+# ============================================================================== F3: R4 / R5 / R6
+B_ROLL = 1000          # block-bootstrap replicates for the rolling-series tests (Step B used 2000)
+B_MONTHLY = 500        # replicates for the monthly-count bootstrap tests
+BLOCK = 12
+WONDER_SERIES = "wonder_drug_induced_monthly"
+
+
+def rolling_break_tests(y, dates, seed):
+    """Step B's procedure (block bootstrap, L = 12) on a rolling 12-month-ending series."""
+    obs = fast_fit(y, 12)
+    t1, t2, fit2, _ = fit_two_breaks(y, 12)
+    _, fit1, _ = fit_one_break(y, 12)
+    fit0, _ = fit_no_break(y)
+    rng = np.random.default_rng(seed)
+    f21 = np.array([stat21(fast_fit(fit1 + mbb(y - fit1, BLOCK, rng), 12)) for _ in range(B_ROLL)])
+    f10 = np.array([stat10(fast_fit(fit0 + mbb(y - fit0, BLOCK, rng), 12)) for _ in range(B_ROLL)])
+    bt = np.array([fast_fit(fit2 + mbb(y - fit2, BLOCK, rng), 12)["tau2"] for _ in range(B_ROLL)])
+    ci = [np.percentile(bt[:, k], [2.5, 97.5]) for k in (0, 1)]
+    n = len(y)
+    return dict(break_1=dates[t1], break_1_ci_low=dates[int(np.floor(ci[0][0]))], break_1_ci_high=dates[min(int(np.ceil(ci[0][1])), n - 1)],
+                break_2=dates[t2], break_2_ci_low=dates[int(np.floor(ci[1][0]))], break_2_ci_high=dates[min(int(np.ceil(ci[1][1])), n - 1)],
+                p_1_vs_0=(1 + (f10 >= stat10(obs)).sum()) / (B_ROLL + 1), p_2_vs_1=(1 + (f21 >= stat21(obs)).sum()) / (B_ROLL + 1),
+                B=B_ROLL, block=BLOCK, seed=seed, n_months=n, first=dates[0], last=dates[-1], t1=t1, t2=t2)
+
+
+def hac_break_tests(y, t1, t2, lags):
+    """Segmented OLS on the rolling series at the ESTIMATED breaks (each segment its own intercept and
+    slope, as in Step B); Wald tests that adjacent segments are equal, Newey-West HAC covariance.
+    Conditional on the estimated break dates, so these p-values are optimistic (anti-conservative)."""
+    import statsmodels.api as sm
+    n = len(y)
+    t = np.arange(n, dtype=float)
+    seg_id = np.where(t < t1, 0, np.where(t < t2, 1, 2))
+    X = np.column_stack([(seg_id == k).astype(float) for k in range(3)] + [t * (seg_id == k) for k in range(3)])
+    fit = sm.OLS(y, X).fit(cov_type="HAC", cov_kwds={"maxlags": lags})
+    out = {}
+    for name, (a, b) in (("break_1", (0, 1)), ("break_2", (1, 2))):
+        R = np.zeros((2, 6))
+        R[0, a], R[0, b], R[1, 3 + a], R[1, 3 + b] = 1, -1, 1, -1
+        out[name] = float(fit.wald_test(R, scalar=True).pvalue)
+    return out
+
+
+def r5_rolling():
+    """F3 on the CDC rolling series: R4 truncation, Predicted Value, R6 synthetic opioids, HAC (R5a),
+    and annual non-overlapping windows (R5b)."""
+    rows, hac_rows, annual_rows = [], [], []
+    variants = [("opioids", OPIOIDS, "Data Value", None), ("all_drug", ALL_DRUG, "Data Value", None),
+                ("opioids", OPIOIDS, "Data Value", 6), ("opioids", OPIOIDS, "Data Value", 12),
+                ("all_drug", ALL_DRUG, "Data Value", 6), ("all_drug", ALL_DRUG, "Data Value", 12),
+                ("opioids", OPIOIDS, "Predicted Value", None), ("synthetic_opioids", SYNTHETIC_OPIOIDS, "Data Value", None)]
+    for i, (tag, ind, vcol, drop) in enumerate(variants):
+        s = load_series(indicator=ind, value_col=vcol)
+        if drop:
+            s = s.iloc[:-drop]
+        y = s.deaths.to_numpy(float)
+        dates = s.date.dt.strftime("%Y-%m").to_numpy()
+        r = rolling_break_tests(y, dates, SEED + 7 * i)
+        label = f"{tag}, {vcol}" + (f", last {drop} months dropped" if drop else "")
+        grp = "R4" if (drop or vcol != "Data Value") else ("R6" if tag == "synthetic_opioids" else "reference")
+        rows.append(dict(check=grp, series=tag, variant=label, indicator=ind, value_col=vcol, months_dropped=drop or 0,
+                         **{k: v for k, v in r.items() if k not in ("t1", "t2")},
+                         source=f"CDC VSRR xkb8-kh2a, US, '{ind}', {vcol}, 12-month-ending"))
+        if drop is None and vcol == "Data Value":
+            for lags in (12, 24):
+                h = hac_break_tests(y, r["t1"], r["t2"], lags)
+                hac_rows.append(dict(check="R5a", series=tag, hac_lags=lags, break_1=r["break_1"], break_2=r["break_2"],
+                                     p_break_1_hac=h["break_1"], p_break_2_hac=h["break_2"],
+                                     note="Wald test that adjacent segments are equal, at the estimated breaks "
+                                          "(conditional on estimated dates: optimistic p-values)",
+                                     source=f"CDC VSRR xkb8-kh2a, US, '{ind}', Data Value"))
+            ann = s[s.month == 12]
+            ya = ann.deaths.to_numpy(float)
+            years = ann.year.to_numpy()
+            p1 = seg.profile(ya, 1, None, min_seg=3)
+            lo, hi = seg.profile_ci(p1)
+            p0 = seg.profile(ya, 0, None, min_seg=3)
+            annual_rows.append(dict(check="R5b", series=tag, years=f"{years[0]}-{years[-1]}", n_years=len(ya),
+                                    break_year=int(years[p1['best'][0]]), break_year_ci_low=int(years[lo]),
+                                    break_year_ci_high=int(years[hi]),
+                                    scaled_deviance_drop_1_vs_0=(p0["dev"] - p1["dev"]) / p1["phi"], dispersion=p1["phi"],
+                                    note="non-overlapping calendar years (Dec 12-month-ending values); quasi-Poisson kink "
+                                         "model, profile CI; too few points for a 2-break model",
+                                    source=f"CDC VSRR xkb8-kh2a, US, '{ind}', Data Value, December values"))
+    pd.DataFrame(rows).to_csv(f"{OUT}/r4_r5_r6_rolling_breaks.csv", index=False)
+    pd.DataFrame(hac_rows).to_csv(f"{OUT}/r5a_hac_break_tests.csv", index=False)
+    pd.DataFrame(annual_rows).to_csv(f"{OUT}/r5b_annual_breaks.csv", index=False)
+    return pd.DataFrame(rows), pd.DataFrame(hac_rows), pd.DataFrame(annual_rows)
+
+
+def r5_monthly():
+    """F3 on TRUE monthly counts (CDC WONDER). Partial months are excluded. Kink model with
+    month-of-year seasonality; profile and block-bootstrap break-date CIs; bootstrap tests."""
+    w = warehouse.query("select * from wonder_deaths_monthly where series = ? order by month_date", [WONDER_SERIES])
+    qp = w.query_parameters.iloc[0]
+    w = w[~w.is_partial].reset_index(drop=True)
+    rows = []
+    for i, drop in enumerate((0, 6, 12)):
+        d = w.iloc[:len(w) - drop] if drop else w
+        y = d.deaths.to_numpy(float)
+        months = d.month.to_numpy()
+        dates = pd.to_datetime(d.month_date).dt.strftime("%Y-%m").to_numpy()
+        seed = SEED + 1000 + i
+        stat10_, p10, _, p1 = seg.bootstrap_test_extra_break(y, months, B_MONTHLY, BLOCK, seed, k0=0)
+        stat21_, p21, _, p2 = seg.bootstrap_test_extra_break(y, months, B_MONTHLY, BLOCK, seed + 1, k0=1)
+        lo1, hi1 = seg.profile_ci(p1)
+        _, bt1 = seg.bootstrap_break_dates(y, 1, months, B_MONTHLY, BLOCK, seed + 2)
+        b1lo, b1hi = np.percentile(bt1[:, 0], [2.5, 97.5])
+        lo2a, hi2a = seg.profile_ci(p2, 0)
+        lo2b, hi2b = seg.profile_ci(p2, 1)
+        rows.append(dict(check="R5" if not drop else "R4", series=WONDER_SERIES, months_dropped=drop,
+                         first=dates[0], last=dates[-1], n_months=len(y),
+                         one_break=dates[p1["best"][0]], one_break_profile_ci=f"{dates[lo1]} to {dates[hi1]}",
+                         one_break_bootstrap_ci=f"{dates[int(np.floor(b1lo))]} to {dates[int(np.ceil(b1hi))]}",
+                         two_breaks=f"{dates[p2['best'][0]]}, {dates[p2['best'][1]]}",
+                         two_break_1_profile_ci=f"{dates[lo2a]} to {dates[hi2a]}",
+                         two_break_2_profile_ci=f"{dates[lo2b]} to {dates[hi2b]}",
+                         stat_1_vs_0=stat10_, p_1_vs_0=p10, stat_2_vs_1=stat21_, p_2_vs_1=p21,
+                         dispersion_1_break=p1["phi"], B=B_MONTHLY, block=BLOCK, seed=seed,
+                         model="log E[y] = trend + kink(s) + month-of-year; quasi-Poisson; partial months excluded",
+                         wonder_query=qp, source="CDC WONDER Provisional Mortality, monthly (final 2019-2024, provisional 2025+)"))
+    out = pd.DataFrame(rows)
+    out.to_csv(f"{OUT}/r5_monthly_breaks.csv", index=False)
+    return out
+
+
 def main(checks):
     os.makedirs(OUT, exist_ok=True)
-    meta = {}
+    mp = f"{OUT}/step_r_meta.json"
+    meta = json.load(open(mp)) if os.path.exists(mp) else {}      # merge: partial runs keep other checks' entries
     if "r12" in checks:
         r = r12()
         chk = check_against_step_a(r)
@@ -311,9 +442,25 @@ def main(checks):
         print(r[["group", "variant", "gap_ratio", "ci_low", "ci_high", "p", "q1_change_ratio", "q4_change_ratio",
                  "n_censored", "converged"]].round(4).to_string(index=False))
         print(chk.to_string(index=False))
+    if "r6" in checks:
+        for ind, tag in ((SYNTHETIC_OPIOIDS, "synthetic_opioids"), (ALL_DRUG, "all_drug")):
+            r12(ind, tag)
+        r12(OPIOIDS, "opioids_predicted_value", value_col="Predicted Value")
+        meta["r6"] = dict(age_adjusted="not done: needs a CDC WONDER annual export grouped by Year with age-adjusted rates")
+    if "r5" in checks:
+        roll, hac, ann = r5_rolling()
+        mon = r5_monthly()
+        pd.set_option("display.width", 250)
+        print(roll[["variant", "break_1", "break_1_ci_low", "break_1_ci_high", "break_2", "break_2_ci_low",
+                    "break_2_ci_high", "p_1_vs_0", "p_2_vs_1"]].to_string(index=False))
+        print(hac.drop(columns=["note", "source"]).to_string(index=False))
+        print(ann.drop(columns=["note", "source"]).to_string(index=False))
+        print(mon.drop(columns=["model", "wonder_query", "source"]).T.to_string())
+        meta["r5"] = dict(monthly_series=WONDER_SERIES, B_rolling=B_ROLL, B_monthly=B_MONTHLY, block=BLOCK,
+                          opioid_monthly="not done: needs a CDC WONDER export with the T40 multiple-cause filter")
     with open(f"{OUT}/step_r_meta.json", "w") as fh:
         json.dump(meta, fh, indent=2)
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:] or ["r12"])
+    main(sys.argv[1:] or ["r12", "r3", "r5", "r6"])
