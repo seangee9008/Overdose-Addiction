@@ -40,3 +40,17 @@ def test_suppression_1_to_9_recovers_truth_where_zeroing_is_biased():
     bad, _, _ = censored_nb(X, np.where(cens, 0.0, y), np.zeros(len(y), bool), np.zeros(len(y)),
                             np.zeros(len(y)), offset=off)
     assert abs(bad.coef[1] - 0.5) > abs(tab.coef[1] - 0.5)
+
+
+def test_censored_poisson_without_censoring_matches_statsmodels_glm():
+    from src.count_models import censored_poisson
+    rng = np.random.default_rng(5)
+    n = 3000
+    x = rng.normal(size=n)
+    pop = rng.uniform(5_000, 200_000, n)
+    y = rng.poisson(np.exp(-9.0 + 0.4 * x + np.log(pop))).astype(float)
+    X = np.column_stack([np.ones(n), x])
+    tab, _, _ = censored_poisson(X, y, np.zeros(n, bool), np.zeros(n), np.zeros(n), offset=np.log(pop))
+    ref = sm.GLM(y, X, family=sm.families.Poisson(), offset=np.log(pop)).fit(cov_type="HC0")
+    assert np.allclose(tab.coef, ref.params, atol=1e-4)
+    assert np.allclose(tab.se, ref.bse * np.sqrt(n / (n - 1)), rtol=2e-2)

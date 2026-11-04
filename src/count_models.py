@@ -84,3 +84,48 @@ def censored_nb(X, y, censored, lo, hi, offset=None, clusters=None, names=None):
     info = dict(loglik=float(-res.fun), alpha=float(np.exp(theta[-1])), n=len(y), n_censored=int(cens.sum()),
                 clusters=G, converged=bool(res.success))
     return tab, V, info
+
+
+def censored_poisson(X, y, censored, lo, hi, offset=None, clusters=None, names=None):
+    """Poisson regression with interval censoring (same interface and cluster-robust sandwich as
+    censored_nb, without the dispersion parameter). Added for Phase 4a robustness (R3)."""
+    X = np.asarray(X, float)
+    y = np.nan_to_num(np.asarray(y, float))
+    cens = np.asarray(censored, bool)
+    lo = np.asarray(lo, float)
+    hi = np.asarray(hi, float)
+    off = np.zeros(len(y)) if offset is None else np.asarray(offset, float)
+
+    def f_obs(beta):
+        mu = np.exp(X @ beta + off)
+        ll = np.empty(len(y))
+        ll[~cens] = stats.poisson.logpmf(y[~cens], mu[~cens])
+        if cens.any():
+            prob = stats.poisson.cdf(hi[cens], mu[cens]) - stats.poisson.cdf(lo[cens] - 1, mu[cens])
+            ll[cens] = np.log(np.clip(prob, 1e-300, None))
+        return ll
+
+    ys = np.where(cens, (lo + hi) / 2, y)
+    start = np.linalg.lstsq(X, np.log(ys + 0.5) - off, rcond=None)[0]
+    res = optimize.minimize(lambda b: -f_obs(b).sum(), start, method="BFGS", options=dict(gtol=1e-7, maxiter=5000))
+    if not res.success:
+        res = optimize.minimize(lambda b: -f_obs(b).sum(), res.x, method="Nelder-Mead",
+                                options=dict(maxiter=20000, xatol=1e-8, fatol=1e-10))
+    beta = res.x
+    S = _num_grad_obs(f_obs, beta)
+    A = -_num_grad_obs(lambda b: _num_grad_obs(f_obs, b).sum(axis=0), beta)
+    A = (A + A.T) / 2
+    g = np.arange(len(y)) if clusters is None else np.asarray(clusters)
+    Sc = pd.DataFrame(S).groupby(g).sum().to_numpy()
+    G = len(Sc)
+    V = np.linalg.inv(A) @ (G / (G - 1) * Sc.T @ Sc) @ np.linalg.inv(A)
+    se = np.sqrt(np.diag(V))
+    z = beta / se
+    tab = pd.DataFrame({"term": names or [f"x{i}" for i in range(X.shape[1])], "coef": beta, "se": se, "z": z,
+                        "p": 2 * stats.norm.sf(np.abs(z)), "ci_low": beta - 1.96 * se, "ci_high": beta + 1.96 * se})
+    tab["rate_ratio"] = np.exp(tab.coef)
+    tab["rr_ci_low"] = np.exp(tab.ci_low)
+    tab["rr_ci_high"] = np.exp(tab.ci_high)
+    info = dict(loglik=float(-res.fun), alpha=0.0, n=len(y), n_censored=int(cens.sum()), clusters=G,
+                converged=bool(res.success))
+    return tab, V, info

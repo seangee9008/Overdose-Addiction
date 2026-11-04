@@ -86,3 +86,56 @@ def test_holm_matches_textbook_example():
     assert np.allclose(holm([0.01, 0.04, 0.03]), [0.03, 0.06, 0.06])
     assert np.allclose(holm([0.5, 0.9]), [1.0, 1.0])            # adjusted p is capped at 1
     assert np.allclose(holm([0.2, 0.6]), [0.4, 0.6])
+
+
+# ---------------------------------------------------------------- R5: break date in monthly counts
+def test_profile_ci_for_break_month_covers_planted_break():
+    from src.segmented import design, profile, profile_ci
+    rng = np.random.default_rng(303)
+    n, tau0 = 85, 40
+    months = (np.arange(n) % 12) + 1
+    beta = np.r_[np.log(8000), 0.012, -0.032, 0.04 * np.sin(np.arange(11))]
+    mu = np.exp(design(n, (tau0,), months) @ beta)
+    cover = 0
+    for _ in range(N_SIMS):
+        y = rng.poisson(mu * rng.gamma(400, 1 / 400, n))           # overdispersed (gamma-Poisson)
+        lo, hi = profile_ci(profile(y, 1, months))
+        cover += lo <= tau0 <= hi
+    rate = cover / N_SIMS
+    assert 0.95 - 3 * np.sqrt(0.95 * 0.05 / N_SIMS) <= rate <= 1.0, f"coverage {rate:.3f}"
+
+
+# ---------------------------------------------------------------- R3: county gap with 1-9 suppression
+def _counties(rng, n_per_q=150, gap=0.12):
+    from src.step_d import COL
+    rows = []
+    for q in (1, 2, 3, 4):
+        for i in range(n_per_q):
+            pop = float(np.exp(rng.normal(10.3, 1.0)))
+            for year, post in ((2022, 0), (2025, 1)):
+                log_rate = np.log(30e-5) + 0.15 * (q - 1) - 0.5 * post + (gap if (q == 4 and post) else 0.0)
+                mu = pop * np.exp(log_rate)
+                yv = rng.poisson(mu * rng.gamma(4, 1 / 4))                 # NB-like
+                rows.append({"FIPS": f"{q}{i:04d}", "Year": year, COL: float(yv), "quartile": q, "E_TOTPOP": pop})
+    m = pd.DataFrame(rows)
+    m.loc[m[COL].between(1, 9), COL] = np.nan                               # artificial NCHS suppression
+    m["censored"] = m[COL].isna()
+    return m
+
+
+def test_censored_model_recovers_planted_svi_gap_where_zeroing_does_not():
+    from src.step_d import fit
+    rng = np.random.default_rng(404)
+    n = max(N_SIMS // 10, 6)
+    est, zero, cover = [], [], 0
+    for _ in range(n):
+        m = _counties(rng)
+        tab, _, _ = fit(m, 2022, 2025, "censored")
+        r = tab.set_index("term").loc["year_2025:SVI_Q4"]
+        est.append(r.coef)
+        cover += r.ci_low <= 0.12 <= r.ci_high
+        zero.append(fit(m, 2022, 2025, "zero")[0].set_index("term").loc["year_2025:SVI_Q4"].coef)
+    mc_se = np.std(est, ddof=1) / np.sqrt(n)                       # Monte Carlo error of the mean
+    assert abs(np.mean(est) - 0.12) < 3 * mc_se + 0.01
+    assert cover / n >= 0.8
+    assert abs(np.mean(zero) - 0.12) > abs(np.mean(est) - 0.12)
