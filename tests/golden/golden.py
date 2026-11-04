@@ -13,6 +13,10 @@ import pandas as pd
 
 GOLDEN = "tests/golden/golden_results.json"
 SOURCES = ("outputs", "data/processed")
+# Phase 4a robustness numbers: a SEPARATE snapshot, so the original one above never changes.
+ROBUST_GOLDEN = "tests/golden/robustness_golden.json"
+ROBUST_SOURCES = ("outputs/robustness",)
+ROBUST_PIPELINE = ["make data", "make results", "python -m src.step_r"]
 PIPELINE = [
     "python analyze_real.py",
     'python analyze_real.py --indicator "Opioids (T40.0-T40.4,T40.6)" --tag opioids',
@@ -35,10 +39,10 @@ def _flatten(obj, prefix=""):
     return {prefix.rstrip("."): obj}
 
 
-def collect():
+def collect(sources=SOURCES):
     """{file: {"row.column" or "json.path": exact value}} for every data file."""
     snap = {}
-    for d in SOURCES:
+    for d in sources:
         for f in sorted(os.listdir(d)):
             p = os.path.join(d, f)
             if f.endswith(".csv"):
@@ -64,14 +68,16 @@ def compare(golden, current):
 
 
 if __name__ == "__main__":
-    if sys.argv[1:] == ["write"]:
-        snap = collect()
+    robust = "--robustness" in sys.argv
+    path, sources, pipeline = (ROBUST_GOLDEN, ROBUST_SOURCES, ROBUST_PIPELINE) if robust else (GOLDEN, SOURCES, PIPELINE)
+    if "write" in sys.argv:
+        snap = collect(sources)
         n = sum(len(v) for v in snap.values())
-        json.dump(dict(produced_by=PIPELINE, files=len(snap), values=n, snapshot=snap),
-                  open(GOLDEN, "w"), indent=1, sort_keys=True)
-        print(f"wrote {GOLDEN}: {len(snap)} files, {n} values")
+        json.dump(dict(produced_by=pipeline, files=len(snap), values=n, snapshot=snap),
+                  open(path, "w"), indent=1, sort_keys=True)
+        print(f"wrote {path}: {len(snap)} files, {n} values")
     else:
-        d = compare(json.load(open(GOLDEN))["snapshot"], collect())
+        d = compare(json.load(open(path))["snapshot"], collect(sources))
         print(f"{len(d)} differences")
         for row in d[:50]:
             print(row)

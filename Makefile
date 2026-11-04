@@ -2,7 +2,8 @@
 #   make data      raw -> validated Parquet (data/interim) -> dbt build (DuckDB marts + tests)
 #   make results   run every analysis script against the marts, then build results/RESULTS.md
 #   make test      pytest (golden comparison + unit + data-layer tests)
-#   make all       data, results, test
+#   make robustness   Phase 4a robustness checks (src/step_r.py) -> outputs/robustness/, then RESULTS.md
+#   make all       data, results, robustness, test
 #   make ci        what GitHub Actions runs: lint + build on SYNTHETIC fixtures + pytest
 # Override the interpreter with e.g. `make all PY=python DBT=dbt`.
 
@@ -10,9 +11,9 @@ PY  ?= .venv/bin/python
 DBT ?= .venv/bin/dbt
 DBT_ARGS = --project-dir dbt --profiles-dir dbt
 
-.PHONY: all data ingest dbt docs results test lint ci fixtures fixtures-data golden clean
+.PHONY: all data ingest dbt docs results robustness test lint ci fixtures fixtures-data golden golden-robustness clean
 
-all: data results test
+all: data results robustness test
 
 data: ingest dbt
 
@@ -37,6 +38,10 @@ results:
 	$(PY) -m src.step_d
 	$(PY) -m src.build_results
 
+robustness:
+	$(PY) -m src.step_r
+	$(PY) -m src.build_results
+
 test:
 	$(PY) -m pytest -q
 
@@ -54,11 +59,14 @@ fixtures-data:
 		$(DBT) build $(DBT_ARGS)
 
 ci: lint fixtures-data
-	SYNTHETIC_FIXTURES=1 $(PY) -m pytest -q
+	SYNTHETIC_FIXTURES=1 ROBUST_SIMS=40 $(PY) -m pytest -q
 
 # Re-capture the golden snapshot -- only after a deliberate, reviewed change to results.
 golden:
 	$(PY) -m tests.golden.golden write
+
+golden-robustness:
+	$(PY) -m tests.golden.golden write --robustness
 
 clean:
 	rm -rf data/interim data/warehouse build dbt/target dbt/logs
