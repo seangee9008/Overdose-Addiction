@@ -1,18 +1,5 @@
 {
-  "r12": {
-    "seed": 20261103,
-    "B": 2000,
-    "starts": [
-      2021,
-      2022,
-      2023
-    ],
-    "end": 2024,
-    "measures": [
-      "OPI_MISUSE",
-      "OPI_OUD",
-      "HERYR"
-    ],
-    "step_a_reproduced": true
+  "r3": {
+    "step_d_reproduced": true
   }
 }
