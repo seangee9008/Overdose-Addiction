@@ -420,6 +420,256 @@ def r5_monthly():
     return out
 
 
+# ============================================================================== decision rule + summary
+DECISION_RULE = {
+    "F1": "d < 0 in every variant; 95% CI excludes 0 in the main specification and in >= 75% of variants; "
+          "Holm-adjusted p < 0.05 in the main specification. 'partially' if signs hold but CI criterion fails; "
+          "'no' if any sign flips.",
+    "F2": "95% CI for d includes 0 in the main specification and in >= 75% of variants ('partially' if 50-75%; "
+          "'no' if the main CI excludes 0).",
+    "F3a": "1 break beats 0 at p < 0.05 by every method AND every break-date CI overlaps calendar 2023 "
+           "('partially' if significant everywhere but some CI does not overlap 2023; 'no' if not significant "
+           "by the main method).",
+    "F3b": "'2020 break not robust' holds if 2 breaks vs 1 gives p >= 0.05 by the corrected method (true monthly "
+           "counts); 'no' if p < 0.05.",
+    "F5": "Q4/Q1 gap ratio > 1 in every variant; 95% CI excludes 1 in the main specification and in >= 75% of "
+          "variants ('partially' if signs hold but CI criterion fails; 'no' if any sign flips).",
+}
+
+
+def _fmt(est, lo, hi, nd=3):
+    return f"{est:.{nd}f} ({lo:.{nd}f}, {hi:.{nd}f})"
+
+
+def _overlaps_2023(lo, hi):
+    return str(lo)[:4] <= "2023" <= str(hi)[:4]
+
+
+def summarize():
+    files = {"opioids": "r1_r2_declines_opioids.csv", "synthetic_opioids": "r1_r2_declines_synthetic_opioids.csv",
+             "all_drug": "r1_r2_declines_all_drug.csv", "opioids_predicted_value": "r1_r2_declines_opioids_predicted_value.csv"}
+    decl = pd.concat([pd.read_csv(f"{OUT}/{f}").assign(outcome=k) for k, f in files.items()], ignore_index=True)
+    decl["is_main"] = ((decl.outcome == "opioids") & (decl.start == 2021) & (decl.death_scale == "count")
+                       & (decl.variance_method == "shared_design"))
+    var_rows, verdicts = [], []
+
+    def variant_label(r):
+        return f"{r.outcome}; start {r.start}; {r.death_scale}; {r.variance_method}"
+
+    for finding, measure in (("F1 (opioid misuse)", "OPI_MISUSE"), ("F1 (OUD)", "OPI_OUD"), ("F2 (heroin)", "HERYR")):
+        g = decl[decl.measure == measure]
+        main = g[g.is_main].iloc[0]
+        rest = g[~g.is_main]
+        for r in g.itertuples():
+            var_rows.append(dict(finding=finding, variant=("MAIN: " if r.is_main else "") + variant_label(r),
+                                 estimate=r.d, ci_low=r.ci_low, ci_high=r.ci_high, p=r.p, p_holm=r.p_holm,
+                                 estimate_95ci=_fmt(r.d, r.ci_low, r.ci_high),
+                                 sign_ok=bool(r.d < 0) if finding.startswith("F1") else np.nan,
+                                 ci_criterion_met=bool(r.ci_high < 0) if finding.startswith("F1") else bool(r.ci_low <= 0 <= r.ci_high)))
+        if finding.startswith("F1"):
+            signs = int((g.d < 0).sum())
+            share = float((rest.ci_high < 0).mean())
+            if signs < len(g):
+                v = "no"
+            elif main.ci_high < 0 and main.p_holm < 0.05 and share >= 0.75:
+                v = "yes"
+            else:
+                v = "partially"
+            note = (f"d<0 in {signs}/{len(g)}; CI excludes 0 in {int((rest.ci_high < 0).sum())}/{len(rest)} variants "
+                    f"({share:.0%}); main Holm p = {main.p_holm:.4f}")
+        else:
+            inc = (rest.ci_low <= 0) & (rest.ci_high >= 0)
+            share = float(inc.mean())
+            main_inc = main.ci_low <= 0 <= main.ci_high
+            v = "no" if not main_inc else ("yes" if share >= 0.75 else ("partially" if share >= 0.5 else "no"))
+            note = (f"CI includes 0 in {int(inc.sum())}/{len(rest)} variants ({share:.0%}); sign of d: "
+                    f"{int((g.d > 0).sum())} positive, {int((g.d < 0).sum())} negative")
+        verdicts.append(dict(finding=finding, original=f"d = {_fmt(main.d, main.ci_low, main.ci_high)}, p = {main.p:.4f}",
+                             n_variants=len(rest), holds=v, notes=note, rule=DECISION_RULE[finding[:2]]))
+
+    roll = pd.read_csv(f"{OUT}/r4_r5_r6_rolling_breaks.csv")
+    hac = pd.read_csv(f"{OUT}/r5a_hac_break_tests.csv")
+    ann = pd.read_csv(f"{OUT}/r5b_annual_breaks.csv")
+    mon = pd.read_csv(f"{OUT}/r5_monthly_breaks.csv")
+    f3 = []
+    for r in roll.itertuples():
+        f3.append(dict(variant=f"rolling: {r.variant}", sig=r.p_1_vs_0 < 0.05, p=r.p_1_vs_0,
+                       timing=f"{r.break_2} ({r.break_2_ci_low} to {r.break_2_ci_high})",
+                       overlaps=_overlaps_2023(r.break_2_ci_low, r.break_2_ci_high),
+                       is_main=(r.variant == "opioids, Data Value")))
+    for r in hac.itertuples():
+        f3.append(dict(variant=f"HAC lag {r.hac_lags}: {r.series} (conditional on estimated date)", sig=r.p_break_2_hac < 0.05,
+                       p=r.p_break_2_hac, timing=f"{r.break_2} (no CI)", overlaps=np.nan, is_main=False))
+    for r in ann.itertuples():
+        lo, hi = r.break_year_ci_low + 1, r.break_year_ci_high + 1
+        f3.append(dict(variant=f"annual non-overlapping: {r.series}", sig=r.scaled_deviance_drop_1_vs_0 > stats.chi2.ppf(0.95, 1),
+                       p=float(stats.chi2.sf(r.scaled_deviance_drop_1_vs_0, 1)),
+                       timing=f"bend at {r.break_year} -> change during {r.break_year + 1} (CI {lo}-{hi})",
+                       overlaps=_overlaps_2023(lo, hi), is_main=False))
+    for r in mon.itertuples():
+        lab = f"monthly counts (WONDER), {r.months_dropped} months dropped" if r.months_dropped else "monthly counts (WONDER)"
+        a, b = r.one_break_profile_ci.split(" to ")
+        f3.append(dict(variant=f"{lab}: one-break profile CI", sig=r.p_1_vs_0 < 0.05, p=r.p_1_vs_0,
+                       timing=f"{r.one_break} ({r.one_break_profile_ci})", overlaps=_overlaps_2023(a, b), is_main=False))
+        a, b = r.one_break_bootstrap_ci.split(" to ")
+        f3.append(dict(variant=f"{lab}: one-break bootstrap CI", sig=r.p_1_vs_0 < 0.05, p=r.p_1_vs_0,
+                       timing=f"{r.one_break} ({r.one_break_bootstrap_ci})", overlaps=_overlaps_2023(a, b), is_main=False))
+        a, b = r.two_break_2_profile_ci.split(" to ")
+        f3.append(dict(variant=f"{lab}: later break of 2-break model", sig=r.p_1_vs_0 < 0.05, p=r.p_1_vs_0,
+                       timing=f"{r.two_breaks.split(', ')[1]} ({r.two_break_2_profile_ci})", overlaps=_overlaps_2023(a, b),
+                       is_main=False))
+    f3 = pd.DataFrame(f3)
+    for r in f3.itertuples():
+        var_rows.append(dict(finding="F3a (2023 break)", variant=("MAIN: " if r.is_main else "") + r.variant,
+                             estimate_95ci=r.timing, p=r.p, sign_ok=r.sig, ci_criterion_met=r.overlaps))
+    main = f3[f3.is_main].iloc[0]
+    with_ci = f3[f3.overlaps.notna()]
+    v = ("no" if not main.sig else ("yes" if f3.sig.all() and with_ci.overlaps.astype(bool).all() else "partially"))
+    sb = pd.read_csv("outputs/step_b_tests.csv")
+    sb = sb[sb.block_len == 12].set_index("series")
+    verdicts.append(dict(finding="F3a (2023 break)",
+                         original=(f"Step B (B=2000): opioids 1 vs 0 p = {sb.loc['opioids', 'p_1vs0']:.4f}, all-drug "
+                                   f"{sb.loc['all_drug', 'p_1vs0']:.4f}; re-run reference here (B={B_ROLL}): {main.p:.4f}"),
+                         n_variants=len(f3) - 1, holds=v,
+                         notes=(f"1 vs 0 significant in {int(f3.sig.sum())}/{len(f3)} rows; break-date CI overlaps 2023 in "
+                                f"{int(with_ci.overlaps.astype(bool).sum())}/{len(with_ci)} rows with a CI. Annual rows map a "
+                                "bend at year Y to a change during Y+1."),
+                         rule=DECISION_RULE["F3a"]))
+
+    f3b = [dict(variant=f"rolling: {r.variant}", p=r.p_2_vs_1, is_corrected=False) for r in roll.itertuples()]
+    f3b += [dict(variant=(f"monthly counts (WONDER), {r.months_dropped} months dropped" if r.months_dropped
+                          else "MAIN (corrected method): monthly counts (WONDER)"), p=r.p_2_vs_1,
+                 is_corrected=(r.months_dropped == 0), timing=f"{r.two_breaks}; earlier break CI {r.two_break_1_profile_ci}")
+             for r in mon.itertuples()]
+    for r in f3b:
+        var_rows.append(dict(finding="F3b (2020 break not robust)", variant=r["variant"], p=r["p"],
+                             estimate_95ci=r.get("timing", ""), ci_criterion_met=bool(r["p"] >= 0.05)))
+    corr = [r for r in f3b if r["is_corrected"]][0]
+    roll_ns = sum(r["p"] >= 0.05 for r in f3b if r["variant"].startswith("rolling"))
+    verdicts.append(dict(finding="F3b (2020 break not robust)",
+                         original=(f"Step B (B=2000): 2 vs 1 p = {sb.loc['all_drug', 'p_2vs1']:.4f} (all-drug), "
+                                   f"{sb.loc['opioids', 'p_2vs1']:.4f} (opioids)"),
+                         n_variants=len(f3b) - 1, holds="yes" if corr["p"] >= 0.05 else "no",
+                         notes=(f"corrected method (true monthly counts, all-drug drug-induced): 2 vs 1 p = {corr['p']:.4f}, "
+                                f"earlier break {corr['timing']}; rolling series: p >= 0.05 in {roll_ns}/8 variants. "
+                                "Opioid-specific monthly counts not yet available."),
+                         rule=DECISION_RULE["F3b"]))
+
+    cg = pd.read_csv(f"{OUT}/r3_r4_county_gap.csv")
+    cg = cg[cg.group != "baseline"]
+    for r in cg.itertuples():
+        var_rows.append(dict(finding="F5 (SVI gap)", variant=("MAIN: " if r.group == "main" else "") + r.variant,
+                             estimate=r.gap_ratio, ci_low=r.ci_low, ci_high=r.ci_high, p=r.p,
+                             estimate_95ci=_fmt(r.gap_ratio, r.ci_low, r.ci_high), sign_ok=bool(r.gap_ratio > 1),
+                             ci_criterion_met=bool(r.ci_low > 1)))
+    main = cg[cg.group == "main"].iloc[0]
+    rest = cg[cg.group != "main"]
+    signs = int((cg.gap_ratio > 1).sum())
+    share = float((rest.ci_low > 1).mean())
+    v = "no" if signs < len(cg) else ("yes" if main.ci_low > 1 and share >= 0.75 else "partially")
+    flips = ", ".join(cg[cg.gap_ratio <= 1].variant)
+    verdicts.append(dict(finding="F5 (SVI gap)", original=f"gap ratio = {_fmt(main.gap_ratio, main.ci_low, main.ci_high)}",
+                         n_variants=len(rest), holds=v,
+                         notes=(f"gap > 1 in {signs}/{len(cg)}; CI excludes 1 in {int((rest.ci_low > 1).sum())}/{len(rest)} "
+                                f"variants ({share:.0%}). Sign flips: {flips or 'none'}. Baseline-adjusted variants excluded "
+                                "(not comparable)."),
+                         rule=DECISION_RULE["F5"]))
+    verdicts.append(dict(finding="F4 (within-group decline)", original="see Step C", n_variants=0,
+                         holds="not re-tested", notes="Not part of R1-R6.", rule=""))
+    pd.DataFrame(var_rows).to_csv(f"{OUT}/summary_variants.csv", index=False)
+    vd = pd.DataFrame(verdicts)
+    vd.to_csv(f"{OUT}/summary_verdicts.csv", index=False)
+    return vd
+
+
+# ============================================================================== figures
+COLORS = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100"]
+
+
+def _style(ax):
+    for side in ("top", "right"):
+        ax.spines[side].set_visible(False)
+    ax.tick_params(colors="#52514e", labelsize=8)
+
+
+def plot_forest():
+    """Forest plot of d (shared-design, counts) by survey measure, death outcome and start year."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    outcomes = [("opioids", "Opioid deaths (T40.0-T40.4,T40.6)"), ("synthetic_opioids", "Synthetic-opioid deaths (T40.4)"),
+                ("all_drug", "All-drug overdose deaths")]
+    meas = [("OPI_MISUSE", "Opioid misuse"), ("OPI_OUD", "Opioid use disorder"), ("HERYR", "Heroin use")]
+    fig, axes = plt.subplots(1, 3, figsize=(12, 5.2), sharey=True)
+    for ax, (m, mlab) in zip(axes, meas):
+        _style(ax)
+        ax.axvline(0, color="#52514e", lw=0.8)
+        ypos, labels = 0, []
+        for start in STARTS:
+            for k, (o, olab) in enumerate(outcomes):
+                r = pd.read_csv(f"{OUT}/r1_r2_declines_{o}.csv")
+                r = r[(r.measure == m) & (r.start == start) & (r.death_scale == "count") & (r.variance_method == "shared_design")].iloc[0]
+                ax.errorbar(r.d, ypos, xerr=[[r.d - r.ci_low], [r.ci_high - r.d]], fmt="o", color=COLORS[k], ms=6,
+                            capsize=2, lw=1.4, label=olab if (start == STARTS[0] and m == "OPI_MISUSE") else None)
+                labels.append(f"{start}->{END}")
+                ypos += 1
+            ypos += 0.6
+        ax.set_title(mlab, fontsize=10, loc="left")
+        ax.set_xlabel("d = log(death change) - log(survey change)", fontsize=8)
+    ticks = [i + 0.6 * (i // 3) for i in range(9)]
+    axes[0].set_yticks(ticks, labels)
+    axes[0].invert_yaxis()
+    fig.legend(loc="lower center", ncol=3, frameon=False, fontsize=8)
+    fig.suptitle("R1/R2/R6: death decline vs survey decline (d < 0: deaths fell faster); 95% CI, shared NSDUH design",
+                 x=0.01, ha="left", fontsize=10)
+    fig.tight_layout(rect=(0, 0.07, 1, 0.95))
+    fig.savefig(f"{OUT}/forest_d.png", dpi=150)
+    plt.close(fig)
+
+
+def plot_break_dates():
+    """Break-date point estimates and 95% intervals across methods (later and earlier break)."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    roll = pd.read_csv(f"{OUT}/r4_r5_r6_rolling_breaks.csv")
+    mon = pd.read_csv(f"{OUT}/r5_monthly_breaks.csv")
+    ann = pd.read_csv(f"{OUT}/r5b_annual_breaks.csv")
+    rows = []
+    for r in roll.itertuples():
+        lab = r.variant.replace(", Data Value", "").replace("last ", "-").replace(" months dropped", " mo")
+        rows.append((f"rolling: {lab}", r.break_1, r.break_1_ci_low, r.break_1_ci_high,
+                     r.break_2, r.break_2_ci_low, r.break_2_ci_high))
+    for r in mon.itertuples():
+        b1, b2 = r.two_breaks.split(", ")
+        lab = "WONDER monthly" + (f", -{r.months_dropped} mo" if r.months_dropped else "")
+        rows.append((lab + ", 2-break", b1, *r.two_break_1_profile_ci.split(" to "), b2, *r.two_break_2_profile_ci.split(" to ")))
+        rows.append((lab + ", 1-break", None, None, None, r.one_break, *r.one_break_profile_ci.split(" to ")))
+    for r in ann.itertuples():
+        rows.append((f"annual: {r.series} (year after bend)", None, None, None, f"{r.break_year + 1}-07",
+                     f"{r.break_year_ci_low + 1}-01", f"{r.break_year_ci_high + 1}-12"))
+    def dt(x):
+        return pd.Timestamp(x + "-01") if isinstance(x, str) and len(x) == 7 else (pd.Timestamp(x) if isinstance(x, str) else None)
+    fig, ax = plt.subplots(figsize=(12, 0.32 * len(rows) + 1.4))
+    _style(ax)
+    for i, (lab, b1, l1, h1, b2, l2, h2) in enumerate(rows):
+        for (b, lo, hi), color in (((b1, l1, h1), COLORS[1]), ((b2, l2, h2), COLORS[0])):
+            if b:
+                ax.plot([dt(lo), dt(hi)], [i, i], color=color, lw=2.5, solid_capstyle="round")
+                ax.plot(dt(b), i, "o", color=color, ms=6)
+    ax.set_yticks(range(len(rows)), [r[0] for r in rows], fontsize=7.5)
+    ax.invert_yaxis()
+    ax.axvspan(pd.Timestamp("2023-01-01"), pd.Timestamp("2023-12-31"), color="#e4e3df", zorder=0)
+    ax.plot([], [], color=COLORS[1], lw=2.5, label="earlier break (around 2020)")
+    ax.plot([], [], color=COLORS[0], lw=2.5, label="later break (downturn)")
+    ax.legend(frameon=False, fontsize=8, loc="lower left")
+    ax.set_title("R4/R5: break dates with 95% intervals by method (shaded: calendar 2023). "
+                 "WONDER monthly = all-drug 'drug-induced' counts", loc="left", fontsize=9.5)
+    fig.tight_layout()
+    fig.savefig(f"{OUT}/break_dates.png", dpi=150)
+    plt.close(fig)
+
+
 def main(checks):
     os.makedirs(OUT, exist_ok=True)
     mp = f"{OUT}/step_r_meta.json"
@@ -458,9 +708,15 @@ def main(checks):
         print(mon.drop(columns=["model", "wonder_query", "source"]).T.to_string())
         meta["r5"] = dict(monthly_series=WONDER_SERIES, B_rolling=B_ROLL, B_monthly=B_MONTHLY, block=BLOCK,
                           opioid_monthly="not done: needs a CDC WONDER export with the T40 multiple-cause filter")
+    if "summary" in checks:
+        plot_forest()
+        plot_break_dates()
+        vd = summarize()
+        pd.set_option("display.width", 250, "display.max_colwidth", 200)
+        print(vd.drop(columns="rule").to_string(index=False))
     with open(f"{OUT}/step_r_meta.json", "w") as fh:
         json.dump(meta, fh, indent=2)
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:] or ["r12", "r3", "r5", "r6"])
+    main(sys.argv[1:] or ["r12", "r3", "r5", "r6", "summary"])
