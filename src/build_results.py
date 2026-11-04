@@ -225,12 +225,48 @@ def sec_step_d(used):
     return "\n".join(parts)
 
 
-SECTIONS = [sec_cdc_breaks, sec_nsduh, sec_step_a, sec_step_b, sec_step_c, sec_step_d]
+ROB = os.path.join(OUT_DIR, "robustness")
+
+
+def sec_robustness(used):
+    vf = os.path.join(ROB, "summary_verdicts.csv")
+    if not os.path.exists(vf):
+        return ""
+    used.add("robustness")
+    verd = pd.read_csv(vf)
+    var = pd.read_csv(os.path.join(ROB, "summary_variants.csv"))
+    meta = json.load(open(os.path.join(ROB, "step_r_meta.json")))
+    parts = ["## Robustness (Phase 4a)\n",
+             "Produced by `src/step_r.py` (`make robustness`). Each finding is re-estimated under alternative choices; "
+             "the decision rule below was fixed before any check was run. Wording is descriptive: 'holds' means the "
+             "pre-set rule is met, not that the finding is true.\n",
+             "### Decision rule (set in advance)\n",
+             table(verd[verd.rule.notna() & (verd.rule != "")][["finding", "rule"]].drop_duplicates("finding")),
+             "\n### Summary\n", table(verd.drop(columns="rule")),
+             "\n### Per-variant results\n",
+             "`sign_ok`: F1 d < 0, F3a 1-vs-0 significant, F5 gap > 1. `ci_criterion_met`: F1 CI excludes 0, F2 CI "
+             "includes 0, F3a break-date CI overlaps 2023, F3b p >= 0.05, F5 CI excludes 1.\n",
+             table(var[["finding", "variant", "estimate_95ci", "p", "p_holm", "sign_ok", "ci_criterion_met"]], 4),
+             "\n" + img("robustness/forest_d.png"), img("robustness/break_dates.png"),
+             "### Not done / pending\n",
+             table(pd.DataFrame([dict(item=k, status=v.get(x)) for k, v in meta.items() for x in v
+                                 if isinstance(v.get(x), str) and v.get(x).startswith("not done")])),
+             "\n### Detailed tables\n"]
+    for f in sorted(os.listdir(ROB)):
+        if f.endswith(".csv") and not f.startswith("summary_"):
+            parts += [f"#### `robustness/{f}`\n", table(pd.read_csv(os.path.join(ROB, f)), 4)]
+    parts += ["#### `robustness/step_r_meta.json`\n",
+              table(pd.DataFrame(flatten(meta), columns=["key", "value"]))]
+    return "\n".join(parts)
+
+
+SECTIONS = [sec_cdc_breaks, sec_nsduh, sec_step_a, sec_step_b, sec_step_c, sec_step_d, sec_robustness]
 EXTRA_SECTIONS = []  # later steps register here
 
 
 def sec_other(used):
-    rest = sorted(f for f in os.listdir(OUT_DIR) if f not in used and not f.startswith("."))
+    rest = sorted(f for f in os.listdir(OUT_DIR) if f not in used and not f.startswith(".")
+                  and os.path.isfile(os.path.join(OUT_DIR, f)))
     if not rest:
         return ""
     parts = ["## Other outputs (auto-rendered)\n"]
