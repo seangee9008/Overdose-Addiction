@@ -88,9 +88,21 @@ unzip -o data/raw/nsduh_2021_2024_concat_puf_stata.zip -d data/raw/nsduh_2021_20
 unzip -o data/raw/nsduh_2024_puf_stata.zip -d data/raw/nsduh_2024
 unzip -o data/raw/nsduh_2023_puf_stata.zip -d data/raw/nsduh_2023   # only for profile_data / notebook
 
-# 2. everything else
-make all        # = make data (ingest + dbt build) -> make results -> make test
+# 2. CDC WONDER monthly counts are a MANUAL export (no download URL): see "CDC WONDER export" below,
+#    and save each export as data/raw/wonder/<series_name>.csv (or .txt)
+
+# 3. everything else
+make all        # = make data (ingest + dbt build) -> make results -> make robustness -> make test
 ```
+
+### CDC WONDER export (manual)
+
+wonder.cdc.gov -> Provisional Mortality Statistics -> Group By: **Month**; under "Select underlying cause
+of death" choose Drug/Alcohol Induced Causes. The export currently in use (`wonder_drug_induced_monthly`)
+selected **"Drug-induced causes"** (all drugs). For opioid-specific counts, select the four "Drug poisonings
+(overdose)" entries and, under "Select multiple cause of death" (MCD - ICD-10 Codes), T40.0-T40.4 and T40.6.
+Tick Export Results / Show Zero Values / Show Suppressed Values. The ingester records each file's
+"Query Parameters" in the `wonder_deaths_monthly` mart, so every series documents its own definition.
 
 `make test` includes `tests/test_golden.py`, which checks every number in `outputs/` and
 `data/processed/` against `tests/golden/golden_results.json` exactly. Other targets: `make data`,
@@ -112,6 +124,7 @@ If a conda environment is active, the Makefile still uses `.venv/bin/python`; ov
 | `python -m src.step_c` | survey-weighted logistic regression (+ R check) | `outputs/step_c_*` |
 | `python -m src.step_d` | county change by SVI quartile | `outputs/step_d_*` |
 | `python -m src.build_results` | collects everything | `results/RESULTS.md` |
+| `python -m src.step_r` (`make robustness`) | Phase 4a robustness checks R1-R6 + decision-rule summary | `outputs/robustness/*` |
 
 `python -m src.profile_data` (writes `data/DATA_PROFILE.md`) and the notebook are exploratory; the
 notebook's CDC sections read the warehouse, so run `make data` first.
@@ -129,12 +142,24 @@ notebook's CDC sections read the warehouse, so run `make data` first.
 | CDC/ATSDR Social Vulnerability Index 2022, county | county | `svi_2022_us_county.csv` | https://svi.cdc.gov/Documents/Data/2022/csv/states_counties/SVI_2022_US_county.csv |
 | SVI 2022 county polygons (ArcGIS mirror, opt-in: `--only svi_2022_arcgis_geo`) | county | `svi_2022_county.geojson` | ArcGIS Online layer `SVI2022_US_county` |
 | NSDUH published past-year opioid misuse %, 2021–2024 | national | hard-coded in `analyze_real.py` | SAMHSA NSDUH annual reports |
+| Census Population Estimates, Vintage 2025 (states + counties, July 1, 2020–2025) | state / county × year | `census_co_est2025_alldata.csv` | https://www2.census.gov/programs-surveys/popest/datasets/2020-2025/counties/totals/co-est2025-alldata.csv |
+| CDC WONDER Provisional Mortality, monthly counts (manual export) | national × month | `wonder/<series>.csv` | https://wonder.cdc.gov/mcd-icd10-provisional.html |
 
 See [DATA.md](DATA.md) for the inventory and join keys, and [data/DATA_PROFILE.md](data/DATA_PROFILE.md)
 for what the downloaded files actually contain (row counts, indicators, date ranges, join-key issues).
 
 NSDUH (individual-level) and CDC county + SVI (area-level) are analysed separately and never
 combined in one model.
+
+## Robustness (Phase 4a)
+
+`make robustness` re-estimates the headline findings under alternative choices (start years, death rates vs
+counts, three variance methods, county model and suppression handling, provisional months, break timing on
+true monthly counts, alternative death definitions). The decision rule for "holds / partially / no" was
+fixed before the checks were run; the verdicts, every variant and both figures are in the Robustness
+section of `results/RESULTS.md`. The methods are validated on simulated data with planted truths
+(`tests/test_robustness_sims.py`; set `ROBUST_SIMS` to change the number of simulations).
+Robustness numbers have their own exact-match snapshot (`tests/golden/robustness_golden.json`).
 
 ## Layout
 

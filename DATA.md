@@ -73,5 +73,7 @@ Marts (what the analysis reads):
 | `county_fips_audit` | one row per issue | counties lost in the CDC-SVI join (CT legacy counties, AK 02261 / 02063 / 02066, CT planning regions) and the duplicate-FIPS rows |
 | `nsduh_respondent` | respondent x year (2021-2024) | design variables, demographics, SAMHSA recodes, comparable `OPI_MISUSE` / `OPI_OUD`; -9 = NULL. Individual level: never join to area marts |
 | `nsduh_value_labels` | variable x code | Stata value labels |
+| `population_annual` | nation / state / county x year (2020-2025) | Census July 1 resident population; nation = 50 states + DC |
+| `wonder_deaths_monthly` | series x month | CDC WONDER true monthly counts (manual exports); final / provisional / partial flags; each series' query parameters |
 
 See README.md "Extension points" for where NFLIS-Drug or TEDS-A would plug in.
