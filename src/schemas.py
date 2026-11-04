@@ -127,9 +127,17 @@ CENSUS_POP = pa.DataFrameSchema({
     **{f"POPESTIMATE{y}": pa.Column(checks=[NUM, INT_VALUED, Check.gt(0)]) for y in range(2020, 2026)},
 }, strict=True, unique=["STATE", "COUNTY"])
 
+WONDER_MONTHLY = pa.DataFrameSchema({
+    "src_row": pa.Column(checks=NUM, unique=True),
+    "series": pa.Column(checks=Check.str_matches(r"^[A-Za-z0-9_]+$")),
+    "Month": pa.Column(),
+    "Month Code": pa.Column(checks=Check.str_matches(r"^(19|20)\d{2}/(0[1-9]|1[0-2])$")),
+    "Deaths": pa.Column(checks=Check.str_matches(r"^\d+$")),     # counts as text; 'Suppressed' would fail loudly
+}, strict=True, unique=["series", "Month Code"])
+
 SCHEMAS = {"cdc_state": CDC_STATE, "cdc_county": CDC_COUNTY, "svi_county": SVI_COUNTY,
            "nsduh_2021_2024": NSDUH_2124, "nsduh_2024": NSDUH_2024, "nsduh_value_labels": NSDUH_LABELS,
-           "census_pop": CENSUS_POP}
+           "census_pop": CENSUS_POP, "wonder_monthly": WONDER_MONTHLY}
 
 
 def validate(table, df, raw_path):

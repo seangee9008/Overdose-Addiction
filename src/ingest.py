@@ -15,6 +15,7 @@ Writes <out-dir>/<table>.parquet and <out-dir>/MANIFEST.json (rows, columns, sha
 file, sha256 of the raw source).
 """
 import argparse
+import glob
 import hashlib
 import json
 import os
@@ -92,6 +93,31 @@ def read_source(name, path):
     return df, extra
 
 
+def read_wonder(raw_dir):
+    """All CDC WONDER exports in <raw_dir>/wonder/ (manual downloads; see README). One table with a
+    `series` column = file name without extension (e.g. wonder_drug_induced_monthly). Monthly rows only;
+    the 'Total' row and the footer are dropped. Month labels carry '(provisional)' / '(partial)' flags.
+    The 'Query Parameters' lines are kept so each series records what it filtered."""
+    files = sorted(glob.glob(os.path.join(raw_dir, "wonder", "*.csv")) + glob.glob(os.path.join(raw_dir, "wonder", "*.txt")))
+    if not files:
+        raise FileNotFoundError(f"no CDC WONDER exports in {raw_dir}/wonder/ (manual export; see README)")
+    frames, params = [], []
+    for f in files:
+        series = os.path.splitext(os.path.basename(f))[0]
+        sep = "\t" if f.endswith(".txt") else ","
+        raw = pd.read_csv(f, sep=sep, dtype=str, keep_default_na=False)
+        rows = raw[raw["Month Code"].str.match(r"^\d{4}/\d{2}$", na=False)].copy()
+        rows = rows[["Month", "Month Code", "Deaths"]]
+        rows.insert(0, "series", series)
+        frames.append(rows)
+        text = open(f, encoding="utf-8", errors="replace").read()
+        q = text.split("Query Parameters:")[1].split("---")[0] if "Query Parameters:" in text else ""
+        lines = [x.strip().strip('"').strip() for x in q.splitlines()]
+        params.append(dict(series=series, query_parameters=" | ".join(x for x in lines if x),
+                           file=os.path.basename(f)))
+    return pd.concat(frames, ignore_index=True), pd.DataFrame(params), files
+
+
 def write(df, out_dir, table, raw_path, manifest):
     p = os.path.join(out_dir, f"{table}.parquet")
     df.to_parquet(p, index=False)
@@ -118,6 +144,13 @@ def main():
         for t, edf in extra.items():
             schemas.validate(t, edf, raw_path)
             write(edf, a.out_dir, t, raw_path, manifest)
+    wonder, params, files = read_wonder(a.raw_dir)
+    wonder = wonder.copy()
+    wonder.insert(0, "src_row", range(len(wonder)))
+    schemas.validate("wonder_monthly", wonder, os.path.join(a.raw_dir, "wonder"))
+    write(wonder, a.out_dir, "wonder_monthly", files[0], manifest)
+    write(params, a.out_dir, "wonder_query_parameters", files[0], manifest)
+    manifest["wonder_monthly"]["raw_files"] = {os.path.basename(f): sha256(f) for f in files}
     with open(os.path.join(a.out_dir, "MANIFEST.json"), "w") as fh:
         json.dump(manifest, fh, indent=2, sort_keys=True)
     print(f"wrote {os.path.join(a.out_dir, 'MANIFEST.json')}")

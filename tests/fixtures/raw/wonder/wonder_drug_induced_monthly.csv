@@ -1,0 +1,48 @@
+"Notes","Month","Month Code",Deaths,Population,Crude Rate
+,"Jan., 2023","2023/01",9013,Not Applicable,Not Applicable
+,"Feb., 2023","2023/02",8877,Not Applicable,Not Applicable
+,"Mar., 2023","2023/03",8816,Not Applicable,Not Applicable
+,"Apr., 2023","2023/04",8662,Not Applicable,Not Applicable
+,"May., 2023","2023/05",8649,Not Applicable,Not Applicable
+,"Jun., 2023","2023/06",8553,Not Applicable,Not Applicable
+,"Jul., 2023","2023/07",8271,Not Applicable,Not Applicable
+,"Aug., 2023","2023/08",8159,Not Applicable,Not Applicable
+,"Sep., 2023","2023/09",8120,Not Applicable,Not Applicable
+,"Oct., 2023","2023/10",7815,Not Applicable,Not Applicable
+,"Nov., 2023","2023/11",7928,Not Applicable,Not Applicable
+,"Dec., 2023","2023/12",7848,Not Applicable,Not Applicable
+,"Jan., 2024","2024/01",7445,Not Applicable,Not Applicable
+,"Feb., 2024","2024/02",7369,Not Applicable,Not Applicable
+,"Mar., 2024","2024/03",7215,Not Applicable,Not Applicable
+,"Apr., 2024","2024/04",7167,Not Applicable,Not Applicable
+,"May., 2024","2024/05",7088,Not Applicable,Not Applicable
+,"Jun., 2024","2024/06",7069,Not Applicable,Not Applicable
+,"Jul., 2024","2024/07",6955,Not Applicable,Not Applicable
+,"Aug., 2024","2024/08",6600,Not Applicable,Not Applicable
+,"Sep., 2024","2024/09",6522,Not Applicable,Not Applicable
+,"Oct., 2024","2024/10",6587,Not Applicable,Not Applicable
+,"Nov., 2024","2024/11",6276,Not Applicable,Not Applicable
+,"Dec., 2024","2024/12",6267,Not Applicable,Not Applicable
+,"Jan., 2025 (provisional)","2025/01",6160,Not Applicable,Not Applicable
+,"Feb., 2025 (provisional)","2025/02",6080,Not Applicable,Not Applicable
+,"Mar., 2025 (provisional)","2025/03",5904,Not Applicable,Not Applicable
+,"Apr., 2025 (provisional)","2025/04",5740,Not Applicable,Not Applicable
+,"May., 2025 (provisional)","2025/05",5779,Not Applicable,Not Applicable
+,"Jun., 2025 (provisional)","2025/06",5490,Not Applicable,Not Applicable
+,"Jul., 2025 (provisional)","2025/07",5552,Not Applicable,Not Applicable
+,"Aug., 2025 (provisional)","2025/08",5446,Not Applicable,Not Applicable
+,"Sep., 2025 (provisional)","2025/09",5117,Not Applicable,Not Applicable
+,"Oct., 2025 (provisional)","2025/10",5188,Not Applicable,Not Applicable
+,"Nov., 2025 (provisional)","2025/11",4827,Not Applicable,Not Applicable
+,"Dec., 2025 (provisional)","2025/12",4871,Not Applicable,Not Applicable
+,"Jan., 2026 (provisional)","2026/01",4822,Not Applicable,Not Applicable
+,"Feb., 2026 (provisional and partial)","2026/02",4544,Not Applicable,Not Applicable
+,"Mar., 2026 (provisional and partial)","2026/03",4448,Not Applicable,Not Applicable
+,"Apr., 2026 (provisional and partial)","2026/04",4229,Not Applicable,Not Applicable
+"Total",,,267468,Not Applicable,Not Applicable
+"---"
+"Dataset: SYNTHETIC fixture (not real data)"
+"Query Parameters:"
+"UCD - Drug/Alcohol Induced Causes: Drug-induced causes"
+"Group By: Month"
+"---"

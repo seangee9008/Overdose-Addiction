@@ -22,3 +22,7 @@ sources:
         description: Value labels for the NSDUH variables, from the Stata metadata.
       - name: census_pop
         description: Census Population Estimates Vintage 2025 (co-est2025-alldata), July 1 resident population 2020-2025, states and counties.
+      - name: wonder_monthly
+        description: CDC WONDER Provisional Mortality monthly death counts (manual exports in data/raw/wonder/), one series per file.
+      - name: wonder_query_parameters
+        description: The 'Query Parameters' block of each WONDER export (what each series filtered).

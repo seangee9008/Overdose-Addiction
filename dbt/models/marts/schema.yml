@@ -125,3 +125,15 @@ models:
         data_tests:
           - accepted_values:
               arguments: {values: [2020, 2021, 2022, 2023, 2024, 2025], quote: false}
+
+  - name: wonder_deaths_monthly
+    description: CDC WONDER monthly death counts by series (manual exports), with provisional/partial flags.
+    columns:
+      - name: row_key
+        data_tests: [unique, not_null]
+      - name: deaths
+        data_tests: [not_null, non_negative]
+      - name: month_date
+        data_tests: [not_null]
+      - name: query_parameters
+        data_tests: [not_null]
