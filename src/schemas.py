@@ -117,8 +117,19 @@ NSDUH_LABELS = pa.DataFrameSchema({
     "variable": pa.Column(), "value": pa.Column(checks=NUM), "label": pa.Column(),
 }, strict=True, unique=["variable", "value"])
 
+CENSUS_POP = pa.DataFrameSchema({
+    "src_row": pa.Column(checks=NUM, unique=True),
+    "SUMLEV": pa.Column(checks=Check.isin([40, 50])),            # 40 = state, 50 = county
+    "STATE": pa.Column(checks=Check.str_matches(r"^\d{2}$")),
+    "COUNTY": pa.Column(checks=Check.str_matches(r"^\d{3}$")),
+    "STNAME": pa.Column(),
+    "CTYNAME": pa.Column(),
+    **{f"POPESTIMATE{y}": pa.Column(checks=[NUM, INT_VALUED, Check.gt(0)]) for y in range(2020, 2026)},
+}, strict=True, unique=["STATE", "COUNTY"])
+
 SCHEMAS = {"cdc_state": CDC_STATE, "cdc_county": CDC_COUNTY, "svi_county": SVI_COUNTY,
-           "nsduh_2021_2024": NSDUH_2124, "nsduh_2024": NSDUH_2024, "nsduh_value_labels": NSDUH_LABELS}
+           "nsduh_2021_2024": NSDUH_2124, "nsduh_2024": NSDUH_2024, "nsduh_value_labels": NSDUH_LABELS,
+           "census_pop": CENSUS_POP}
 
 
 def validate(table, df, raw_path):

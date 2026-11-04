@@ -20,3 +20,5 @@ sources:
         description: NSDUH 2024 single-year PUF, QUESTID2 + UDYR5PNRANY2 (2024 pain-reliever use disorder).
       - name: nsduh_value_labels
         description: Value labels for the NSDUH variables, from the Stata metadata.
+      - name: census_pop
+        description: Census Population Estimates Vintage 2025 (co-est2025-alldata), July 1 resident population 2020-2025, states and counties.

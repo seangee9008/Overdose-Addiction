@@ -109,3 +109,19 @@ models:
     columns:
       - name: label
         data_tests: [not_null]
+
+  - name: population_annual
+    description: Census July 1 resident population by nation/state/county and year (2020-2025).
+    columns:
+      - name: row_key
+        data_tests: [unique, not_null]
+      - name: level
+        data_tests:
+          - accepted_values:
+              arguments: {values: ["nation", "state", "county"]}
+      - name: population
+        data_tests: [not_null, non_negative]
+      - name: year
+        data_tests:
+          - accepted_values:
+              arguments: {values: [2020, 2021, 2022, 2023, 2024, 2025], quote: false}

@@ -38,7 +38,10 @@ SOURCES = {
     "svi_county": "svi_2022_us_county.csv",
     "nsduh_2021_2024": "nsduh_2021_2024/NSDUH_2021_2024.dta",
     "nsduh_2024": "nsduh_2024/NSDUH_2024.dta",
+    "census_pop": "census_co_est2025_alldata.csv",
 }
+CENSUS_COLUMNS = ["SUMLEV", "STATE", "COUNTY", "STNAME", "CTYNAME",
+                  *[f"POPESTIMATE{y}" for y in range(2020, 2026)]]
 
 
 def sha256(path):
@@ -79,6 +82,9 @@ def read_source(name, path):
              for v, d in sorted(labels.items()) if v in NSDUH_COLUMNS for k, lab in d.items()])
     elif name == "nsduh_2024":
         df, _ = read_dta(path, NSDUH_2024_COLUMNS)
+    elif name == "census_pop":
+        df = pd.read_csv(path, dtype={"STATE": str, "COUNTY": str}, usecols=CENSUS_COLUMNS,
+                         encoding="latin-1")[CENSUS_COLUMNS]          # Census files are Latin-1 (e.g. Doña Ana)
     else:
         raise ValueError(name)
     df = df.copy()                       # de-fragment before adding a column
