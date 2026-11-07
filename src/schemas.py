@@ -149,10 +149,50 @@ WONDER_ANNUAL = pa.DataFrameSchema({
     "Age Adjusted Rate Upper 95% Confidence Interval": pa.Column(checks=Check.str_matches(RATE_TEXT)),
 }, strict=True, unique=["series", "Year Code"])
 
+def _codes(*vals):
+    """Allowed TEDS codes (-9 = missing/unknown/not collected/invalid, per the codebook)."""
+    return Check.isin([-9, *vals])
+
+
+SUBST = _codes(*range(1, 20))
+TEDS_A = pa.DataFrameSchema({
+    "src_row": pa.Column(checks=NUM),
+    "CASEID": pa.Column(checks=[NUM, Check.gt(0)]),
+    "ADMYR": pa.Column(checks=Check.in_range(2006, 2030)),
+    "STFIPS": pa.Column(checks=Check.isin([1, 2, 4, 5, 6, 8, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+                                           25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 44, 45,
+                                           46, 47, 48, 49, 50, 51, 53, 54, 55, 56, 72])),
+    "SUB1": pa.Column(checks=SUBST), "SUB2": pa.Column(checks=SUBST), "SUB3": pa.Column(checks=SUBST),
+    "HERFLG": pa.Column(checks=Check.isin([0, 1])), "METHFLG": pa.Column(checks=Check.isin([0, 1])),
+    "OPSYNFLG": pa.Column(checks=Check.isin([0, 1])),
+    "AGE": pa.Column(checks=Check.isin(list(range(1, 13)))),
+    "SEX": pa.Column(checks=_codes(1, 2)),
+    "RACE": pa.Column(checks=_codes(*range(1, 10))),
+    "ETHNIC": pa.Column(checks=_codes(*range(1, 6))),
+    "NOPRIOR": pa.Column(checks=_codes(0, 1, 2, 3, 4, 5)),
+    "METHUSE": pa.Column(checks=_codes(1, 2)),
+    "SERVICES": pa.Column(checks=_codes(*range(1, 9))),
+    "PSOURCE": pa.Column(checks=_codes(*range(1, 8))),
+    "ROUTE1": pa.Column(checks=_codes(*range(1, 6))),
+    "IDU": pa.Column(checks=_codes(0, 1)),
+}, strict=True)
+
+CENSUS_STATE_AGE = pa.DataFrameSchema({
+    "src_row": pa.Column(checks=NUM, unique=True),
+    "STATE": pa.Column(checks=Check.str_matches(r"^\d{2}$")),
+    "NAME": pa.Column(),
+    "RACE": pa.Column(checks=Check.isin([1, 2, 3, 4, 5, 6])),
+    "AGE": pa.Column(checks=Check.in_range(0, 85)),
+    "year": pa.Column(checks=Check.in_range(2010, 2025)),
+    "population": pa.Column(checks=[NUM, INT_VALUED, Check.ge(0)]),
+    "vintage": pa.Column(checks=Check.isin(["intercensal 2010-2020", "Vintage 2025"])),
+    "file": pa.Column(),
+}, strict=True, unique=["STATE", "RACE", "AGE", "year"])
+
 SCHEMAS = {"cdc_state": CDC_STATE, "cdc_county": CDC_COUNTY, "svi_county": SVI_COUNTY,
            "nsduh_2021_2024": NSDUH_2124, "nsduh_2024": NSDUH_2024, "nsduh_value_labels": NSDUH_LABELS,
            "census_pop": CENSUS_POP, "wonder_monthly": WONDER_MONTHLY,
-           "wonder_annual": WONDER_ANNUAL}
+           "wonder_annual": WONDER_ANNUAL, "teds_a": TEDS_A, "census_state_age": CENSUS_STATE_AGE}
 
 
 def validate(table, df, raw_path):

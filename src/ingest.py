@@ -19,8 +19,11 @@ import glob
 import hashlib
 import json
 import os
+import zipfile
 
 import pandas as pd
+import pyarrow as pa_arrow
+import pyarrow.parquet as pq
 import pyreadstat
 
 from src import schemas
@@ -140,6 +143,86 @@ def read_wonder(raw_dir):
     return m, a, pd.DataFrame(params), files
 
 
+# ---------------------------------------------------------------------------------------------- TEDS-A
+TEDS_ZIP = "teds_a_2006_2023_csv.zip"
+TEDS_COLUMNS = ["CASEID", "ADMYR", "STFIPS", "SUB1", "SUB2", "SUB3", "HERFLG", "METHFLG", "OPSYNFLG", "AGE", "SEX",
+                "RACE", "ETHNIC", "NOPRIOR", "METHUSE", "SERVICES", "PSOURCE", "ROUTE1", "IDU"]
+TEDS_YEARS = (2015, 2023)          # analysis window; the full 2006-2023 file stays in data/raw/
+CHUNK = 1_000_000
+
+
+def ingest_teds(raw_dir, out_dir, manifest):
+    """TEDS-A combined 2006-2023 CSV, read from the zip in chunks (never unzipped to disk). Keeps the
+    columns in TEDS_COLUMNS and admission years TEDS_YEARS; every chunk is pandera-validated before it is
+    appended to data/interim/teds_a.parquet. src_row = 0-based row number in the raw CSV."""
+    path = os.path.join(raw_dir, TEDS_ZIP)
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"{path} missing (run fetch_data.py --only teds_a_2006_2023)")
+    out = os.path.join(out_dir, "teds_a.parquet")
+    writer, n_in, n_kept, offset = None, 0, 0, 0
+    with zipfile.ZipFile(path) as zf:
+        member = [m for m in zf.namelist() if m.lower().endswith(".csv")]
+        if len(member) != 1:
+            raise ValueError(f"{path}: expected one CSV inside, found {member}")
+        with zf.open(member[0]) as fh:
+            header = pd.read_csv(fh, nrows=0).columns
+        actual = {c.upper(): c for c in header}
+        missing = [c for c in TEDS_COLUMNS if c not in actual]
+        if missing:
+            raise KeyError(f"{path}: columns not found: {missing}")
+        with zf.open(member[0]) as fh:
+            for chunk in pd.read_csv(fh, usecols=[actual[c] for c in TEDS_COLUMNS], chunksize=CHUNK):
+                chunk.columns = [c.upper() for c in chunk.columns]
+                chunk = chunk[TEDS_COLUMNS]
+                chunk.insert(0, "src_row", range(offset, offset + len(chunk)))
+                offset += len(chunk)
+                n_in += len(chunk)
+                keep = chunk[chunk.ADMYR.between(*TEDS_YEARS)]
+                if keep.empty:
+                    continue
+                schemas.validate("teds_a", keep, path)
+                table = pa_arrow.Table.from_pandas(keep, preserve_index=False)
+                if writer is None:
+                    writer = pq.ParquetWriter(out, table.schema)
+                writer.write_table(table)
+                n_kept += len(keep)
+    if writer is None:
+        raise ValueError(f"{path}: no admissions in {TEDS_YEARS}")
+    writer.close()
+    manifest["teds_a"] = dict(file="teds_a.parquet", rows=n_kept, columns=len(TEDS_COLUMNS) + 1, sha256=sha256(out),
+                              raw_source=os.path.relpath(path), raw_sha256=sha256(path), raw_rows=n_in,
+                              years=list(TEDS_YEARS), csv_member=member[0])
+    print(f"  {'teds_a':22} {n_kept:>8,} rows ({n_in:,} in raw)  -> {out}")
+
+
+CENSUS_ASR = {"census_state_asr_2010_2020": ("census_sc_est2020int_alldata5.csv", range(2010, 2020)),
+              "census_state_asr_2020_2025": ("census_sc_est2025_alldata5.csv", range(2020, 2026))}
+
+
+def ingest_census_asr(raw_dir, out_dir, manifest):
+    """Census state population by single year of age (intercensal 2010-2019; Vintage 2025 2020-2025).
+    Keeps state rows (SUMLEV 40) for both sexes (SEX 0) and all origins (ORIGIN 0); RACE is kept (summed in dbt)."""
+    frames = []
+    for table, (fname, years) in CENSUS_ASR.items():
+        path = os.path.join(raw_dir, fname)
+        if not os.path.exists(path):
+            raise FileNotFoundError(f"{path} missing (run fetch_data.py --only {table})")
+        cols = ["SUMLEV", "STATE", "NAME", "SEX", "ORIGIN", "RACE", "AGE", *[f"POPESTIMATE{y}" for y in years]]
+        d = pd.read_csv(path, dtype={"STATE": str, "SUMLEV": str}, usecols=cols, encoding="latin-1")[cols]
+        d = d[(d.SUMLEV == "040") & (d.SEX == 0) & (d.ORIGIN == 0)]
+        long = d.melt(id_vars=["STATE", "NAME", "RACE", "AGE"], value_vars=[f"POPESTIMATE{y}" for y in years],
+                      var_name="year", value_name="population")
+        long["year"] = long.year.str[-4:].astype(int)
+        long["vintage"] = "intercensal 2010-2020" if "2010" in table else "Vintage 2025"
+        long["file"] = fname
+        frames.append(long)
+        manifest.setdefault("census_state_age_raw", {})[fname] = sha256(path)
+    df = pd.concat(frames, ignore_index=True)
+    df.insert(0, "src_row", range(len(df)))
+    schemas.validate("census_state_age", df, os.path.join(raw_dir, "census_sc_est*_alldata5.csv"))
+    write(df, out_dir, "census_state_age", os.path.join(raw_dir, CENSUS_ASR["census_state_asr_2020_2025"][0]), manifest)
+
+
 def write(df, out_dir, table, raw_path, manifest):
     p = os.path.join(out_dir, f"{table}.parquet")
     df.to_parquet(p, index=False)
@@ -177,6 +260,8 @@ def main():
     write(wonder_annual, a.out_dir, "wonder_annual", files[0], manifest)   # may be empty until an annual export exists
     write(params, a.out_dir, "wonder_query_parameters", files[0], manifest)
     manifest["wonder_monthly"]["raw_files"] = {os.path.basename(f): sha256(f) for f in files}
+    ingest_teds(a.raw_dir, a.out_dir, manifest)
+    ingest_census_asr(a.raw_dir, a.out_dir, manifest)
     with open(os.path.join(a.out_dir, "MANIFEST.json"), "w") as fh:
         json.dump(manifest, fh, indent=2, sort_keys=True)
     print(f"wrote {os.path.join(a.out_dir, 'MANIFEST.json')}")
