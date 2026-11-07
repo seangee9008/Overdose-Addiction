@@ -51,6 +51,8 @@ def wild_cluster_bootstrap(df, y_col, x_cols, unit, time, j=0, B=9999, seed=0):
     X, names = twfe_design(df, x_cols, unit, time)
     clusters, cidx = np.unique(df[unit].to_numpy(), return_inverse=True)
     G = len(clusters)
+    if G < 2:
+        raise ValueError(f"wild cluster bootstrap needs at least 2 clusters, got {G}")
     XtX_inv = np.linalg.pinv(X.T @ X)
     beta, resid = _ols(X, y)
     se = _cr1_se(X, resid, cidx, G, XtX_inv)
