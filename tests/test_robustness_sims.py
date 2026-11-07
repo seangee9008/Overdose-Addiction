@@ -139,3 +139,32 @@ def test_censored_model_recovers_planted_svi_gap_where_zeroing_does_not():
     assert abs(np.mean(est) - 0.12) < 3 * mc_se + 0.01
     assert cover / n >= 0.8
     assert abs(np.mean(zero) - 0.12) > abs(np.mean(est) - 0.12)
+
+
+# ---------------------------------------------------------------- TEDS (a): TWFE + wild cluster bootstrap
+def test_twfe_point_estimate_matches_statsmodels_with_dummies():
+    import statsmodels.api as sm
+
+    from src.panel import twfe_design, wild_cluster_bootstrap
+    d = __import__("src.panel", fromlist=["simulate_panel"]).simulate_panel(np.random.default_rng(1))
+    X, names = twfe_design(d, ["x"], "unit", "time")
+    ref = sm.OLS(d.y, X).fit(cov_type="cluster", cov_kwds={"groups": d.unit})
+    r = wild_cluster_bootstrap(d, "y", ["x"], "unit", "time", B=99, seed=1)
+    assert r["estimate"] == pytest.approx(ref.params.iloc[0], abs=1e-10)
+    assert r["se_cr1"] == pytest.approx(ref.bse.iloc[0], rel=1e-6)
+
+
+def test_wild_cluster_bootstrap_ci_covers_planted_slope_and_null_rejects_about_5pct():
+    from src.panel import simulate_panel, wild_cluster_bootstrap
+    rng = np.random.default_rng(505)
+    n = max(N_SIMS // 2, 40)
+    cover, reject = 0, 0
+    for s in range(n):
+        d = simulate_panel(rng, beta=0.6)
+        r = wild_cluster_bootstrap(d, "y", ["x"], "unit", "time", B=199, seed=s)
+        cover += r["ci_low"] <= 0.6 <= r["ci_high"]
+        d0 = simulate_panel(rng, beta=0.0)
+        reject += wild_cluster_bootstrap(d0, "y", ["x"], "unit", "time", B=199, seed=10_000 + s)["p_wild"] < 0.05
+    se_band = 3 * np.sqrt(0.95 * 0.05 / n)
+    assert 0.95 - se_band <= cover / n <= 1.0, f"coverage {cover / n:.3f}"
+    assert reject / n <= 0.05 + se_band, f"null rejection {reject / n:.3f}"
