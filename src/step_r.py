@@ -164,7 +164,7 @@ def county_frame(base, end):
     return m
 
 
-def _county_fit(d, family="nb", cluster="fips", svi="quartile", y=None, censored=None, offset=None):
+def _county_fit(d, family="nb", cluster="fips", svi="quartile", y=None, censored=None, offset=None, extra=None):
     """deaths ~ post x SVI with offset log(pop); suppressed cells interval-censored on [1, 9] unless an
     imputed y is given. Returns (coef table, V, info, names)."""
     yv = d.deaths_reported.to_numpy(float) if y is None else y
@@ -180,6 +180,9 @@ def _county_fit(d, family="nb", cluster="fips", svi="quartile", y=None, censored
     else:
         cols += [d.rpl_themes.to_numpy(), d.rpl_themes.to_numpy() * d.post.to_numpy()]
         names += ["SVI", "post:SVI"]
+    for name, col in (extra or {}).items():                  # optional extra covariates (Phase 4a follow-up)
+        cols.append(np.asarray(col, float))
+        names.append(name)
     X = np.column_stack(cols)
     off = np.log(d.e_totpop.to_numpy(float)) if offset is None else offset
     fn = censored_nb if family == "nb" else censored_poisson
@@ -384,39 +387,233 @@ def r5_rolling():
     return pd.DataFrame(rows), pd.DataFrame(hac_rows), pd.DataFrame(annual_rows)
 
 
+def wonder_monthly_series():
+    """Monthly WONDER series in the warehouse: the original drug-induced series first (its seeds and labels
+    must not change), then any others (e.g. an opioid-specific export) in name order."""
+    names = list(warehouse.query("select distinct series from wonder_deaths_monthly order by series").series)
+    return ([WONDER_SERIES] if WONDER_SERIES in names else []) + [n for n in names if n != WONDER_SERIES]
+
+
+def is_opioid_series(name):
+    return "opioid" in name.lower()
+
+
 def r5_monthly():
-    """F3 on TRUE monthly counts (CDC WONDER). Partial months are excluded. Kink model with
+    """F3 on TRUE monthly counts (CDC WONDER), for every monthly series present (an opioid-specific export
+    in data/raw/wonder/ is picked up automatically). Partial months are excluded. Kink model with
     month-of-year seasonality; profile and block-bootstrap break-date CIs; bootstrap tests."""
-    w = warehouse.query("select * from wonder_deaths_monthly where series = ? order by month_date", [WONDER_SERIES])
-    qp = w.query_parameters.iloc[0]
-    w = w[~w.is_partial].reset_index(drop=True)
     rows = []
-    for i, drop in enumerate((0, 6, 12)):
-        d = w.iloc[:len(w) - drop] if drop else w
-        y = d.deaths.to_numpy(float)
-        months = d.month.to_numpy()
-        dates = pd.to_datetime(d.month_date).dt.strftime("%Y-%m").to_numpy()
-        seed = SEED + 1000 + i
-        stat10_, p10, _, p1 = seg.bootstrap_test_extra_break(y, months, B_MONTHLY, BLOCK, seed, k0=0)
-        stat21_, p21, _, p2 = seg.bootstrap_test_extra_break(y, months, B_MONTHLY, BLOCK, seed + 1, k0=1)
-        lo1, hi1 = seg.profile_ci(p1)
-        _, bt1 = seg.bootstrap_break_dates(y, 1, months, B_MONTHLY, BLOCK, seed + 2)
-        b1lo, b1hi = np.percentile(bt1[:, 0], [2.5, 97.5])
-        lo2a, hi2a = seg.profile_ci(p2, 0)
-        lo2b, hi2b = seg.profile_ci(p2, 1)
-        rows.append(dict(check="R5" if not drop else "R4", series=WONDER_SERIES, months_dropped=drop,
-                         first=dates[0], last=dates[-1], n_months=len(y),
-                         one_break=dates[p1["best"][0]], one_break_profile_ci=f"{dates[lo1]} to {dates[hi1]}",
-                         one_break_bootstrap_ci=f"{dates[int(np.floor(b1lo))]} to {dates[int(np.ceil(b1hi))]}",
-                         two_breaks=f"{dates[p2['best'][0]]}, {dates[p2['best'][1]]}",
-                         two_break_1_profile_ci=f"{dates[lo2a]} to {dates[hi2a]}",
-                         two_break_2_profile_ci=f"{dates[lo2b]} to {dates[hi2b]}",
-                         stat_1_vs_0=stat10_, p_1_vs_0=p10, stat_2_vs_1=stat21_, p_2_vs_1=p21,
-                         dispersion_1_break=p1["phi"], B=B_MONTHLY, block=BLOCK, seed=seed,
-                         model="log E[y] = trend + kink(s) + month-of-year; quasi-Poisson; partial months excluded",
-                         wonder_query=qp, source="CDC WONDER Provisional Mortality, monthly (final 2019-2024, provisional 2025+)"))
+    for k, series in enumerate(wonder_monthly_series()):
+        w = warehouse.query("select * from wonder_deaths_monthly where series = ? order by month_date", [series])
+        qp = w.query_parameters.iloc[0]
+        w = w[~w.is_partial].reset_index(drop=True)
+        for i, drop in enumerate((0, 6, 12)):
+            d = w.iloc[:len(w) - drop] if drop else w
+            y = d.deaths.to_numpy(float)
+            months = d.month.to_numpy()
+            dates = pd.to_datetime(d.month_date).dt.strftime("%Y-%m").to_numpy()
+            seed = SEED + 1000 + 100 * k + i
+            stat10_, p10, _, p1 = seg.bootstrap_test_extra_break(y, months, B_MONTHLY, BLOCK, seed, k0=0)
+            stat21_, p21, _, p2 = seg.bootstrap_test_extra_break(y, months, B_MONTHLY, BLOCK, seed + 1, k0=1)
+            lo1, hi1 = seg.profile_ci(p1)
+            _, bt1 = seg.bootstrap_break_dates(y, 1, months, B_MONTHLY, BLOCK, seed + 2)
+            b1lo, b1hi = np.percentile(bt1[:, 0], [2.5, 97.5])
+            lo2a, hi2a = seg.profile_ci(p2, 0)
+            lo2b, hi2b = seg.profile_ci(p2, 1)
+            rows.append(dict(check="R5" if not drop else "R4", series=series, months_dropped=drop,
+                             first=dates[0], last=dates[-1], n_months=len(y),
+                             one_break=dates[p1["best"][0]], one_break_profile_ci=f"{dates[lo1]} to {dates[hi1]}",
+                             one_break_bootstrap_ci=f"{dates[int(np.floor(b1lo))]} to {dates[int(np.ceil(b1hi))]}",
+                             two_breaks=f"{dates[p2['best'][0]]}, {dates[p2['best'][1]]}",
+                             two_break_1_profile_ci=f"{dates[lo2a]} to {dates[hi2a]}",
+                             two_break_2_profile_ci=f"{dates[lo2b]} to {dates[hi2b]}",
+                             stat_1_vs_0=stat10_, p_1_vs_0=p10, stat_2_vs_1=stat21_, p_2_vs_1=p21,
+                             dispersion_1_break=p1["phi"], B=B_MONTHLY, block=BLOCK, seed=seed,
+                             model="log E[y] = trend + kink(s) + month-of-year; quasi-Poisson; partial months excluded",
+                             wonder_query=qp,
+                             source="CDC WONDER Provisional Mortality, monthly (final 2019-2024, provisional 2025+)"))
     out = pd.DataFrame(rows)
     out.to_csv(f"{OUT}/r5_monthly_breaks.csv", index=False)
+    return out
+
+
+# ============================================================================== follow-ups (Phase 4a review)
+F4_RULE = ("|adjusted log-OR - crude log-OR| <= 0.05 for the start-year -> 2024 contrast in every measure x start year "
+           "(adjustment for age, sex, race/ethnicity moves the year odds ratio by less than about 5%): 'holds'; "
+           "<= 0.05 in >= 75%: 'partial'; otherwise 'fails'. Written before the F4 re-test was run.")
+
+
+def f4():
+    """F4 re-test: did prevalence fall within demographic groups? Survey-weighted logistic regression
+    (same models as Step C, src/survey_glm.py) for start years 2021/2022/2023 vs 2024; compares the crude and
+    the adjusted year contrast. NSDUH only."""
+    from src.survey_glm import design_matrix, svy_logit
+    df, _ = nsduh.load_analysis(demographics=("CATAG3", "IRSEX", "NEWRACE2"))
+    W, H, J = nsduh.WEIGHT, nsduh.STRATA, nsduh.PSU
+    rows = []
+    for m in MEASURES:
+        fits = {}
+        for model, cats in (("crude", {"YEAR": 2021}),
+                            ("adjusted", {"YEAR": 2021, "CATAG3": 1, "IRSEX": 1, "NEWRACE2": 1})):
+            X, names = design_matrix(df, categorical=cats)
+            res, V = svy_logit(X, df[m], df[W], df[H], df[J], nsduh.DESIGN_DF, names)
+            fits[model] = (res.coef.to_numpy(), V, names, int(res.df.iloc[0]))
+        for start in STARTS:
+            out = {}
+            for model, (coef, V, names, dof) in fits.items():
+                L = np.zeros(len(names))
+                L[names.index(f"YEAR[{END}]")] = 1
+                if start != 2021:
+                    L[names.index(f"YEAR[{start}]")] = -1
+                est, se = float(L @ coef), float(np.sqrt(L @ V @ L))
+                tc = stats.t.ppf(0.975, dof)
+                out[model] = dict(or_=np.exp(est), lo=np.exp(est - tc * se), hi=np.exp(est + tc * se),
+                                  p=2 * stats.t.sf(abs(est / se), dof), logor=est, df=dof)
+            c, a = out["crude"], out["adjusted"]
+            rows.append(dict(check="F4", measure=m, label=nsduh.COMPARABLE[m], start=start, end=END,
+                             crude_or=c["or_"], crude_ci_low=c["lo"], crude_ci_high=c["hi"], crude_p=c["p"],
+                             adjusted_or=a["or_"], adjusted_ci_low=a["lo"], adjusted_ci_high=a["hi"], adjusted_p=a["p"],
+                             adjustment_shift_log_or=a["logor"] - c["logor"], df_crude=c["df"], df_adjusted=a["df"],
+                             source=NSDUH_SRC + "; survey-weighted logistic, crude vs + CATAG3, IRSEX, NEWRACE2"))
+    out = pd.DataFrame(rows)
+    out.to_csv(f"{OUT}/f4_start_years.csv", index=False)
+    sc = pd.read_csv("outputs/step_c_year_effects.csv")
+    sc = sc[sc.year_vs_2021 == END].set_index("outcome")
+    sub = out[out.start == 2021].set_index("measure")
+    chk = pd.DataFrame([dict(measure=m, crude_or_here=sub.loc[m, "crude_or"], crude_or_step_c=sc.loc[m, "crude_or"],
+                             adjusted_or_here=sub.loc[m, "adjusted_or"], adjusted_or_step_c=sc.loc[m, "adjusted_or"])
+                        for m in MEASURES])
+    chk["match"] = (np.isclose(chk.crude_or_here, chk.crude_or_step_c, rtol=1e-9)
+                    & np.isclose(chk.adjusted_or_here, chk.adjusted_or_step_c, rtol=1e-9))
+    chk.to_csv(f"{OUT}/f4_check_vs_step_c.csv", index=False)
+    return out, chk
+
+
+def _state_baseline():
+    """State all-drug overdose death rate, pooled Dec 2021 + Dec 2022 12-month-ending totals (CDC VSRR state
+    file; NY = 'NY' + 'YC' (New York City)) over Census 2021 + 2022 state population. Never suppressed."""
+    v = warehouse.query(f"""
+        select case when state = 'YC' then 'NY' else state end as st, sum(data_value) as deaths
+        from state_deaths_long
+        where indicator = '{ALL_DRUG}' and month = 12 and year in (2021, 2022) and state not in ('US', 'PR')
+        group by 1""")
+    names = warehouse.query("select distinct state, state_name from state_deaths_long where state not in ('US', 'YC', 'PR')")
+    pop = warehouse.query("select state_name, sum(population) as population from population_annual "
+                          "where level = 'state' and year in (2021, 2022) group by 1")
+    b = v.merge(names, left_on="st", right_on="state").merge(pop, on="state_name")
+    b["log_state_rate"] = np.log(b.deaths / b.population)
+    return b.set_index("st").log_state_rate
+
+
+def r3_rtm():
+    """F5 regression-to-the-mean follow-up. Baselines with fewer suppressed cells than the single-year
+    2020-22 county baseline: (a) pooled 2021-2022 county baseline, usable only where both years are exact;
+    (b) state-level 2021-2022 baseline (never suppressed). Each is fitted as the MAIN change model plus
+    post x log(baseline rate), i.e. allowing a county's change to depend on its baseline level; the Q4/Q1 gap
+    keeps its main-specification meaning (ratio of change ratios). Kept separate from the F5 verdict."""
+    d = county_frame((2022, 12), (2025, 12))
+    base = warehouse.query("""select fips, year, deaths_reported from county_deaths_svi
+                              where month = 12 and year in (2021, 2022) and rpl_themes is not null""")
+    piv = base.pivot(index="fips", columns="year", values="deaths_reported")
+    n_all = d.fips.nunique()
+    exact22 = set(piv.index[piv[2022].notna()])
+    exact_pooled = set(piv.index[piv[2021].notna() & piv[2022].notna()])
+    rows = []
+    sub = d[d.fips.isin(exact_pooled)].reset_index(drop=True)
+    tab, V, info, names = _county_fit(sub)
+    rows.append(_gap_row("main model, counties with exact 2021 and 2022 baseline only", "rtm", tab, V, info, names, sub,
+                         note=f"{sub.fips.nunique()} of {n_all} counties usable"))
+    pooled = (piv[2021] + piv[2022]).rename("pooled")
+    sub = sub.merge(pooled.reset_index(), on="fips", how="left")
+    lb = np.log((sub.pooled.to_numpy() / 2 + 0.5) / sub.e_totpop.to_numpy(float))
+    tab, V, info, names = _county_fit(sub, extra={"log_base": lb, "post:log_base": lb * sub.post.to_numpy()})
+    slope = float(tab.set_index("term").loc["post:log_base", "coef"])
+    rows.append(_gap_row("+ post x log(pooled 2021-22 county baseline rate), exact-baseline counties", "rtm", tab, V, info,
+                         names, sub, note=f"{sub.fips.nunique()} of {n_all} counties usable; post x log-baseline coefficient "
+                                          f"{slope:.3f} (negative = higher-baseline counties declined more)"))
+    sb = _state_baseline()
+    dd = d.merge(sb.rename("log_state_rate").reset_index().rename(columns={"st": "st_abbrev"}), on="st_abbrev", how="left")
+    missing = int(dd.log_state_rate.isna().groupby(dd.fips).any().sum())
+    dd = dd[dd.log_state_rate.notna()].reset_index(drop=True)
+    ls = dd.log_state_rate.to_numpy()
+    for cl in ("fips", "state"):
+        tab, V, info, names = _county_fit(dd, cluster=cl, extra={"post:log_state_base": ls * dd.post.to_numpy()})
+        slope = float(tab.set_index("term").loc["post:log_state_base", "coef"])
+        rows.append(_gap_row(f"+ post x log(state 2021-22 baseline rate), clusters={'county' if cl == 'fips' else 'state'}",
+                             "rtm", tab, V, info, names, dd,
+                             note=f"{dd.fips.nunique()} of {n_all} counties usable ({missing} without a state baseline); "
+                                  f"post x log-state-baseline coefficient {slope:.3f}"))
+    out = pd.DataFrame(rows)
+    out["usable_counties_single_2022_baseline"] = len(exact22 & set(d.fips))
+    out["usable_counties_pooled_2021_2022_baseline"] = len(exact_pooled & set(d.fips))
+    one_hidden = set(piv.index[piv[2021].notna() ^ piv[2022].notna()])     # pooled sum known only to within +/- 4
+    out["counties_pooled_baseline_one_year_suppressed"] = len(one_hidden & set(d.fips))
+    out["usable_counties_state_baseline"] = dd.fips.nunique()
+    out["counties_in_main_analysis"] = n_all
+    out["source"] = COUNTY_SRC + "; state baseline: CDC VSRR state file (all-drug) / Census state population"
+    out.to_csv(f"{OUT}/r3b_baseline_rtm.csv", index=False)
+    return out
+
+
+def never_suppressed_profile():
+    """How the 940 never-suppressed counties differ from all analysed counties (they are not a random subset)."""
+    d = county_frame((2022, 12), (2025, 12))
+    d = d[d.post == 0]
+    ur = warehouse.query("select distinct fips, nchs_urban_rural_2013 as ur from county_deaths_svi")
+    d = d.merge(ur, on="fips", how="left")
+    never = set(warehouse.query("""select fips from county_deaths_svi where month = 12 and rpl_themes is not null
+                                   group by fips having sum(is_suppressed::int) = 0""").fips)
+    rows = []
+    for lab, g in (("never suppressed (Dec 2020-2025)", d[d.fips.isin(never)]), ("all analysed counties", d)):
+        r = dict(group=lab, counties=len(g), population_total=int(g.e_totpop.sum()),
+                 population_share=float(g.e_totpop.sum() / d.e_totpop.sum()), population_median=float(g.e_totpop.median()))
+        for q in (1, 2, 3, 4):
+            r[f"share_svi_Q{q}"] = float((g.quartile == q).mean())
+        for c in range(1, 7):
+            r[f"share_urban_rural_{c}"] = float((g.ur == c).mean())
+        rows.append(r)
+    out = pd.DataFrame(rows)
+    out["note"] = "NCHS 2013 urban-rural code: 1 = large central metro ... 6 = noncore (most rural); SVI quartile 4 = most vulnerable"
+    out["source"] = COUNTY_SRC
+    out.to_csv(f"{OUT}/r3c_never_suppressed_profile.csv", index=False)
+    return out
+
+
+def r6_wonder_age_adjusted():
+    """R6 with age-adjusted opioid death rates from a CDC WONDER annual export (Group By Year), if present.
+    d = log(AA rate change) - log(survey change); survey variance: shared NSDUH design (main method);
+    death variance: Poisson 1/D_start + 1/D_end. Returns None (and writes nothing) when no such export exists."""
+    a = warehouse.query("select * from wonder_deaths_annual order by series, year")
+    a = a[a.series.map(is_opioid_series) & a.age_adjusted_rate.notna()]
+    if a.empty:
+        return None
+    series = sorted(a.series.unique())[0]
+    a = a[a.series == series].set_index("year")
+    if not all(y in a.index for y in (*STARTS, END)):
+        return None
+    df, _ = nsduh.load_analysis(demographics=())
+    W, H, J = nsduh.WEIGHT, nsduh.STRATA, nsduh.PSU
+    yr = {y: (df.YEAR == y).to_numpy() for y in (*STARTS, END)}
+    rows = []
+    for start in STARTS:
+        L_death = float(np.log(a.loc[END, "age_adjusted_rate"] / a.loc[start, "age_adjusted_rate"]))
+        var_pois = 1 / a.loc[start, "deaths"] + 1 / a.loc[END, "deaths"]
+        for m in MEASURES:
+            c = sv.contrast(df, m, W, H, J, yr[start], yr[END], df_design=DF)
+            se = float(np.sqrt(c["log_ratio_se"] ** 2 + var_pois))
+            d = L_death - c["log_ratio"]
+            tc = stats.t.ppf(0.975, DF)
+            rows.append(dict(check="R6", measure=m, start=start, end=END, death_scale="age_adjusted_rate",
+                             variance_method="shared_design", aa_rate_start=a.loc[start, "age_adjusted_rate"],
+                             aa_rate_end=a.loc[END, "age_adjusted_rate"], death_pct_change=100 * np.expm1(L_death),
+                             survey_pct_change=100 * np.expm1(c["log_ratio"]), d=d, se=se, ci_low=d - tc * se,
+                             ci_high=d + tc * se, p=2 * stats.t.sf(abs(d / se), DF), wonder_series=series,
+                             wonder_query=a.query_parameters.iloc[0], survey_source=NSDUH_SRC))
+    out = pd.DataFrame(rows)
+    out["p_holm"] = np.nan
+    for _, g in out.groupby("start"):
+        out.loc[g.index, "p_holm"] = sv.holm(g.p.to_numpy())
+    out.to_csv(f"{OUT}/r6_wonder_age_adjusted.csv", index=False)
     return out
 
 
@@ -448,6 +645,8 @@ def _overlaps_2023(lo, hi):
 def summarize():
     files = {"opioids": "r1_r2_declines_opioids.csv", "synthetic_opioids": "r1_r2_declines_synthetic_opioids.csv",
              "all_drug": "r1_r2_declines_all_drug.csv", "opioids_predicted_value": "r1_r2_declines_opioids_predicted_value.csv"}
+    if os.path.exists(f"{OUT}/r6_wonder_age_adjusted.csv"):
+        files["opioids_age_adjusted_wonder"] = "r6_wonder_age_adjusted.csv"
     decl = pd.concat([pd.read_csv(f"{OUT}/{f}").assign(outcome=k) for k, f in files.items()], ignore_index=True)
     decl["is_main"] = ((decl.outcome == "opioids") & (decl.start == 2021) & (decl.death_scale == "count")
                        & (decl.variance_method == "shared_design"))
@@ -507,7 +706,8 @@ def summarize():
                        timing=f"bend at {r.break_year} -> change during {r.break_year + 1} (CI {lo}-{hi})",
                        overlaps=_overlaps_2023(lo, hi), is_main=False))
     for r in mon.itertuples():
-        lab = f"monthly counts (WONDER), {r.months_dropped} months dropped" if r.months_dropped else "monthly counts (WONDER)"
+        base_lab = "monthly counts (WONDER)" if r.series == WONDER_SERIES else f"monthly counts (WONDER {r.series})"
+        lab = f"{base_lab}, {r.months_dropped} months dropped" if r.months_dropped else base_lab
         a, b = r.one_break_profile_ci.split(" to ")
         f3.append(dict(variant=f"{lab}: one-break profile CI", sig=r.p_1_vs_0 < 0.05, p=r.p_1_vs_0,
                        timing=f"{r.one_break} ({r.one_break_profile_ci})", overlaps=_overlaps_2023(a, b), is_main=False))
@@ -537,10 +737,13 @@ def summarize():
                          rule=DECISION_RULE["F3a"]))
 
     f3b = [dict(variant=f"rolling: {r.variant}", p=r.p_2_vs_1, is_corrected=False) for r in roll.itertuples()]
-    f3b += [dict(variant=(f"monthly counts (WONDER), {r.months_dropped} months dropped" if r.months_dropped
-                          else "MAIN (corrected method): monthly counts (WONDER)"), p=r.p_2_vs_1,
-                 is_corrected=(r.months_dropped == 0), timing=f"{r.two_breaks}; earlier break CI {r.two_break_1_profile_ci}")
-             for r in mon.itertuples()]
+    main_series = next((x for x in mon.series.unique() if is_opioid_series(x)), WONDER_SERIES)
+    for r in mon.itertuples():
+        corrected = (r.months_dropped == 0) and (r.series == main_series)
+        base_lab = "monthly counts (WONDER)" if r.series == WONDER_SERIES else f"monthly counts (WONDER {r.series})"
+        lab = f"{base_lab}, {r.months_dropped} months dropped" if r.months_dropped else base_lab
+        f3b.append(dict(variant=("MAIN (corrected method): " + lab) if corrected else lab, p=r.p_2_vs_1,
+                        is_corrected=corrected, timing=f"{r.two_breaks}; earlier break CI {r.two_break_1_profile_ci}"))
     for r in f3b:
         var_rows.append(dict(finding="F3b (2020 break not robust)", variant=r["variant"], p=r["p"],
                              estimate_95ci=r.get("timing", ""), ci_criterion_met=bool(r["p"] >= 0.05)))
@@ -550,9 +753,11 @@ def summarize():
                          original=(f"Step B (B=2000): 2 vs 1 p = {sb.loc['all_drug', 'p_2vs1']:.4f} (all-drug), "
                                    f"{sb.loc['opioids', 'p_2vs1']:.4f} (opioids)"),
                          n_variants=len(f3b) - 1, holds="yes" if corr["p"] >= 0.05 else "no",
-                         notes=(f"corrected method (true monthly counts, all-drug drug-induced): 2 vs 1 p = {corr['p']:.4f}, "
-                                f"earlier break {corr['timing']}; rolling series: p >= 0.05 in {roll_ns}/8 variants. "
-                                "Opioid-specific monthly counts not yet available."),
+                         notes=(f"corrected method (true monthly counts, "
+                                f"{'opioid-specific' if is_opioid_series(main_series) else 'all-drug drug-induced'}"
+                                f"): 2 vs 1 p = {corr['p']:.4f}, "
+                                f"earlier break {corr['timing']}; rolling series: p >= 0.05 in {roll_ns}/8 variants."
+                                + ("" if is_opioid_series(main_series) else " Opioid-specific monthly counts not yet available.")),
                          rule=DECISION_RULE["F3b"]))
 
     cg = pd.read_csv(f"{OUT}/r3_r4_county_gap.csv")
@@ -574,12 +779,154 @@ def summarize():
                                 f"variants ({share:.0%}). Sign flips: {flips or 'none'}. Baseline-adjusted variants excluded "
                                 "(not comparable)."),
                          rule=DECISION_RULE["F5"]))
-    verdicts.append(dict(finding="F4 (within-group decline)", original="see Step C", n_variants=0,
-                         holds="not re-tested", notes="Not part of R1-R6.", rule=""))
+    f4f = f"{OUT}/f4_start_years.csv"
+    if os.path.exists(f4f):
+        f4t = pd.read_csv(f4f)
+        shift = f4t.adjustment_shift_log_or.abs()
+        share = float((shift <= 0.05).mean())
+        v = "yes" if share == 1 else ("partially" if share >= 0.75 else "no")
+        for r in f4t.itertuples():
+            var_rows.append(dict(finding="F4 (within-group decline)", variant=f"{r.measure}; start {r.start}",
+                                 estimate=r.adjustment_shift_log_or,
+                                 estimate_95ci=(f"crude OR {_fmt(r.crude_or, r.crude_ci_low, r.crude_ci_high)}; adjusted OR "
+                                                f"{_fmt(r.adjusted_or, r.adjusted_ci_low, r.adjusted_ci_high)}"),
+                                 p=r.adjusted_p, ci_criterion_met=bool(abs(r.adjustment_shift_log_or) <= 0.05)))
+        verdicts.append(dict(finding="F4 (within-group decline)",
+                             original="Step C: adjustment moved the 2024-vs-2021 log-OR by <= 0.003",
+                             n_variants=len(f4t), holds=v,
+                             notes=(f"|adjusted - crude log-OR| <= 0.05 in {int((shift <= 0.05).sum())}/{len(f4t)} "
+                                    f"measure x start-year contrasts; max shift {shift.max():.4f}"),
+                             rule=F4_RULE))
+    else:
+        verdicts.append(dict(finding="F4 (within-group decline)", original="see Step C", n_variants=0,
+                             holds="not re-tested", notes="Not part of R1-R6.", rule=""))
     pd.DataFrame(var_rows).to_csv(f"{OUT}/summary_variants.csv", index=False)
     vd = pd.DataFrame(verdicts)
     vd.to_csv(f"{OUT}/summary_verdicts.csv", index=False)
+    findings_ledger(vd, decl)
     return vd
+
+
+VERDICT_WORDS = {"yes": "holds", "partially": "partial", "no": "fails", "not re-tested": "not tested"}
+
+
+def findings_ledger(vd, decl):
+    """One row per finding, every number filled in from outputs/; wording is templated and descriptive."""
+    v = vd.set_index("finding")
+    word = {k: VERDICT_WORDS.get(x, x) for k, x in v.holds.items()}
+    rows = []
+
+    def main_row(measure):
+        return decl[(decl.measure == measure) & decl.is_main].iloc[0]
+
+    for fid, finding, measure, label in (("F1-misuse", "F1 (opioid misuse)", "OPI_MISUSE", "past-year opioid misuse"),
+                                         ("F1-OUD", "F1 (OUD)", "OPI_OUD", "past-year opioid use disorder")):
+        g = decl[decl.measure == measure]
+        m = main_row(measure)
+        rest = g[~g.is_main]
+        k = int((rest.ci_high < 0).sum())
+        weakest = rest.sort_values("ci_high", ascending=False).iloc[0]
+        rows.append(dict(
+            finding=fid,
+            original_claim=(f"Opioid deaths fell faster than NSDUH {label}, 2021->2024 (deaths {m.death_pct_change:.1f}%, "
+                            f"survey {m.survey_pct_change:.1f}%)."),
+            verdict=word[finding],
+            supported_claim=(f"In {int((g.d < 0).sum())}/{len(g)} specifications the death decline was proportionally larger "
+                             f"than the decline in {label}; the 95% CI for the difference excluded zero in {k}/{len(rest)} "
+                             "alternative specifications."),
+            key_evidence=(f"main d = {_fmt(m.d, m.ci_low, m.ci_high)}, Holm p = {m.p_holm:.4f}; d ranges "
+                          f"{g.d.min():.3f} to {g.d.max():.3f}; least clear variant: {weakest.outcome}, start {weakest.start}, "
+                          f"{weakest.death_scale}, {weakest.variance_method}: d = {_fmt(weakest.d, weakest.ci_low, weakest.ci_high)}"),
+            main_caveat=("NSDUH measures mostly prescription pain-reliever misuse in household respondents; deaths are mostly "
+                         "illicitly made fentanyl (T40.4 in 88% of opioid deaths). Different behaviours and populations; no "
+                         "confounders controlled.")))
+    g = decl[decl.measure == "HERYR"]
+    m = main_row("HERYR")
+    rows.append(dict(
+        finding="F2", original_claim=(f"Heroin use fell about as fast as opioid deaths, 2021->2024 (heroin "
+                                      f"{m.survey_pct_change:.1f}%, deaths {m.death_pct_change:.1f}%); not significantly different."),
+        verdict="not distinguishable" if word["F2 (heroin)"] == "holds" else word["F2 (heroin)"],
+        supported_claim=(f"The data do not distinguish whether heroin use or opioid deaths declined faster: the 95% CI for the "
+                         f"difference included zero in {int(((g.ci_low <= 0) & (g.ci_high >= 0)).sum())}/{len(g)} specifications, "
+                         f"and the point estimate was positive in {int((g.d > 0).sum())} and negative in {int((g.d < 0).sum())}."),
+        key_evidence=f"main d = {_fmt(m.d, m.ci_low, m.ci_high)}, p = {m.p:.4f}; d ranges {g.d.min():.3f} to {g.d.max():.3f}",
+        main_caveat="Heroin use is rare in NSDUH (0.19-0.39%); estimates are imprecise (subgroup RSE often > 0.3).",
+    ))
+    roll = pd.read_csv(f"{OUT}/r4_r5_r6_rolling_breaks.csv")
+    mon = pd.read_csv(f"{OUT}/r5_monthly_breaks.csv")
+    main_series = next((x for x in mon.series.unique() if is_opioid_series(x)), WONDER_SERIES)
+    mm = mon[(mon.series == main_series) & (mon.months_dropped == 0)].iloc[0]
+    ro = roll[roll.variant == "opioids, Data Value"].iloc[0]
+    defn = "opioid-specific" if is_opioid_series(main_series) else "all-drug 'drug-induced'"
+    rows.append(dict(
+        finding="F3a", original_claim="The national death series has a real downturn break in 2023.",
+        verdict=word["F3a (2023 break)"],
+        supported_claim=(f"A downturn break is statistically clear in every method; in true monthly counts ({defn}) it is "
+                         f"estimated at {mm.one_break} (one-break model), earlier than the {ro.break_2} estimate from rolling "
+                         "12-month totals."),
+        key_evidence=(f"monthly: one-break {mm.one_break}, profile CI {mm.one_break_profile_ci}, bootstrap CI "
+                      f"{mm.one_break_bootstrap_ci}, 1 vs 0 p = {mm.p_1_vs_0:.4f}; rolling opioids: {ro.break_2} "
+                      f"(CI {ro.break_2_ci_low} to {ro.break_2_ci_high}), 1 vs 0 p = {ro.p_1_vs_0:.4f}; "
+                      f"{v.loc['F3a (2023 break)', 'notes']}"),
+        main_caveat=("Rolling 12-month totals spread a change over up to 12 months, so their break dates lag; "
+                     f"the monthly series is {defn} and starts {mm.first}.")))
+    rows.append(dict(
+        finding="F3b", original_claim="The 2020 break is not robust (2 breaks did not clearly beat 1 on the rolling series).",
+        verdict=word["F3b (2020 break not robust)"],
+        supported_claim=(f"In true monthly counts ({defn}) a second trend change around {mm.two_breaks.split(', ')[0]} is supported "
+                         f"(2 vs 1 p = {mm.p_2_vs_1:.4f}); on rolling 12-month totals the evidence is mixed "
+                         f"(p < 0.05 in {int((roll.p_2_vs_1 < 0.05).sum())}/{len(roll)} variants)."),
+        key_evidence=(f"monthly two-break model: {mm.two_breaks}; earlier-break profile CI {mm.two_break_1_profile_ci}; "
+                      f"rolling 2 vs 1 p ranges {roll.p_2_vs_1.min():.4f} to {roll.p_2_vs_1.max():.4f}"),
+        main_caveat=(f"Monthly series is {defn}, starts {mm.first} (few months before 2020), and uses a continuous-kink "
+                     "model, unlike Step B's segment model.")))
+    f4f = f"{OUT}/f4_start_years.csv"
+    if os.path.exists(f4f):
+        f4t = pd.read_csv(f4f)
+        mis = f4t[(f4t.measure == "OPI_MISUSE") & (f4t.start == 2021)].iloc[0]
+        rows.append(dict(
+            finding="F4", original_claim="The NSDUH declines happened within age/sex/race groups, not through shifts in population mix.",
+            verdict=word["F4 (within-group decline)"],
+            supported_claim=(f"Adjusting for age group, sex and race/ethnicity changed the start-year->2024 log odds ratio by at "
+                             f"most {f4t.adjustment_shift_log_or.abs().max():.4f} across {len(f4t)} measure x start-year "
+                             "contrasts, so these demographic shifts do not account for the changes."),
+            key_evidence=(f"misuse 2021->2024: crude OR {_fmt(mis.crude_or, mis.crude_ci_low, mis.crude_ci_high)}, adjusted OR "
+                          f"{_fmt(mis.adjusted_or, mis.adjusted_ci_low, mis.adjusted_ci_high)}; adjusted ORs with CI excluding 1: "
+                          f"{int((f4t.adjusted_ci_high < 1).sum())}/{len(f4t)}"),
+            main_caveat=("Only age group (5 levels), sex and race/ethnicity are adjusted; finer or other compositional shifts "
+                         "are not examined. This says nothing about whether the declines themselves are significant.")))
+    cg = pd.read_csv(f"{OUT}/r3_r4_county_gap.csv").set_index("variant")
+    mainc = cg[cg.group == "main"].iloc[0]
+    ns = cg.loc["only counties never suppressed in any Dec 2020-2025 window"]
+    st = cg.loc["negative binomial, censored, clusters=state"]
+    p23 = cg.loc["2023 -> 2025 (Step D sensitivity)"]
+    prof = pd.read_csv(f"{OUT}/r3c_never_suppressed_profile.csv").set_index("group") if os.path.exists(
+        f"{OUT}/r3c_never_suppressed_profile.csv") else None
+    rtm = pd.read_csv(f"{OUT}/r3b_baseline_rtm.csv") if os.path.exists(f"{OUT}/r3b_baseline_rtm.csv") else None
+    prof_txt = ""
+    if prof is not None:
+        a, b = prof.iloc[0], prof.iloc[1]
+        prof_txt = (f" The {int(a.counties)} never-suppressed counties are not a random subset: median population "
+                    f"{a.population_median:,.0f} vs {b.population_median:,.0f} for all counties, "
+                    f"{a.population_share:.0%} of the analysed population.")
+    rtm_txt = ""
+    if rtm is not None:
+        r = rtm[rtm.variant.str.contains("state 2021-22") & rtm.variant.str.contains("county")].iloc[0]
+        rtm_txt = f"; with a state-baseline term: {_fmt(r.gap_ratio, r.ci_low, r.ci_high)}"
+    rows.append(dict(
+        finding="F5", original_claim=(f"County deaths fell less in the most vulnerable SVI quartile "
+                                      f"(Q4 {100 * (mainc.q4_change_ratio - 1):.0f}%) than in the least vulnerable "
+                                      f"(Q1 {100 * (mainc.q1_change_ratio - 1):.0f}%), 2022->2025."),
+        verdict=word["F5 (SVI gap)"],
+        supported_claim=("The main county model estimates a smaller decline in the most vulnerable quartile, but the estimate is "
+                         "not robust to clustering, period choice and the handling of suppressed counts."),
+        key_evidence=(f"main gap ratio {_fmt(mainc.gap_ratio, mainc.ci_low, mainc.ci_high)}; state clusters "
+                      f"{_fmt(st.gap_ratio, st.ci_low, st.ci_high)}; 2023->2025 {_fmt(p23.gap_ratio, p23.ci_low, p23.ci_high)}; "
+                      f"suppressed = 9: {cg.loc['suppressed set to 9 (no censoring)', 'gap_ratio']:.3f}; never-suppressed counties "
+                      f"{_fmt(ns.gap_ratio, ns.ci_low, ns.ci_high)}{rtm_txt}; {v.loc['F5 (SVI gap)', 'notes']}"),
+        main_caveat=("About half of county cells are suppressed (1-9 deaths); all-drug deaths only; area-level association "
+                     "(no individual inference)." + prof_txt)))
+    pd.DataFrame(rows).to_csv(f"{OUT}/findings_ledger.csv", index=False)
 
 
 # ============================================================================== figures
@@ -642,7 +989,8 @@ def plot_break_dates():
                      r.break_2, r.break_2_ci_low, r.break_2_ci_high))
     for r in mon.itertuples():
         b1, b2 = r.two_breaks.split(", ")
-        lab = "WONDER monthly" + (f", -{r.months_dropped} mo" if r.months_dropped else "")
+        lab = ("WONDER monthly" if r.series == WONDER_SERIES else f"WONDER {r.series.replace('wonder_', '')}") + (
+            f", -{r.months_dropped} mo" if r.months_dropped else "")
         rows.append((lab + ", 2-break", b1, *r.two_break_1_profile_ci.split(" to "), b2, *r.two_break_2_profile_ci.split(" to ")))
         rows.append((lab + ", 1-break", None, None, None, r.one_break, *r.one_break_profile_ci.split(" to ")))
     for r in ann.itertuples():
@@ -696,7 +1044,21 @@ def main(checks):
         for ind, tag in ((SYNTHETIC_OPIOIDS, "synthetic_opioids"), (ALL_DRUG, "all_drug")):
             r12(ind, tag)
         r12(OPIOIDS, "opioids_predicted_value", value_col="Predicted Value")
-        meta["r6"] = dict(age_adjusted="not done: needs a CDC WONDER annual export grouped by Year with age-adjusted rates")
+        aa = r6_wonder_age_adjusted()
+        meta["r6"] = dict(age_adjusted=("done: outputs/robustness/r6_wonder_age_adjusted.csv" if aa is not None else
+                                        "not done: needs a CDC WONDER annual export (Group By Year, opioid filter, "
+                                        "age-adjusted rates) in data/raw/wonder/ with 'opioid' in the file name"))
+    if "f4" in checks:
+        out, chk = f4()
+        meta["f4"] = dict(rule=F4_RULE, step_c_reproduced=bool(chk.match.all()))
+        print(out[["measure", "start", "crude_or", "adjusted_or", "adjustment_shift_log_or", "adjusted_p"]].round(4).to_string(index=False))
+        print(chk.to_string(index=False))
+    if "rtm" in checks:
+        r = r3_rtm()
+        prof = never_suppressed_profile()
+        print(r[["variant", "gap_ratio", "ci_low", "ci_high", "p", "note"]].round(4).to_string(index=False))
+        print(r[[c for c in r.columns if c.startswith("usable") or c.startswith("counties_in")]].iloc[0].to_string())
+        print(prof.drop(columns=["note", "source"]).round(3).T.to_string())
     if "r5" in checks:
         roll, hac, ann = r5_rolling()
         mon = r5_monthly()
@@ -706,8 +1068,11 @@ def main(checks):
         print(hac.drop(columns=["note", "source"]).to_string(index=False))
         print(ann.drop(columns=["note", "source"]).to_string(index=False))
         print(mon.drop(columns=["model", "wonder_query", "source"]).T.to_string())
+        has_op = any(is_opioid_series(x) for x in mon.series.unique())
         meta["r5"] = dict(monthly_series=WONDER_SERIES, B_rolling=B_ROLL, B_monthly=B_MONTHLY, block=BLOCK,
-                          opioid_monthly="not done: needs a CDC WONDER export with the T40 multiple-cause filter")
+                          opioid_monthly=("done: opioid series in outputs/robustness/r5_monthly_breaks.csv" if has_op else
+                                          "not done: needs a CDC WONDER monthly export with the T40 multiple-cause filter "
+                                          "in data/raw/wonder/ with 'opioid' in the file name"))
     if "summary" in checks:
         plot_forest()
         plot_break_dates()
@@ -719,4 +1084,4 @@ def main(checks):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:] or ["r12", "r3", "r5", "r6", "summary"])
+    main(sys.argv[1:] or ["r12", "r3", "r5", "r6", "f4", "rtm", "summary"])
