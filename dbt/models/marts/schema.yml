@@ -191,3 +191,21 @@ models:
         data_tests: [unique, not_null]
       - name: population
         data_tests: [not_null, non_negative]
+
+  - name: state_regions
+    description: State FIPS to Census region (from the Census state population files).
+    columns:
+      - name: state_fips
+        data_tests: [unique, not_null]
+      - name: region_name
+        data_tests: [not_null]
+
+  - name: teds_state_year_age
+    description: TEDS-A primary-opioid admissions by state x year x age group, split by prior treatment (area level).
+    columns:
+      - name: row_key
+        data_tests: [unique, not_null]
+      - name: age_group
+        data_tests:
+          - accepted_values:
+              arguments: {values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], quote: false}
