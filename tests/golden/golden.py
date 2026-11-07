@@ -17,6 +17,10 @@ SOURCES = ("outputs", "data/processed")
 ROBUST_GOLDEN = "tests/golden/robustness_golden.json"
 ROBUST_SOURCES = ("outputs/robustness",)
 ROBUST_PIPELINE = ["make data", "make results", "python -m src.step_r"]
+# Phase 4b TEDS-A numbers: their own snapshot too.
+TEDS_GOLDEN = "tests/golden/teds_golden.json"
+TEDS_SOURCES = ("outputs/teds",)
+TEDS_PIPELINE = ["make data", "python -m src.step_t"]
 PIPELINE = [
     "python analyze_real.py",
     'python analyze_real.py --indicator "Opioids (T40.0-T40.4,T40.6)" --tag opioids',
@@ -68,8 +72,12 @@ def compare(golden, current):
 
 
 if __name__ == "__main__":
-    robust = "--robustness" in sys.argv
-    path, sources, pipeline = (ROBUST_GOLDEN, ROBUST_SOURCES, ROBUST_PIPELINE) if robust else (GOLDEN, SOURCES, PIPELINE)
+    if "--teds" in sys.argv:
+        path, sources, pipeline = TEDS_GOLDEN, TEDS_SOURCES, TEDS_PIPELINE
+    elif "--robustness" in sys.argv:
+        path, sources, pipeline = ROBUST_GOLDEN, ROBUST_SOURCES, ROBUST_PIPELINE
+    else:
+        path, sources, pipeline = GOLDEN, SOURCES, PIPELINE
     if "write" in sys.argv:
         snap = collect(sources)
         n = sum(len(v) for v in snap.values())

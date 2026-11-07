@@ -272,7 +272,36 @@ def sec_robustness(used):
     return "\n".join(parts)
 
 
-SECTIONS = [sec_cdc_breaks, sec_nsduh, sec_step_a, sec_step_b, sec_step_c, sec_step_d, sec_robustness]
+TEDS_DIR = os.path.join(OUT_DIR, "teds")
+
+
+def sec_teds(used):
+    if not os.path.exists(os.path.join(TEDS_DIR, "a_meta.json")):
+        return ""
+    used.add("teds")
+    meta = json.load(open(os.path.join(TEDS_DIR, "a_meta.json")))
+    st = pd.read_csv(os.path.join(TEDS_DIR, "a_panel_states.csv"))
+    parts = ["## TEDS-A (Phase 4b): treatment admissions, area level\n",
+             "Produced by `src/step_t.py` (`make teds`). TEDS-A counts treatment **admissions** (episodes, not people) at "
+             "publicly funded facilities; it is not a prevalence measure and is never joined to NSDUH.\n",
+             "### (a) Opioid admissions vs opioid deaths: method (from the script)\n", "```\n" + meta["method"] + "\n```\n",
+             f"Completeness rule: {meta['completeness_rule']}. Main panel: {meta['main_panel_states']} of "
+             f"{meta['states_considered']} states.\n",
+             img("teds/a_trends.png"),
+             "### States excluded from the main panel\n",
+             table(st[~st.in_main_panel][["state_name", "main_panel_exclusion_reason", "years_reported", "years_with_deaths"]]),
+             "\n### State-year association (log admission rate on log opioid death rate)\n",
+             table(pd.read_csv(os.path.join(TEDS_DIR, "a_state_year_association.csv")), 4, drop=("model", "source")),
+             "\n### National series\n",
+             table(pd.read_csv(os.path.join(TEDS_DIR, "a_national_series.csv")), 2, drop=("source",)),
+             "\n### State changes, 2019 -> 2023 (main panel)\n",
+             table(pd.read_csv(os.path.join(TEDS_DIR, "a_state_changes_2019_2023.csv")), 3, drop=("source",)),
+             "\n### All states considered\n", table(st, 3),
+             "\nSources:\n", sources(pd.read_csv(os.path.join(TEDS_DIR, "a_national_series.csv")))]
+    return "\n".join(parts)
+
+
+SECTIONS = [sec_cdc_breaks, sec_nsduh, sec_step_a, sec_step_b, sec_step_c, sec_step_d, sec_robustness, sec_teds]
 EXTRA_SECTIONS = []  # later steps register here
 
 

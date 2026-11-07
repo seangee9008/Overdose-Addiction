@@ -1,0 +1,52 @@
+state_fips,state_name,is_complete,exclusion_reason,years_with_deaths,years_reported,deaths_all_years,in_main_panel,main_panel_exclusion_reason
+01,Alabama,True,,2,9,False,False,"no CDC opioid death value for 2015, 2016, 2017, 2018, 2019, 2020, 2021"
+02,Alaska,True,,8,9,False,False,no CDC opioid death value for 2015
+04,Arizona,False,"year-to-year change > 50%: 2017 (x1.95), 2018 (x2.49)",7,9,False,False,"year-to-year change > 50%: 2017 (x1.95), 2018 (x2.49); no CDC opioid death value for 2015, 2016"
+05,Arkansas,True,,2,9,False,False,"no CDC opioid death value for 2015, 2016, 2017, 2018, 2019, 2020, 2021"
+06,California,True,,5,9,False,False,"no CDC opioid death value for 2015, 2016, 2017, 2018"
+08,Colorado,True,,6,9,False,False,"no CDC opioid death value for 2015, 2016, 2017"
+09,Connecticut,True,,9,9,True,True,
+10,Delaware,False,"not reported in: 2022, 2023",6,7,False,False,"not reported in: 2022, 2023; no CDC opioid death value for 2015, 2016, 2017"
+11,District of Columbia,True,,9,9,True,True,
+12,Florida,False,"year-to-year change > 50%: 2017 (x1.64), 2018 (x2.0)",4,9,False,False,"year-to-year change > 50%: 2017 (x1.64), 2018 (x2.0); no CDC opioid death value for 2015, 2016, 2017, 2018, 2020"
+13,Georgia,True,,9,9,True,True,
+15,Hawaii,True,,7,9,False,False,"no CDC opioid death value for 2015, 2017"
+16,Idaho,False,"not reported in: 2020, 2021",3,7,False,False,"not reported in: 2020, 2021; no CDC opioid death value for 2015, 2016, 2017, 2018, 2019, 2020"
+17,Illinois,False,"year-to-year change > 50%: 2017 (x1.59), 2021 (x0.43), 2023 (x2.77)",9,9,True,False,"year-to-year change > 50%: 2017 (x1.59), 2021 (x0.43), 2023 (x2.77)"
+18,Indiana,True,,5,9,False,False,"no CDC opioid death value for 2015, 2016, 2017, 2018"
+19,Iowa,True,,9,9,True,True,
+20,Kansas,False,year-to-year change > 50%: 2016 (x2.09),5,9,False,False,"year-to-year change > 50%: 2016 (x2.09); no CDC opioid death value for 2015, 2016, 2017, 2018"
+21,Kentucky,True,,6,9,False,False,"no CDC opioid death value for 2015, 2016, 2017"
+22,Louisiana,True,,0,9,False,False,"no CDC opioid death value for 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023"
+23,Maine,True,,9,9,True,True,
+24,Maryland,False,year-to-year change > 50%: 2017 (x1.58),9,9,True,False,year-to-year change > 50%: 2017 (x1.58)
+25,Massachusetts,True,,9,9,True,True,
+26,Michigan,True,,5,9,False,False,"no CDC opioid death value for 2015, 2016, 2017, 2019"
+27,Minnesota,True,,3,9,False,False,"no CDC opioid death value for 2015, 2016, 2017, 2018, 2019, 2020"
+28,Mississippi,True,,5,9,False,False,"no CDC opioid death value for 2015, 2016, 2017, 2018"
+29,Missouri,True,,6,9,False,False,"no CDC opioid death value for 2015, 2016, 2017"
+30,Montana,False,year-to-year change > 50%: 2017 (x0.49),4,9,False,False,"year-to-year change > 50%: 2017 (x0.49); no CDC opioid death value for 2015, 2016, 2017, 2018, 2019"
+31,Nebraska,True,,2,9,False,False,"no CDC opioid death value for 2015, 2016, 2017, 2018, 2019, 2020, 2022"
+32,Nevada,True,,9,9,True,True,
+33,New Hampshire,False,year-to-year change > 50%: 2021 (x0.46),9,9,True,False,year-to-year change > 50%: 2021 (x0.46)
+34,New Jersey,True,,6,9,False,False,"no CDC opioid death value for 2015, 2016, 2017"
+35,New Mexico,False,"year-to-year change > 50%: 2017 (x1.63), 2018 (x1.82), 2020 (x0.48)",9,9,True,False,"year-to-year change > 50%: 2017 (x1.63), 2018 (x1.82), 2020 (x0.48)"
+36,New York,True,,9,9,True,True,
+37,North Carolina,False,year-to-year change > 50%: 2016 (x1.59),8,9,False,False,year-to-year change > 50%: 2016 (x1.59); no CDC opioid death value for 2023
+38,North Dakota,False,year-to-year change > 50%: 2016 (x2.05),1,9,False,False,"year-to-year change > 50%: 2016 (x2.05); no CDC opioid death value for 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022"
+39,Ohio,True,,9,9,True,True,
+40,Oklahoma,True,,9,9,True,True,
+41,Oregon,False,"not reported in: 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022",9,1,True,False,"not reported in: 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022"
+42,Pennsylvania,True,,0,9,False,False,"no CDC opioid death value for 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023"
+44,Rhode Island,True,,9,9,True,True,
+45,South Carolina,False,"not reported in: 2015, 2023",9,7,True,False,"not reported in: 2015, 2023"
+46,South Dakota,True,,8,9,False,False,no CDC opioid death value for 2015
+47,Tennessee,True,,9,9,True,True,
+48,Texas,True,,5,9,False,False,"no CDC opioid death value for 2015, 2016, 2017, 2018"
+49,Utah,True,,9,9,True,True,
+50,Vermont,True,,9,9,True,True,
+51,Virginia,True,,9,9,True,True,
+53,Washington,False,"year-to-year change > 50%: 2016 (x2.72), 2018 (x0.32)",9,9,True,False,"year-to-year change > 50%: 2016 (x2.72), 2018 (x0.32)"
+54,West Virginia,False,"not reported in: 2022, 2023",9,7,True,False,"not reported in: 2022, 2023"
+55,Wisconsin,True,,8,9,False,False,no CDC opioid death value for 2015
+56,Wyoming,True,,7,9,False,False,"no CDC opioid death value for 2015, 2016"

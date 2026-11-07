@@ -1,0 +1,12 @@
+{
+  "window": [
+    2015,
+    2023
+  ],
+  "seed": 20261107,
+  "B": 9999,
+  "completeness_rule": "TEDS admissions in every year 2015-2023 and total admissions never change by more than 50% year to year (ratio within [0.5, 1.5])",
+  "main_panel_states": 15,
+  "states_considered": 51,
+  "method": "Admissions are not prevalence: they count treatment episodes at publicly funded facilities, depend on\nfunding, capacity and referral practice, and miss office-based buprenorphine. Never joined to NSDUH."
+}

@@ -3,7 +3,8 @@
 #   make results   run every analysis script against the marts, then build results/RESULTS.md
 #   make test      pytest (golden comparison + unit + data-layer tests)
 #   make robustness   Phase 4a robustness checks (src/step_r.py) -> outputs/robustness/, then RESULTS.md
-#   make all       data, results, robustness, test
+#   make teds      Phase 4b TEDS-A area-level analyses (src/step_t.py) -> outputs/teds/, then RESULTS.md
+#   make all       data, results, robustness, teds, test
 #   make ci        what GitHub Actions runs: lint + build on SYNTHETIC fixtures + pytest
 # Override the interpreter with e.g. `make all PY=python DBT=dbt`.
 
@@ -11,9 +12,9 @@ PY  ?= .venv/bin/python
 DBT ?= .venv/bin/dbt
 DBT_ARGS = --project-dir dbt --profiles-dir dbt
 
-.PHONY: all data ingest dbt docs results robustness test lint ci fixtures fixtures-data golden golden-robustness clean
+.PHONY: all data ingest dbt docs results robustness teds test lint ci fixtures fixtures-data golden golden-robustness golden-teds clean
 
-all: data results robustness test
+all: data results robustness teds test
 
 data: ingest dbt
 
@@ -42,6 +43,10 @@ robustness:
 	$(PY) -m src.step_r
 	$(PY) -m src.build_results
 
+teds:
+	$(PY) -m src.step_t
+	$(PY) -m src.build_results
+
 test:
 	$(PY) -m pytest -q
 
@@ -67,6 +72,9 @@ golden:
 
 golden-robustness:
 	$(PY) -m tests.golden.golden write --robustness
+
+golden-teds:
+	$(PY) -m tests.golden.golden write --teds
 
 clean:
 	rm -rf data/interim data/warehouse build dbt/target dbt/logs
