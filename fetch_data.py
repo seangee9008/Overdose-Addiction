@@ -19,6 +19,10 @@ STATUS OF EACH SOURCE
   nsduh_2024   Single-year 2024 PUF (Stata) + codebook, to check 2024 opioid misuse / OUD definitions.
   census_pop   Census Population Estimates, Vintage 2025: July 1 resident population 2020-2025 for
                states (SUMLEV 040) and counties (SUMLEV 050). National = sum of 50 states + DC.
+  teds_a_2006_2023  SAMHSA TEDS-A combined 2006-2023 public-use file (CSV in zip, ~651 MB) + codebook.
+               Kept whole in raw; ingestion reads it from the zip and keeps 2015-2023.
+  census_state_asr_*  Census state population by single year of age, sex, race, Hispanic origin:
+               intercensal 2010-2020 (used for 2015-2019) and Vintage 2025 (used for 2020-2023).
   svi_2022     VERIFIED 2026-10-10. Official ATSDR CSV from svi.cdc.gov (no geometry; join on FIPS).
   svi_2022_arcgis_geo  OPT-IN ONLY (--only svi_2022_arcgis_geo). Polygons from an ArcGIS Online
                layer whose metadata credits CDC/ATSDR GRASP, but it is hosted in a shared public
@@ -32,6 +36,7 @@ import os
 import time
 import urllib.parse
 import urllib.request
+import zipfile
 
 RAW = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "raw")
 UA = "UCLA-Stats199-research/0.1 (student project)"
@@ -55,6 +60,14 @@ FILES = {
                             "nsduh_2024_codebook.pdf"),
     "census_pop": ("https://www2.census.gov/programs-surveys/popest/datasets/2020-2025/counties/totals/co-est2025-alldata.csv",
                    "census_co_est2025_alldata.csv"),
+    "teds_a_2006_2023": ("https://www.samhsa.gov/data/system/files/media-puf-file/TEDS-A-2006_2023-DS0001-bndl-data-csv_v1.zip",
+                         "teds_a_2006_2023_csv.zip"),
+    "teds_a_2006_2023_codebook": ("https://www.samhsa.gov/data/system/files/media-puf-file/teds-a-2006_2023-ds0001-info-codebook_v1.pdf",
+                                  "teds_a_2006_2023_codebook.pdf"),
+    "census_state_asr_2010_2020": ("https://www2.census.gov/programs-surveys/popest/datasets/2010-2020/intercensal/state/asrh/sc-est2020int-alldata5.csv",
+                                   "census_sc_est2020int_alldata5.csv"),
+    "census_state_asr_2020_2025": ("https://www2.census.gov/programs-surveys/popest/datasets/2020-2025/state/asrh/sc-est2025-alldata5.csv",
+                                   "census_sc_est2025_alldata5.csv"),
     "svi_2022": ("https://svi.cdc.gov/Documents/Data/2022/csv/states_counties/SVI_2022_US_county.csv",
                  "svi_2022_us_county.csv"),
 }
@@ -77,11 +90,18 @@ def download(url, dest, force=False):
     tmp = dest + ".part"
     try:
         with urllib.request.urlopen(req, timeout=120) as r, open(tmp, "wb") as out:
+            expected = r.headers.get("Content-Length")
             while True:
                 chunk = r.read(1 << 20)
                 if not chunk:
                     break
                 out.write(chunk)
+        got = os.path.getsize(tmp)
+        # a dropped connection can end the stream early without raising: verify before accepting the file
+        if expected is not None and got != int(expected):
+            raise IOError(f"incomplete download: {got:,} of {int(expected):,} bytes")
+        if dest.endswith(".zip") and not zipfile.is_zipfile(tmp):
+            raise IOError(f"downloaded file is not a valid zip ({got:,} bytes); probably truncated")
         os.replace(tmp, dest)
     except Exception as e:
         print(f"  FAILED: {type(e).__name__}: {e}")
