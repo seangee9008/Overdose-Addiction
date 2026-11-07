@@ -438,7 +438,7 @@ def r5_monthly():
 
 
 # ============================================================================== follow-ups (Phase 4a review)
-F4_RULE = ("|adjusted log-OR - crude log-OR| <= 0.05 for the start-year -> 2024 contrast in every measure x start year "
+F4_RULE = ("abs(adjusted log-OR - crude log-OR) <= 0.05 for the start-year -> 2024 contrast in every measure x start year "
            "(adjustment for age, sex, race/ethnicity moves the year odds ratio by less than about 5%): 'holds'; "
            "<= 0.05 in >= 75%: 'partial'; otherwise 'fails'. Written before the F4 re-test was run.")
 

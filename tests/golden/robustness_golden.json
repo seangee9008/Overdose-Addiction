@@ -8473,7 +8473,7 @@
    "2.years": "2015-2025"
   },
   "outputs/robustness/step_r_meta.json": {
-   "f4.rule": "|adjusted log-OR - crude log-OR| <= 0.05 for the start-year -> 2024 contrast in every measure x start year (adjustment for age, sex, race/ethnicity moves the year odds ratio by less than about 5%): 'holds'; <= 0.05 in >= 75%: 'partial'; otherwise 'fails'. Written before the F4 re-test was run.",
+   "f4.rule": "abs(adjusted log-OR - crude log-OR) <= 0.05 for the start-year -> 2024 contrast in every measure x start year (adjustment for age, sex, race/ethnicity moves the year odds ratio by less than about 5%): 'holds'; <= 0.05 in >= 75%: 'partial'; otherwise 'fails'. Written before the F4 re-test was run.",
    "f4.step_c_reproduced": true,
    "r12.B": 2000,
    "r12.end": 2024,
@@ -11327,7 +11327,7 @@
    "6.n_variants": "9",
    "6.notes": "|adjusted - crude log-OR| <= 0.05 in 9/9 measure x start-year contrasts; max shift 0.0027",
    "6.original": "Step C: adjustment moved the 2024-vs-2021 log-OR by <= 0.003",
-   "6.rule": "|adjusted log-OR - crude log-OR| <= 0.05 for the start-year -> 2024 contrast in every measure x start year (adjustment for age, sex, race/ethnicity moves the year odds ratio by less than about 5%): 'holds'; <= 0.05 in >= 75%: 'partial'; otherwise 'fails'. Written before the F4 re-test was run."
+   "6.rule": "abs(adjusted log-OR - crude log-OR) <= 0.05 for the start-year -> 2024 contrast in every measure x start year (adjustment for age, sex, race/ethnicity moves the year odds ratio by less than about 5%): 'holds'; <= 0.05 in >= 75%: 'partial'; otherwise 'fails'. Written before the F4 re-test was run."
   }
  },
  "values": 11285

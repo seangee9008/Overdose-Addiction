@@ -833,7 +833,7 @@ Produced by `src/step_r.py` (`make robustness`). Each finding is re-estimated un
 | F3a (2023 break) | 1 break beats 0 at p < 0.05 by every method AND every break-date CI overlaps calendar 2023 ('partially' if significant everywhere but some CI does not overlap 2023; 'no' if not significant by the main method). |
 | F3b (2020 break not robust) | '2020 break not robust' holds if 2 breaks vs 1 gives p >= 0.05 by the corrected method (true monthly counts); 'no' if p < 0.05. |
 | F5 (SVI gap) | Q4/Q1 gap ratio > 1 in every variant; 95% CI excludes 1 in the main specification and in >= 75% of variants ('partially' if signs hold but CI criterion fails; 'no' if any sign flips). |
-| F4 (within-group decline) | /adjusted log-OR - crude log-OR/ <= 0.05 for the start-year -> 2024 contrast in every measure x start year (adjustment for age, sex, race/ethnicity moves the year odds ratio by less than about 5%): 'holds'; <= 0.05 in >= 75%: 'partial'; otherwise 'fails'. Written before the F4 re-test was run. |
+| F4 (within-group decline) | abs(adjusted log-OR - crude log-OR) <= 0.05 for the start-year -> 2024 contrast in every measure x start year (adjustment for age, sex, race/ethnicity moves the year odds ratio by less than about 5%): 'holds'; <= 0.05 in >= 75%: 'partial'; otherwise 'fails'. Written before the F4 re-test was run. |
 
 
 ### Summary
@@ -1532,5 +1532,5 @@ Produced by `src/step_r.py` (`make robustness`). Each finding is re-estimated un
 | r5.B_monthly | 500 |
 | r5.block | 12 |
 | r5.opioid_monthly | not done: needs a CDC WONDER monthly export with the T40 multiple-cause filter in data/raw/wonder/ with 'opioid' in the file name |
-| f4.rule | /adjusted log-OR - crude log-OR/ <= 0.05 for the start-year -> 2024 contrast in every measure x start year (adjustment for age, sex, race/ethnicity moves the year odds ratio by less than about 5%): 'holds'; <= 0.05 in >= 75%: 'partial'; otherwise 'fails'. Written before the F4 re-test was run. |
+| f4.rule | abs(adjusted log-OR - crude log-OR) <= 0.05 for the start-year -> 2024 contrast in every measure x start year (adjustment for age, sex, race/ethnicity moves the year odds ratio by less than about 5%): 'holds'; <= 0.05 in >= 75%: 'partial'; otherwise 'fails'. Written before the F4 re-test was run. |
 | f4.step_c_reproduced | True |
