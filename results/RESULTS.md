@@ -1543,171 +1543,437 @@ Produced by `src/step_r.py` (`make robustness`). Each finding is re-estimated un
 
 Produced by `src/step_t.py` (`make teds`). TEDS-A counts treatment **admissions** (episodes, not people) at publicly funded facilities; it is not a prevalence measure and is never joined to NSDUH.
 
-### (a) Opioid admissions vs opioid deaths: method (from the script)
+> **Scope:** TEDS-A data here end in 2023, so they cover the period before the main decline in overdose deaths (late 2022 onward); they describe treatment admissions before and at the start of that decline and do not test the decline itself.
+
+> **TEDS-A 2024:** TEDS-A 2024 is available from SAMHSA as a single-year file (released 2026; no combined 2006-2024 file) but is NOT included: these analyses use the combined 2006-2023 file and end in 2023.
+
+### Method (from the script)
 
 ```
-Admissions are not prevalence: they count treatment episodes at publicly funded facilities, depend on
-funding, capacity and referral practice, and miss office-based buprenorphine. Never joined to NSDUH.
+Phase 4b: TEDS-A treatment admissions as an independent, AREA-LEVEL signal on opioid addiction.
+
+    python -m src.step_t            # panels, (a), (b), (c), (d), simulation coverage at actual panel sizes
+
+Admissions are not prevalence: they count treatment episodes (not people) at publicly funded facilities,
+depend on funding, capacity and referral practice, and miss office-based buprenorphine. Never joined to
+NSDUH. TEDS-A here ends in 2023 (combined 2006-2023 file), so it covers the period BEFORE the main
+decline in overdose deaths (late 2022 onward) and cannot test that decline itself.
 ```
 
-Completeness rule: TEDS admissions in every year 2015-2023 and total admissions never change by more than 50% year to year (ratio within [0.5, 1.5]). Main panel: 15 of 51 states.
+Completeness rule: TEDS admissions in every year 2015-2023 and total admissions never change by more than 50% year to year (ratio within [0.5, 1.5]).
+
+### Panels, population share and regional mix
+
+| panel | window | states | population_2023 | population_share_of_us | states_Northeast | pop_share_Northeast | states_Midwest | pop_share_Midwest | states_South | pop_share_South | states_West | pop_share_West |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| P35 (admissions trends) | 2015-2023 | 35 | 258,845,218 | 0.731 | 8 | 0.226 | 9 | 0.213 | 11 | 0.335 | 7 | 0.227 |
+| P_deaths (admissions vs deaths) | 2019-2023 | 28 | 213,395,307 | 0.603 | 7 | 0.210 | 6 | 0.171 | 8 | 0.343 | 7 | 0.275 |
+| P15 (sensitivity) | 2015-2023 | 15 | 91,408,216 | 0.258 | 6 | 0.384 | 2 | 0.172 | 5 | 0.366 | 2 | 0.078 |
+| all 50 states + DC |  | 51 | 354,133,708 | 1.000 | 9 | 0.169 | 12 | 0.204 | 17 | 0.387 | 13 | 0.240 |
+
+
+> **Caveat:** the panels are not random samples of the US. They contain only states whose TEDS reporting is complete and stable (and, for P_deaths / P15, whose CDC opioid-specific death values are available); compare the regional mix above with all 50 states + DC.
+
+#### State membership and reasons
+
+| state_name | region_name | in_P35 | in_P_deaths | in_P15 | teds_exclusion_reason | opioid_deaths_missing_2019_2023 | opioid_deaths_missing_2015_2023 | population_2023 |
+|---|---|---|---|---|---|---|---|---|
+| Alabama | South | True | False | False |  | 2019, 2020, 2021 | 2015, 2016, 2017, 2018, 2019, 2020, 2021 | 5,322,187 |
+| Alaska | West | True | True | False |  |  | 2015 | 819,747.000 |
+| Arizona | West | False | False | False | year-to-year change > 50%: 2017 (x1.95), 2018 (x2.49) |  | 2015, 2016 | 7,858,252 |
+| Arkansas | South | True | False | False |  | 2019, 2020, 2021 | 2015, 2016, 2017, 2018, 2019, 2020, 2021 | 3,231,727 |
+| California | West | True | True | False |  |  | 2015, 2016, 2017, 2018 | 41,984,111 |
+| Colorado | West | True | True | False |  |  | 2015, 2016, 2017 | 6,262,591 |
+| Connecticut | Northeast | True | True | True |  |  |  | 3,804,167 |
+| Delaware | South | False | False | False | not reported in: 2022, 2023 |  | 2015, 2016, 2017 | 1,088,013 |
+| District of Columbia | South | True | True | True |  |  |  | 720,204.000 |
+| Florida | South | False | False | False | year-to-year change > 50%: 2017 (x1.64), 2018 (x2.0) | 2020 | 2015, 2016, 2017, 2018, 2020 | 23,889,197 |
+| Georgia | South | True | True | True |  |  |  | 11,548,832 |
+| Hawaii | West | True | True | False |  |  | 2015, 2017 | 1,934,308 |
+| Idaho | West | False | False | False | not reported in: 2020, 2021 | 2019, 2020 | 2015, 2016, 2017, 2018, 2019, 2020 | 2,064,432 |
+| Illinois | Midwest | False | False | False | year-to-year change > 50%: 2017 (x1.59), 2021 (x0.43), 2023 (x2.77) |  |  | 13,148,656 |
+| Indiana | Midwest | True | True | False |  |  | 2015, 2016, 2017, 2018 | 7,175,763 |
+| Iowa | Midwest | True | True | True |  |  |  | 3,328,986 |
+| Kansas | Midwest | False | False | False | year-to-year change > 50%: 2016 (x2.09) |  | 2015, 2016, 2017, 2018 | 3,121,602 |
+| Kentucky | South | True | True | False |  |  | 2015, 2016, 2017 | 4,739,657 |
+| Louisiana | South | True | False | False |  | 2019, 2020, 2021, 2022, 2023 | 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023 | 4,771,142 |
+| Maine | Northeast | True | True | True |  |  |  | 1,451,063 |
+| Maryland | South | False | False | False | year-to-year change > 50%: 2017 (x1.58) |  |  | 6,549,068 |
+| Massachusetts | Northeast | True | True | True |  |  |  | 7,362,603 |
+| Michigan | Midwest | True | False | False |  | 2019 | 2015, 2016, 2017, 2019 | 10,514,358 |
+| Minnesota | Midwest | True | False | False |  | 2019, 2020 | 2015, 2016, 2017, 2018, 2019, 2020 | 6,008,006 |
+| Mississippi | South | True | True | False |  |  | 2015, 2016, 2017, 2018 | 3,032,249 |
+| Missouri | Midwest | True | True | False |  |  | 2015, 2016, 2017 | 6,522,122 |
+| Montana | West | False | False | False | year-to-year change > 50%: 2017 (x0.49) | 2019 | 2015, 2016, 2017, 2018, 2019 | 1,186,035 |
+| Nebraska | Midwest | True | False | False |  | 2019, 2020, 2022 | 2015, 2016, 2017, 2018, 2019, 2020, 2022 | 2,076,956 |
+| Nevada | West | True | True | True |  |  |  | 3,485,249 |
+| New Hampshire | Northeast | False | False | False | year-to-year change > 50%: 2021 (x0.46) |  |  | 1,450,313 |
+| New Jersey | Northeast | True | True | False |  |  | 2015, 2016, 2017 | 9,780,707 |
+| New Mexico | West | False | False | False | year-to-year change > 50%: 2017 (x1.63), 2018 (x1.82), 2020 (x0.48) |  |  | 2,219,832 |
+| New York | Northeast | True | True | True |  |  |  | 20,691,467 |
+| North Carolina | South | False | False | False | year-to-year change > 50%: 2016 (x1.59) | 2023 | 2023 | 11,397,402 |
+| North Dakota | Midwest | False | False | False | year-to-year change > 50%: 2016 (x2.05) | 2019, 2020, 2021, 2022 | 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022 | 820,052.000 |
+| Ohio | Midwest | True | True | True |  |  |  | 12,350,591 |
+| Oklahoma | South | True | True | True |  |  |  | 4,514,159 |
+| Oregon | West | False | False | False | not reported in: 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022 |  |  | 4,554,846 |
+| Pennsylvania | Northeast | True | False | False |  | 2019, 2020, 2021, 2022, 2023 | 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023 | 13,525,535 |
+| Rhode Island | Northeast | True | True | True |  |  |  | 1,154,269 |
+| South Carolina | South | False | False | False | not reported in: 2015, 2023 |  |  | 5,618,482 |
+| South Dakota | Midwest | True | True | False |  |  | 2015 | 956,499.000 |
+| Tennessee | South | True | True | True |  |  |  | 7,463,724 |
+| Texas | South | True | True | False |  |  | 2015, 2016, 2017, 2018 | 32,015,407 |
+| Utah | West | True | True | True |  |  |  | 3,616,428 |
+| Vermont | Northeast | True | True | True |  |  |  | 673,792.000 |
+| Virginia | South | True | True | True |  |  |  | 9,242,682 |
+| Washington | West | False | False | False | year-to-year change > 50%: 2016 (x2.72), 2018 (x0.32) |  |  | 8,482,473 |
+| West Virginia | South | False | False | False | not reported in: 2022, 2023 |  |  | 1,839,835 |
+| Wisconsin | Midwest | True | True | False |  |  | 2015 | 6,152,559 |
+| Wyoming | West | True | True | False |  |  | 2015, 2016 | 611,371.000 |
+
+
+### (a) Opioid admissions over time and versus opioid deaths
 
 ![teds/a_trends.png](../outputs/teds/a_trends.png)
 
-### States excluded from the main panel
+#### Admission-rate trend, P35 (with and without 2020)
 
-| state_name | main_panel_exclusion_reason | years_reported | years_with_deaths |
-|---|---|---|---|
-| Alabama | no CDC opioid death value for 2015, 2016, 2017, 2018, 2019, 2020, 2021 | 9 | 2 |
-| Alaska | no CDC opioid death value for 2015 | 9 | 8 |
-| Arizona | year-to-year change > 50%: 2017 (x1.95), 2018 (x2.49); no CDC opioid death value for 2015, 2016 | 9 | 7 |
-| Arkansas | no CDC opioid death value for 2015, 2016, 2017, 2018, 2019, 2020, 2021 | 9 | 2 |
-| California | no CDC opioid death value for 2015, 2016, 2017, 2018 | 9 | 5 |
-| Colorado | no CDC opioid death value for 2015, 2016, 2017 | 9 | 6 |
-| Delaware | not reported in: 2022, 2023; no CDC opioid death value for 2015, 2016, 2017 | 7 | 6 |
-| Florida | year-to-year change > 50%: 2017 (x1.64), 2018 (x2.0); no CDC opioid death value for 2015, 2016, 2017, 2018, 2020 | 9 | 4 |
-| Hawaii | no CDC opioid death value for 2015, 2017 | 9 | 7 |
-| Idaho | not reported in: 2020, 2021; no CDC opioid death value for 2015, 2016, 2017, 2018, 2019, 2020 | 7 | 3 |
-| Illinois | year-to-year change > 50%: 2017 (x1.59), 2021 (x0.43), 2023 (x2.77) | 9 | 9 |
-| Indiana | no CDC opioid death value for 2015, 2016, 2017, 2018 | 9 | 5 |
-| Kansas | year-to-year change > 50%: 2016 (x2.09); no CDC opioid death value for 2015, 2016, 2017, 2018 | 9 | 5 |
-| Kentucky | no CDC opioid death value for 2015, 2016, 2017 | 9 | 6 |
-| Louisiana | no CDC opioid death value for 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023 | 9 | 0 |
-| Maryland | year-to-year change > 50%: 2017 (x1.58) | 9 | 9 |
-| Michigan | no CDC opioid death value for 2015, 2016, 2017, 2019 | 9 | 5 |
-| Minnesota | no CDC opioid death value for 2015, 2016, 2017, 2018, 2019, 2020 | 9 | 3 |
-| Mississippi | no CDC opioid death value for 2015, 2016, 2017, 2018 | 9 | 5 |
-| Missouri | no CDC opioid death value for 2015, 2016, 2017 | 9 | 6 |
-| Montana | year-to-year change > 50%: 2017 (x0.49); no CDC opioid death value for 2015, 2016, 2017, 2018, 2019 | 9 | 4 |
-| Nebraska | no CDC opioid death value for 2015, 2016, 2017, 2018, 2019, 2020, 2022 | 9 | 2 |
-| New Hampshire | year-to-year change > 50%: 2021 (x0.46) | 9 | 9 |
-| New Jersey | no CDC opioid death value for 2015, 2016, 2017 | 9 | 6 |
-| New Mexico | year-to-year change > 50%: 2017 (x1.63), 2018 (x1.82), 2020 (x0.48) | 9 | 9 |
-| North Carolina | year-to-year change > 50%: 2016 (x1.59); no CDC opioid death value for 2023 | 9 | 8 |
-| North Dakota | year-to-year change > 50%: 2016 (x2.05); no CDC opioid death value for 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022 | 9 | 1 |
-| Oregon | not reported in: 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022 | 1 | 9 |
-| Pennsylvania | no CDC opioid death value for 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023 | 9 | 0 |
-| South Carolina | not reported in: 2015, 2023 | 7 | 9 |
-| South Dakota | no CDC opioid death value for 2015 | 9 | 8 |
-| Texas | no CDC opioid death value for 2015, 2016, 2017, 2018 | 9 | 5 |
-| Washington | year-to-year change > 50%: 2016 (x2.72), 2018 (x0.32) | 9 | 9 |
-| West Virginia | not reported in: 2022, 2023 | 7 | 9 |
-| Wisconsin | no CDC opioid death value for 2015 | 9 | 8 |
-| Wyoming | no CDC opioid death value for 2015, 2016 | 9 | 7 |
+| panel | measure | years | slope_log_per_year | pct_change_per_year | ci_low_pct | ci_high_pct | p_boot | states | B | method |
+|---|---|---|---|---|---|---|---|---|---|---|
+| P35 | primary_opioid | 2015-2023 | -0.072 | -6.943 | -9.056 | -4.289 | 0.000 | 35 | 9999 | log-linear trend of panel admission rate; state-cluster bootstrap |
+| P35 | primary_opioid | 2015-2023 excluding 2020 | -0.071 | -6.854 | -8.975 | -4.209 | 0.000 | 35 | 9999 | log-linear trend of panel admission rate; state-cluster bootstrap |
+| P35 | primary_heroin | 2015-2023 | -0.112 | -10.622 | -12.992 | -7.719 | 0.000 | 35 | 9999 | log-linear trend of panel admission rate; state-cluster bootstrap |
+| P35 | primary_heroin | 2015-2023 excluding 2020 | -0.113 | -10.730 | -13.163 | -7.816 | 0.000 | 35 | 9999 | log-linear trend of panel admission rate; state-cluster bootstrap |
+| P35 | primary_other_opiates | 2015-2023 | 0.018 | 1.770 | -3.296 | 6.858 | 0.513 | 35 | 9999 | log-linear trend of panel admission rate; state-cluster bootstrap |
+| P35 | primary_other_opiates | 2015-2023 excluding 2020 | 0.023 | 2.336 | -2.875 | 7.530 | 0.412 | 35 | 9999 | log-linear trend of panel admission rate; state-cluster bootstrap |
+| P35 | any_opioid | 2015-2023 | -0.063 | -6.147 | -8.000 | -3.767 | 0.000 | 35 | 9999 | log-linear trend of panel admission rate; state-cluster bootstrap |
+| P35 | any_opioid | 2015-2023 excluding 2020 | -0.062 | -6.058 | -7.912 | -3.672 | 0.000 | 35 | 9999 | log-linear trend of panel admission rate; state-cluster bootstrap |
 
 
-### State-year association (log admission rate on log opioid death rate)
+#### State-year association (log admission rate on log opioid death rate)
 
-| analysis | sample | admissions_measure | measure_label | elasticity | ci_low | ci_high | p_wild | se_cr1 | n_state_years | states | B | seed |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| a | main panel (complete states) | primary_opioid | primary substance heroin / non-Rx methadone / other opiates & synthetics | -0.0278 | -0.4958 | 0.4335 | 0.9009 | 0.2321 | 135 | 15 | 9999 | 20,261,107 |
-| a | main panel (complete states) | any_opioid | any opioid mention in primary, secondary or tertiary substance | -0.0588 | -0.5066 | 0.3984 | 0.7928 | 0.2207 | 135 | 15 | 9999 | 20,261,108 |
-| a | all reporting state-years | primary_opioid | primary substance heroin / non-Rx methadone / other opiates & synthetics | 0.3104 | -0.2302 | 0.8315 | 0.2524 | 0.2632 | 326 | 49 | 9999 | 20,261,117 |
-| a | all reporting state-years | any_opioid | any opioid mention in primary, secondary or tertiary substance | 0.2552 | -0.2560 | 0.7561 | 0.3213 | 0.2499 | 326 | 49 | 9999 | 20,261,118 |
-
-
-### National series
-
-| sample | year | states | primary_opioid | any_opioid | opioid_deaths | population | primary_opioid_per_100k | primary_opioid_index_2015 | any_opioid_per_100k | any_opioid_index_2015 | opioid_deaths_per_100k | opioid_deaths_index_2015 |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| main panel (complete states) | 2015 | 15 | 248,606 | 300,231 | 12,036.00 | 87,049,562 | 285.59 | 100.00 | 344.90 | 100.00 | 13.83 | 100.00 |
-| main panel (complete states) | 2016 | 15 | 253,161 | 304,288 | 15,216.00 | 87,791,022 | 288.37 | 100.97 | 346.60 | 100.50 | 17.33 | 125.35 |
-| main panel (complete states) | 2017 | 15 | 247,434 | 300,645 | 16,430.00 | 88,509,306 | 279.56 | 97.89 | 339.68 | 98.49 | 18.56 | 134.26 |
-| main panel (complete states) | 2018 | 15 | 228,667 | 284,418 | 14,737.00 | 89,178,390 | 256.42 | 89.78 | 318.93 | 92.47 | 16.53 | 119.52 |
-| main panel (complete states) | 2019 | 15 | 213,377 | 270,344 | 15,356.00 | 89,800,275 | 237.61 | 83.20 | 301.05 | 87.29 | 17.10 | 123.68 |
-| main panel (complete states) | 2020 | 15 | 164,503 | 209,508 | 20,434.00 | 90,160,283 | 182.46 | 63.89 | 232.37 | 67.37 | 22.66 | 163.92 |
-| main panel (complete states) | 2021 | 15 | 150,544 | 193,548 | 23,543.00 | 90,234,767 | 166.84 | 58.42 | 214.49 | 62.19 | 26.09 | 188.70 |
-| main panel (complete states) | 2022 | 15 | 139,662 | 181,889 | 24,327.00 | 90,659,069 | 154.05 | 53.94 | 200.63 | 58.17 | 26.83 | 194.07 |
-| main panel (complete states) | 2023 | 15 | 127,445 | 169,376 | 23,596.00 | 91,408,216 | 139.42 | 48.82 | 185.30 | 53.73 | 25.81 | 186.70 |
-| all reporting state-years | 2015 | 22 | 369,851 | 434,634 | 17,813.00 | 130,039,596 | 284.41 | 100.00 | 334.23 | 100.00 | 13.70 | 100.00 |
-| all reporting state-years | 2016 | 27 | 394,832 | 469,734 | 24,488.00 | 145,828,855 | 270.75 | 95.20 | 322.11 | 96.37 | 16.79 | 122.59 |
-| all reporting state-years | 2017 | 28 | 440,319 | 521,318 | 27,775.00 | 152,848,936 | 288.07 | 101.29 | 341.07 | 102.05 | 18.17 | 132.66 |
-| all reporting state-years | 2018 | 35 | 542,175 | 646,356 | 33,712.00 | 194,002,133 | 279.47 | 98.26 | 333.17 | 99.68 | 17.38 | 126.86 |
-| all reporting state-years | 2019 | 40 | 517,340 | 626,553 | 43,145.00 | 292,280,543 | 177.00 | 62.23 | 214.37 | 64.14 | 14.76 | 107.76 |
-| all reporting state-years | 2020 | 41 | 372,386 | 457,809 | 56,125.00 | 283,345,389 | 131.42 | 46.21 | 161.57 | 48.34 | 19.81 | 144.60 |
-| all reporting state-years | 2021 | 44 | 379,918 | 468,992 | 73,189.00 | 314,525,615 | 120.79 | 42.47 | 149.11 | 44.61 | 23.27 | 169.87 |
-| all reporting state-years | 2022 | 44 | 357,922 | 443,793 | 74,646.00 | 322,333,095 | 111.04 | 39.04 | 137.68 | 41.19 | 23.16 | 169.06 |
-| all reporting state-years | 2023 | 45 | 336,844 | 424,280 | 69,802.00 | 315,893,299 | 106.63 | 37.49 | 134.31 | 40.19 | 22.10 | 161.31 |
+| panel | role | years | admissions_measure | weights | elasticity | ci_low | ci_high | p_wild | se_cr1 | n_state_years | states | B | seed |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| P_deaths | main | 2019-2023 | primary_opioid | webb | 0.2118 | -0.0168 | 0.4442 | 0.0518 | 0.1340 | 140 | 28 | 9999 | 20,261,107 |
+| P_deaths | main | 2019-2023 | primary_opioid | rademacher | 0.2118 | -0.0178 | 0.4394 | 0.0528 | 0.1340 | 140 | 28 | 9999 | 20,261,107 |
+| P_deaths | main | 2019-2023 | any_opioid | webb | 0.1564 | -0.0543 | 0.3589 | 0.1347 | 0.1204 | 140 | 28 | 9999 | 20,261,108 |
+| P_deaths | main | 2019-2023 excl. 2020 | primary_opioid | webb | 0.2257 | -0.0298 | 0.4837 | 0.0785 | 0.1530 | 112 | 28 | 9999 | 20,261,117 |
+| P_deaths | main | 2019-2023 excl. 2020 | any_opioid | webb | 0.1643 | -0.0687 | 0.4044 | 0.1824 | 0.1401 | 112 | 28 | 9999 | 20,261,118 |
+| P15 | sensitivity | 2015-2023 | primary_opioid | webb | -0.0278 | -0.4963 | 0.4457 | 0.9075 | 0.2321 | 135 | 15 | 9999 | 20,261,207 |
+| P15 | sensitivity | 2015-2023 | any_opioid | webb | -0.0588 | -0.5029 | 0.3918 | 0.7877 | 0.2207 | 135 | 15 | 9999 | 20,261,208 |
+| P15 | sensitivity | 2015-2023 excl. 2020 | primary_opioid | webb | 0.0030 | -0.4978 | 0.5032 | 0.9905 | 0.2475 | 120 | 15 | 9999 | 20,261,217 |
+| P15 | sensitivity | 2015-2023 excl. 2020 | any_opioid | webb | -0.0384 | -0.5243 | 0.4536 | 0.8690 | 0.2387 | 120 | 15 | 9999 | 20,261,218 |
 
 
-### State changes, 2019 -> 2023 (main panel)
+#### Admission series, P35
 
-| state_fips | state_name | primary_opioid_per_100k_2019 | primary_opioid_per_100k_2023 | primary_opioid_log_change | opioid_deaths_per_100k_2019 | opioid_deaths_per_100k_2023 | opioid_deaths_log_change |
+| panel | measure | year | states | admissions | population | per_100k | index_2015 |
 |---|---|---|---|---|---|---|---|
-| 9 | Connecticut | 622.385 | 390.388 | -0.466 | 29.860 | 31.597 | 0.057 |
-| 11 | District of Columbia | 225.051 | 49.014 | -1.524 | 38.988 | 70.397 | 0.591 |
-| 13 | Georgia | 43.201 | 27.293 | -0.459 | 7.569 | 15.958 | 0.746 |
-| 19 | Iowa | 69.119 | 45.599 | -0.416 | 4.778 | 7.149 | 0.403 |
-| 23 | Maine | 306.540 | 251.402 | -0.198 | 22.635 | 35.284 | 0.444 |
-| 25 | Massachusetts | 604.596 | 390.528 | -0.437 | 27.210 | 28.577 | 0.049 |
-| 32 | Nevada | 25.649 | 35.693 | 0.330 | 12.461 | 26.827 | 0.767 |
-| 36 | New York | 430.281 | 245.444 | -0.561 | 14.024 | 26.605 | 0.640 |
-| 39 | Ohio | 89.771 | 32.015 | -1.031 | 28.407 | 30.849 | 0.082 |
-| 40 | Oklahoma | 60.293 | 36.197 | -0.510 | 5.728 | 18.298 | 1.161 |
-| 44 | Rhode Island | 508.232 | 333.891 | -0.420 | 22.070 | 29.889 | 0.303 |
-| 47 | Tennessee | 102.151 | 67.969 | -0.407 | 21.962 | 40.154 | 0.603 |
-| 49 | Utah | 138.972 | 80.770 | -0.543 | 11.841 | 13.743 | 0.149 |
-| 50 | Vermont | 541.963 | 275.753 | -0.676 | 15.330 | 32.799 | 0.761 |
-| 51 | Virginia | 74.104 | 41.611 | -0.577 | 13.837 | 22.223 | 0.474 |
+| P35 | primary_opioid | 2015 | 35 | 437,247 | 246,339,802 | 177.50 | 100.00 |
+| P35 | primary_opioid | 2016 | 35 | 453,061 | 248,559,870 | 182.27 | 102.69 |
+| P35 | primary_opioid | 2017 | 35 | 453,109 | 250,602,053 | 180.81 | 101.87 |
+| P35 | primary_opioid | 2018 | 35 | 448,799 | 252,429,912 | 177.79 | 100.17 |
+| P35 | primary_opioid | 2019 | 35 | 424,453 | 254,062,516 | 167.07 | 94.12 |
+| P35 | primary_opioid | 2020 | 35 | 337,298 | 255,310,946 | 132.11 | 74.43 |
+| P35 | primary_opioid | 2021 | 35 | 320,387 | 255,544,531 | 125.37 | 70.63 |
+| P35 | primary_opioid | 2022 | 35 | 301,979 | 256,807,740 | 117.59 | 66.25 |
+| P35 | primary_opioid | 2023 | 35 | 280,554 | 258,845,218 | 108.39 | 61.06 |
+| P35 | primary_heroin | 2015 | 35 | 335,378 | 246,339,802 | 136.14 | 100.00 |
+| P35 | primary_heroin | 2016 | 35 | 355,726 | 248,559,870 | 143.11 | 105.12 |
+| P35 | primary_heroin | 2017 | 35 | 358,610 | 250,602,053 | 143.10 | 105.11 |
+| P35 | primary_heroin | 2018 | 35 | 354,452 | 252,429,912 | 140.42 | 103.14 |
+| P35 | primary_heroin | 2019 | 35 | 335,691 | 254,062,516 | 132.13 | 97.05 |
+| P35 | primary_heroin | 2020 | 35 | 262,429 | 255,310,946 | 102.79 | 75.50 |
+| P35 | primary_heroin | 2021 | 35 | 231,378 | 255,544,531 | 90.54 | 66.51 |
+| P35 | primary_heroin | 2022 | 35 | 187,770 | 256,807,740 | 73.12 | 53.71 |
+| P35 | primary_heroin | 2023 | 35 | 147,056 | 258,845,218 | 56.81 | 41.73 |
+| P35 | primary_other_opiates | 2015 | 35 | 98,591 | 246,339,802 | 40.02 | 100.00 |
+| P35 | primary_other_opiates | 2016 | 35 | 94,663 | 248,559,870 | 38.08 | 95.16 |
+| P35 | primary_other_opiates | 2017 | 35 | 91,884 | 250,602,053 | 36.67 | 91.61 |
+| P35 | primary_other_opiates | 2018 | 35 | 91,811 | 252,429,912 | 36.37 | 90.88 |
+| P35 | primary_other_opiates | 2019 | 35 | 86,507 | 254,062,516 | 34.05 | 85.08 |
+| P35 | primary_other_opiates | 2020 | 35 | 73,308 | 255,310,946 | 28.71 | 71.74 |
+| P35 | primary_other_opiates | 2021 | 35 | 87,738 | 255,544,531 | 34.33 | 85.79 |
+| P35 | primary_other_opiates | 2022 | 35 | 113,134 | 256,807,740 | 44.05 | 110.07 |
+| P35 | primary_other_opiates | 2023 | 35 | 132,487 | 258,845,218 | 51.18 | 127.89 |
+| P35 | any_opioid | 2015 | 35 | 523,975 | 246,339,802 | 212.70 | 100.00 |
+| P35 | any_opioid | 2016 | 35 | 543,528 | 248,559,870 | 218.67 | 102.81 |
+| P35 | any_opioid | 2017 | 35 | 549,405 | 250,602,053 | 219.23 | 103.07 |
+| P35 | any_opioid | 2018 | 35 | 550,029 | 252,429,912 | 217.89 | 102.44 |
+| P35 | any_opioid | 2019 | 35 | 528,734 | 254,062,516 | 208.11 | 97.84 |
+| P35 | any_opioid | 2020 | 35 | 420,761 | 255,310,946 | 164.80 | 77.48 |
+| P35 | any_opioid | 2021 | 35 | 402,119 | 255,544,531 | 157.36 | 73.98 |
+| P35 | any_opioid | 2022 | 35 | 380,931 | 256,807,740 | 148.33 | 69.74 |
+| P35 | any_opioid | 2023 | 35 | 359,987 | 258,845,218 | 139.07 | 65.38 |
 
 
-### All states considered
+#### Admissions vs deaths series (P_deaths 2019-2023; P15 2015-2023 sensitivity)
 
-| state_fips | state_name | is_complete | exclusion_reason | years_with_deaths | years_reported | deaths_all_years | in_main_panel | main_panel_exclusion_reason |
+| panel | measure | year | states | per_100k | index_first_year | first_year |
+|---|---|---|---|---|---|---|
+| P_deaths | primary_opioid | 2019 | 28 | 173.44 | 100.00 | 2019 |
+| P_deaths | any_opioid | 2019 | 28 | 215.28 | 100.00 | 2019 |
+| P_deaths | opioid_deaths | 2019 | 28 | 13.41 | 100.00 | 2019 |
+| P_deaths | primary_opioid | 2020 | 28 | 137.16 | 79.08 | 2019 |
+| P_deaths | any_opioid | 2020 | 28 | 170.40 | 79.15 | 2019 |
+| P_deaths | opioid_deaths | 2020 | 28 | 18.37 | 136.99 | 2019 |
+| P_deaths | primary_opioid | 2021 | 28 | 130.60 | 75.30 | 2019 |
+| P_deaths | any_opioid | 2021 | 28 | 162.83 | 75.64 | 2019 |
+| P_deaths | opioid_deaths | 2021 | 28 | 21.76 | 162.30 | 2019 |
+| P_deaths | primary_opioid | 2022 | 28 | 121.92 | 70.29 | 2019 |
+| P_deaths | any_opioid | 2022 | 28 | 152.74 | 70.95 | 2019 |
+| P_deaths | opioid_deaths | 2022 | 28 | 22.19 | 165.52 | 2019 |
+| P_deaths | primary_opioid | 2023 | 28 | 111.14 | 64.08 | 2019 |
+| P_deaths | any_opioid | 2023 | 28 | 141.58 | 65.76 | 2019 |
+| P_deaths | opioid_deaths | 2023 | 28 | 21.67 | 161.61 | 2019 |
+| P15 | primary_opioid | 2015 | 15 | 285.59 | 100.00 | 2015 |
+| P15 | any_opioid | 2015 | 15 | 344.90 | 100.00 | 2015 |
+| P15 | opioid_deaths | 2015 | 15 | 13.83 | 100.00 | 2015 |
+| P15 | primary_opioid | 2016 | 15 | 288.37 | 100.97 | 2015 |
+| P15 | any_opioid | 2016 | 15 | 346.60 | 100.50 | 2015 |
+| P15 | opioid_deaths | 2016 | 15 | 17.33 | 125.35 | 2015 |
+| P15 | primary_opioid | 2017 | 15 | 279.56 | 97.89 | 2015 |
+| P15 | any_opioid | 2017 | 15 | 339.68 | 98.49 | 2015 |
+| P15 | opioid_deaths | 2017 | 15 | 18.56 | 134.26 | 2015 |
+| P15 | primary_opioid | 2018 | 15 | 256.42 | 89.78 | 2015 |
+| P15 | any_opioid | 2018 | 15 | 318.93 | 92.47 | 2015 |
+| P15 | opioid_deaths | 2018 | 15 | 16.53 | 119.52 | 2015 |
+| P15 | primary_opioid | 2019 | 15 | 237.61 | 83.20 | 2015 |
+| P15 | any_opioid | 2019 | 15 | 301.05 | 87.29 | 2015 |
+| P15 | opioid_deaths | 2019 | 15 | 17.10 | 123.68 | 2015 |
+| P15 | primary_opioid | 2020 | 15 | 182.46 | 63.89 | 2015 |
+| P15 | any_opioid | 2020 | 15 | 232.37 | 67.37 | 2015 |
+| P15 | opioid_deaths | 2020 | 15 | 22.66 | 163.92 | 2015 |
+| P15 | primary_opioid | 2021 | 15 | 166.84 | 58.42 | 2015 |
+| P15 | any_opioid | 2021 | 15 | 214.49 | 62.19 | 2015 |
+| P15 | opioid_deaths | 2021 | 15 | 26.09 | 188.70 | 2015 |
+| P15 | primary_opioid | 2022 | 15 | 154.05 | 53.94 | 2015 |
+| P15 | any_opioid | 2022 | 15 | 200.63 | 58.17 | 2015 |
+| P15 | opioid_deaths | 2022 | 15 | 26.83 | 194.07 | 2015 |
+| P15 | primary_opioid | 2023 | 15 | 139.42 | 48.82 | 2015 |
+| P15 | any_opioid | 2023 | 15 | 185.30 | 53.73 | 2015 |
+| P15 | opioid_deaths | 2023 | 15 | 25.81 | 186.70 | 2015 |
+
+
+### (b) Heroin vs other opiates/synthetics among primary-opioid admissions (P35)
+
+![teds/b_shares.png](../outputs/teds/b_shares.png)
+
+Code 7 ('other opiates and synthetics') combines fentanyl, prescription opioids and buprenorphine; the public file has no fentanyl-specific code.
+
+| component | statistic | estimate | ci_low | ci_high | p_boot | states | B | method |
 |---|---|---|---|---|---|---|---|---|
-| 1 | Alabama | True |  | 2 | 9 | False | False | no CDC opioid death value for 2015, 2016, 2017, 2018, 2019, 2020, 2021 |
-| 2 | Alaska | True |  | 8 | 9 | False | False | no CDC opioid death value for 2015 |
-| 4 | Arizona | False | year-to-year change > 50%: 2017 (x1.95), 2018 (x2.49) | 7 | 9 | False | False | year-to-year change > 50%: 2017 (x1.95), 2018 (x2.49); no CDC opioid death value for 2015, 2016 |
-| 5 | Arkansas | True |  | 2 | 9 | False | False | no CDC opioid death value for 2015, 2016, 2017, 2018, 2019, 2020, 2021 |
-| 6 | California | True |  | 5 | 9 | False | False | no CDC opioid death value for 2015, 2016, 2017, 2018 |
-| 8 | Colorado | True |  | 6 | 9 | False | False | no CDC opioid death value for 2015, 2016, 2017 |
-| 9 | Connecticut | True |  | 9 | 9 | True | True |  |
-| 10 | Delaware | False | not reported in: 2022, 2023 | 6 | 7 | False | False | not reported in: 2022, 2023; no CDC opioid death value for 2015, 2016, 2017 |
-| 11 | District of Columbia | True |  | 9 | 9 | True | True |  |
-| 12 | Florida | False | year-to-year change > 50%: 2017 (x1.64), 2018 (x2.0) | 4 | 9 | False | False | year-to-year change > 50%: 2017 (x1.64), 2018 (x2.0); no CDC opioid death value for 2015, 2016, 2017, 2018, 2020 |
-| 13 | Georgia | True |  | 9 | 9 | True | True |  |
-| 15 | Hawaii | True |  | 7 | 9 | False | False | no CDC opioid death value for 2015, 2017 |
-| 16 | Idaho | False | not reported in: 2020, 2021 | 3 | 7 | False | False | not reported in: 2020, 2021; no CDC opioid death value for 2015, 2016, 2017, 2018, 2019, 2020 |
-| 17 | Illinois | False | year-to-year change > 50%: 2017 (x1.59), 2021 (x0.43), 2023 (x2.77) | 9 | 9 | True | False | year-to-year change > 50%: 2017 (x1.59), 2021 (x0.43), 2023 (x2.77) |
-| 18 | Indiana | True |  | 5 | 9 | False | False | no CDC opioid death value for 2015, 2016, 2017, 2018 |
-| 19 | Iowa | True |  | 9 | 9 | True | True |  |
-| 20 | Kansas | False | year-to-year change > 50%: 2016 (x2.09) | 5 | 9 | False | False | year-to-year change > 50%: 2016 (x2.09); no CDC opioid death value for 2015, 2016, 2017, 2018 |
-| 21 | Kentucky | True |  | 6 | 9 | False | False | no CDC opioid death value for 2015, 2016, 2017 |
-| 22 | Louisiana | True |  | 0 | 9 | False | False | no CDC opioid death value for 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023 |
-| 23 | Maine | True |  | 9 | 9 | True | True |  |
-| 24 | Maryland | False | year-to-year change > 50%: 2017 (x1.58) | 9 | 9 | True | False | year-to-year change > 50%: 2017 (x1.58) |
-| 25 | Massachusetts | True |  | 9 | 9 | True | True |  |
-| 26 | Michigan | True |  | 5 | 9 | False | False | no CDC opioid death value for 2015, 2016, 2017, 2019 |
-| 27 | Minnesota | True |  | 3 | 9 | False | False | no CDC opioid death value for 2015, 2016, 2017, 2018, 2019, 2020 |
-| 28 | Mississippi | True |  | 5 | 9 | False | False | no CDC opioid death value for 2015, 2016, 2017, 2018 |
-| 29 | Missouri | True |  | 6 | 9 | False | False | no CDC opioid death value for 2015, 2016, 2017 |
-| 30 | Montana | False | year-to-year change > 50%: 2017 (x0.49) | 4 | 9 | False | False | year-to-year change > 50%: 2017 (x0.49); no CDC opioid death value for 2015, 2016, 2017, 2018, 2019 |
-| 31 | Nebraska | True |  | 2 | 9 | False | False | no CDC opioid death value for 2015, 2016, 2017, 2018, 2019, 2020, 2022 |
-| 32 | Nevada | True |  | 9 | 9 | True | True |  |
-| 33 | New Hampshire | False | year-to-year change > 50%: 2021 (x0.46) | 9 | 9 | True | False | year-to-year change > 50%: 2021 (x0.46) |
-| 34 | New Jersey | True |  | 6 | 9 | False | False | no CDC opioid death value for 2015, 2016, 2017 |
-| 35 | New Mexico | False | year-to-year change > 50%: 2017 (x1.63), 2018 (x1.82), 2020 (x0.48) | 9 | 9 | True | False | year-to-year change > 50%: 2017 (x1.63), 2018 (x1.82), 2020 (x0.48) |
-| 36 | New York | True |  | 9 | 9 | True | True |  |
-| 37 | North Carolina | False | year-to-year change > 50%: 2016 (x1.59) | 8 | 9 | False | False | year-to-year change > 50%: 2016 (x1.59); no CDC opioid death value for 2023 |
-| 38 | North Dakota | False | year-to-year change > 50%: 2016 (x2.05) | 1 | 9 | False | False | year-to-year change > 50%: 2016 (x2.05); no CDC opioid death value for 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022 |
-| 39 | Ohio | True |  | 9 | 9 | True | True |  |
-| 40 | Oklahoma | True |  | 9 | 9 | True | True |  |
-| 41 | Oregon | False | not reported in: 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022 | 9 | 1 | True | False | not reported in: 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022 |
-| 42 | Pennsylvania | True |  | 0 | 9 | False | False | no CDC opioid death value for 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023 |
-| 44 | Rhode Island | True |  | 9 | 9 | True | True |  |
-| 45 | South Carolina | False | not reported in: 2015, 2023 | 9 | 7 | True | False | not reported in: 2015, 2023 |
-| 46 | South Dakota | True |  | 8 | 9 | False | False | no CDC opioid death value for 2015 |
-| 47 | Tennessee | True |  | 9 | 9 | True | True |  |
-| 48 | Texas | True |  | 5 | 9 | False | False | no CDC opioid death value for 2015, 2016, 2017, 2018 |
-| 49 | Utah | True |  | 9 | 9 | True | True |  |
-| 50 | Vermont | True |  | 9 | 9 | True | True |  |
-| 51 | Virginia | True |  | 9 | 9 | True | True |  |
-| 53 | Washington | False | year-to-year change > 50%: 2016 (x2.72), 2018 (x0.32) | 9 | 9 | True | False | year-to-year change > 50%: 2016 (x2.72), 2018 (x0.32) |
-| 54 | West Virginia | False | not reported in: 2022, 2023 | 9 | 7 | True | False | not reported in: 2022, 2023 |
-| 55 | Wisconsin | True |  | 8 | 9 | False | False | no CDC opioid death value for 2015 |
-| 56 | Wyoming | True |  | 7 | 9 | False | False | no CDC opioid death value for 2015, 2016 |
+| primary_heroin | share change 2015->2023 (percentage points) | -24.2859 | -36.2812 | -12.9074 | 0.0000 | 35 | 9999 | share of primary-opioid admissions, P35 panel totals; state-cluster bootstrap |
+| primary_heroin | share change 2019->2023 (percentage points) | -26.6716 | -38.0898 | -16.3269 | 0.0000 | 35 | 9999 | share of primary-opioid admissions, P35 panel totals; state-cluster bootstrap |
+| primary_heroin | log-odds trend per year, 2015-2023 | -0.1267 | -0.1864 | -0.0646 | 0.0000 | 35 | 9999 | share of primary-opioid admissions, P35 panel totals; state-cluster bootstrap |
+| primary_heroin | log-odds trend per year, 2015-2023 excluding 2020 | -0.1334 | -0.1953 | -0.0693 | 0.0000 | 35 | 9999 | share of primary-opioid admissions, P35 panel totals; state-cluster bootstrap |
+| primary_methadone_nonrx | share change 2015->2023 (percentage points) | -0.3893 | -0.8185 | -0.1286 | 0.0000 | 35 | 9999 | share of primary-opioid admissions, P35 panel totals; state-cluster bootstrap |
+| primary_methadone_nonrx | share change 2019->2023 (percentage points) | -0.1709 | -0.3182 | -0.0909 | 0.0000 | 35 | 9999 | share of primary-opioid admissions, P35 panel totals; state-cluster bootstrap |
+| primary_methadone_nonrx | log-odds trend per year, 2015-2023 | -0.0904 | -0.1494 | -0.0371 | 0.0000 | 35 | 9999 | share of primary-opioid admissions, P35 panel totals; state-cluster bootstrap |
+| primary_methadone_nonrx | log-odds trend per year, 2015-2023 excluding 2020 | -0.0908 | -0.1491 | -0.0383 | 0.0000 | 35 | 9999 | share of primary-opioid admissions, P35 panel totals; state-cluster bootstrap |
+| primary_other_opiates | share change 2015->2023 (percentage points) | 24.6752 | 13.3294 | 36.7400 | 0.0000 | 35 | 9999 | share of primary-opioid admissions, P35 panel totals; state-cluster bootstrap |
+| primary_other_opiates | share change 2019->2023 (percentage points) | 26.8425 | 16.4531 | 38.2874 | 0.0000 | 35 | 9999 | share of primary-opioid admissions, P35 panel totals; state-cluster bootstrap |
+| primary_other_opiates | log-odds trend per year, 2015-2023 | 0.1302 | 0.0683 | 0.1904 | 0.0000 | 35 | 9999 | share of primary-opioid admissions, P35 panel totals; state-cluster bootstrap |
+| primary_other_opiates | log-odds trend per year, 2015-2023 excluding 2020 | 0.1369 | 0.0730 | 0.1992 | 0.0000 | 35 | 9999 | share of primary-opioid admissions, P35 panel totals; state-cluster bootstrap |
+
+
+#### Shares by year
+
+| panel | year | component | admissions | primary_opioid | share |
+|---|---|---|---|---|---|
+| P35 | 2015 | primary_heroin | 335,378 | 437,247 | 0.7670 |
+| P35 | 2015 | primary_methadone_nonrx | 3278 | 437,247 | 0.0075 |
+| P35 | 2015 | primary_other_opiates | 98,591 | 437,247 | 0.2255 |
+| P35 | 2016 | primary_heroin | 355,726 | 453,061 | 0.7852 |
+| P35 | 2016 | primary_methadone_nonrx | 2672 | 453,061 | 0.0059 |
+| P35 | 2016 | primary_other_opiates | 94,663 | 453,061 | 0.2089 |
+| P35 | 2017 | primary_heroin | 358,610 | 453,109 | 0.7914 |
+| P35 | 2017 | primary_methadone_nonrx | 2615 | 453,109 | 0.0058 |
+| P35 | 2017 | primary_other_opiates | 91,884 | 453,109 | 0.2028 |
+| P35 | 2018 | primary_heroin | 354,452 | 448,799 | 0.7898 |
+| P35 | 2018 | primary_methadone_nonrx | 2536 | 448,799 | 0.0057 |
+| P35 | 2018 | primary_other_opiates | 91,811 | 448,799 | 0.2046 |
+| P35 | 2019 | primary_heroin | 335,691 | 424,453 | 0.7909 |
+| P35 | 2019 | primary_methadone_nonrx | 2255 | 424,453 | 0.0053 |
+| P35 | 2019 | primary_other_opiates | 86,507 | 424,453 | 0.2038 |
+| P35 | 2020 | primary_heroin | 262,429 | 337,298 | 0.7780 |
+| P35 | 2020 | primary_methadone_nonrx | 1561 | 337,298 | 0.0046 |
+| P35 | 2020 | primary_other_opiates | 73,308 | 337,298 | 0.2173 |
+| P35 | 2021 | primary_heroin | 231,378 | 320,387 | 0.7222 |
+| P35 | 2021 | primary_methadone_nonrx | 1271 | 320,387 | 0.0040 |
+| P35 | 2021 | primary_other_opiates | 87,738 | 320,387 | 0.2739 |
+| P35 | 2022 | primary_heroin | 187,770 | 301,979 | 0.6218 |
+| P35 | 2022 | primary_methadone_nonrx | 1075 | 301,979 | 0.0036 |
+| P35 | 2022 | primary_other_opiates | 113,134 | 301,979 | 0.3746 |
+| P35 | 2023 | primary_heroin | 147,056 | 280,554 | 0.5242 |
+| P35 | 2023 | primary_methadone_nonrx | 1011 | 280,554 | 0.0036 |
+| P35 | 2023 | primary_other_opiates | 132,487 | 280,554 | 0.4722 |
+
+
+### (c) First-time primary-opioid admissions by age (P35)
+
+![teds/c_first_time.png](../outputs/teds/c_first_time.png)
+
+First-time admissions (no prior treatment episode) are not new cases of addiction: entry into treatment also depends on access, capacity, referral and the years between onset and first treatment. Bounds treat missing NOPRIOR as not first-time (lower) or first-time (upper).
+
+| age_band | bound | statistic | estimate | pct_change | ci_low_pct | ci_high_pct | p_boot | states | B | method |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 12-17 | lower (missing = not first-time) | log change 2015->2023 | -0.061 | -5.945 | -46.698 | 42.586 | 0.741 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 12-17 | lower (missing = not first-time) | log change 2019->2023 | 0.988 | 168.625 | 75.274 | 253.278 | 0.000 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 12-17 | lower (missing = not first-time) | log-linear trend 2015-2023, per year | -0.003 | -0.347 | -8.570 | 5.696 | 0.843 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 12-17 | lower (missing = not first-time) | log-linear trend 2015-2023 excluding 2020, per year | 0.005 | 0.550 | -7.599 | 6.505 | 0.959 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 12-17 | upper (missing = first-time) | log change 2015->2023 | -0.123 | -11.601 | -49.776 | 39.058 | 0.589 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 12-17 | upper (missing = first-time) | log change 2019->2023 | 0.973 | 164.607 | 73.660 | 247.817 | 0.000 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 12-17 | upper (missing = first-time) | log-linear trend 2015-2023, per year | -0.013 | -1.304 | -9.437 | 5.098 | 0.669 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 12-17 | upper (missing = first-time) | log-linear trend 2015-2023 excluding 2020, per year | -0.004 | -0.394 | -8.504 | 5.966 | 0.849 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 18-24 | lower (missing = not first-time) | log change 2015->2023 | -1.177 | -69.184 | -76.740 | -60.690 | 0.000 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 18-24 | lower (missing = not first-time) | log change 2019->2023 | -0.606 | -45.447 | -56.918 | -26.036 | 0.000 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 18-24 | lower (missing = not first-time) | log-linear trend 2015-2023, per year | -0.148 | -13.797 | -17.248 | -10.910 | 0.000 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 18-24 | lower (missing = not first-time) | log-linear trend 2015-2023 excluding 2020, per year | -0.147 | -13.680 | -16.942 | -10.810 | 0.000 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 18-24 | upper (missing = first-time) | log change 2015->2023 | -1.294 | -72.572 | -79.258 | -60.965 | 0.000 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 18-24 | upper (missing = first-time) | log change 2019->2023 | -0.632 | -46.854 | -56.128 | -29.121 | 0.000 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 18-24 | upper (missing = first-time) | log-linear trend 2015-2023, per year | -0.167 | -15.377 | -18.716 | -11.196 | 0.000 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 18-24 | upper (missing = first-time) | log-linear trend 2015-2023 excluding 2020, per year | -0.165 | -15.209 | -18.454 | -11.108 | 0.000 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 25-34 | lower (missing = not first-time) | log change 2015->2023 | -0.717 | -51.160 | -61.565 | -40.698 | 0.000 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 25-34 | lower (missing = not first-time) | log change 2019->2023 | -0.830 | -56.400 | -67.810 | -35.602 | 0.000 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 25-34 | lower (missing = not first-time) | log-linear trend 2015-2023, per year | -0.089 | -8.525 | -11.844 | -6.047 | 0.000 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 25-34 | lower (missing = not first-time) | log-linear trend 2015-2023 excluding 2020, per year | -0.092 | -8.760 | -11.824 | -6.422 | 0.000 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 25-34 | upper (missing = first-time) | log change 2015->2023 | -0.790 | -54.620 | -62.426 | -42.080 | 0.000 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 25-34 | upper (missing = first-time) | log change 2019->2023 | -0.813 | -55.651 | -65.763 | -40.247 | 0.000 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 25-34 | upper (missing = first-time) | log-linear trend 2015-2023, per year | -0.102 | -9.704 | -12.300 | -6.378 | 0.000 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 25-34 | upper (missing = first-time) | log-linear trend 2015-2023 excluding 2020, per year | -0.104 | -9.860 | -12.246 | -6.725 | 0.000 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 35-44 | lower (missing = not first-time) | log change 2015->2023 | -0.074 | -7.143 | -21.960 | 9.726 | 0.395 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 35-44 | lower (missing = not first-time) | log change 2019->2023 | -0.497 | -39.186 | -56.120 | -11.260 | 0.000 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 35-44 | lower (missing = not first-time) | log-linear trend 2015-2023, per year | -0.013 | -1.294 | -4.041 | 0.962 | 0.283 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 35-44 | lower (missing = not first-time) | log-linear trend 2015-2023 excluding 2020, per year | -0.015 | -1.450 | -4.055 | 0.803 | 0.216 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 35-44 | upper (missing = first-time) | log change 2015->2023 | -0.175 | -16.036 | -30.591 | 10.944 | 0.297 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 35-44 | upper (missing = first-time) | log change 2019->2023 | -0.475 | -37.836 | -52.249 | -16.313 | 0.000 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 35-44 | upper (missing = first-time) | log-linear trend 2015-2023, per year | -0.029 | -2.851 | -5.589 | 1.009 | 0.195 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 35-44 | upper (missing = first-time) | log-linear trend 2015-2023 excluding 2020, per year | -0.030 | -2.922 | -5.474 | 0.750 | 0.156 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 45-54 | lower (missing = not first-time) | log change 2015->2023 | -0.166 | -15.307 | -27.266 | 6.668 | 0.133 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 45-54 | lower (missing = not first-time) | log change 2019->2023 | -0.540 | -41.734 | -60.929 | -9.868 | 0.001 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 45-54 | lower (missing = not first-time) | log-linear trend 2015-2023, per year | -0.024 | -2.344 | -4.567 | 0.284 | 0.078 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 45-54 | lower (missing = not first-time) | log-linear trend 2015-2023 excluding 2020, per year | -0.025 | -2.462 | -4.776 | 0.449 | 0.093 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 45-54 | upper (missing = first-time) | log change 2015->2023 | -0.366 | -30.640 | -44.699 | 4.684 | 0.102 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 45-54 | upper (missing = first-time) | log change 2019->2023 | -0.582 | -44.119 | -57.905 | -13.840 | 0.000 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 45-54 | upper (missing = first-time) | log-linear trend 2015-2023, per year | -0.054 | -5.258 | -8.473 | 0.181 | 0.066 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 45-54 | upper (missing = first-time) | log-linear trend 2015-2023 excluding 2020, per year | -0.054 | -5.290 | -8.399 | 0.249 | 0.069 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 55+ | lower (missing = not first-time) | log change 2015->2023 | 0.009 | 0.923 | -24.213 | 42.111 | 0.951 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 55+ | lower (missing = not first-time) | log change 2019->2023 | -0.706 | -50.643 | -71.653 | 3.873 | 0.090 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 55+ | lower (missing = not first-time) | log-linear trend 2015-2023, per year | -0.003 | -0.251 | -3.879 | 4.431 | 0.873 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 55+ | lower (missing = not first-time) | log-linear trend 2015-2023 excluding 2020, per year | -0.005 | -0.493 | -4.359 | 4.760 | 0.826 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 55+ | upper (missing = first-time) | log change 2015->2023 | -0.056 | -5.445 | -21.696 | 35.735 | 0.662 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 55+ | upper (missing = first-time) | log change 2019->2023 | -0.635 | -47.030 | -68.421 | -3.328 | 0.032 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 55+ | upper (missing = first-time) | log-linear trend 2015-2023, per year | -0.014 | -1.371 | -3.699 | 3.537 | 0.452 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+| 55+ | upper (missing = first-time) | log-linear trend 2015-2023 excluding 2020, per year | -0.015 | -1.473 | -3.956 | 3.769 | 0.449 | 35 | 9999 | first-time (NOPRIOR = 0) primary-opioid admissions per 100k age-band population, P35 panel totals; bounds for missing NOPRIOR; state-cluster bootstrap |
+
+
+#### Rates by year
+
+| age_band | year | first_time | noprior_missing | primary_opioid | population | first_time_per_100k_lower | first_time_per_100k_upper | share_noprior_missing |
+|---|---|---|---|---|---|---|---|---|
+| 12-17 | 2015 | 699 | 101 | 1827 | 20,128,026 | 3.47 | 3.97 | 0.06 |
+| 12-17 | 2016 | 527 | 59 | 1405 | 20,293,728 | 2.60 | 2.89 | 0.04 |
+| 12-17 | 2017 | 422 | 47 | 1013 | 20,144,619 | 2.09 | 2.33 | 0.05 |
+| 12-17 | 2018 | 339 | 20 | 728 | 20,244,208 | 1.67 | 1.77 | 0.03 |
+| 12-17 | 2019 | 250 | 23 | 514 | 20,560,339 | 1.22 | 1.33 | 0.04 |
+| 12-17 | 2020 | 276 | 16 | 479 | 20,553,502 | 1.34 | 1.42 | 0.03 |
+| 12-17 | 2021 | 424 | 12 | 693 | 20,545,403 | 2.06 | 2.12 | 0.02 |
+| 12-17 | 2022 | 591 | 29 | 1009 | 20,678,517 | 2.86 | 3.00 | 0.03 |
+| 12-17 | 2023 | 674 | 51 | 1211 | 20,634,974 | 3.27 | 3.51 | 0.04 |
+| 18-24 | 2015 | 19,483 | 8092 | 77,448 | 24,841,358 | 78.43 | 111.00 | 0.10 |
+| 18-24 | 2016 | 16,459 | 7027 | 69,510 | 24,743,511 | 66.52 | 94.92 | 0.10 |
+| 18-24 | 2017 | 13,207 | 5605 | 56,923 | 24,680,882 | 53.51 | 76.22 | 0.10 |
+| 18-24 | 2018 | 13,306 | 4076 | 46,062 | 24,709,438 | 53.85 | 70.35 | 0.09 |
+| 18-24 | 2019 | 10,956 | 3211 | 36,037 | 24,729,354 | 44.30 | 57.29 | 0.09 |
+| 18-24 | 2020 | 8448 | 2152 | 26,429 | 24,670,901 | 34.24 | 42.97 | 0.08 |
+| 18-24 | 2021 | 7587 | 1994 | 23,912 | 24,698,182 | 30.72 | 38.79 | 0.08 |
+| 18-24 | 2022 | 6895 | 1822 | 22,184 | 24,962,910 | 27.62 | 34.92 | 0.08 |
+| 18-24 | 2023 | 6091 | 1582 | 19,612 | 25,201,648 | 24.17 | 30.45 | 0.08 |
+| 25-34 | 2015 | 40,305 | 18,749 | 191,828 | 33,564,802 | 120.08 | 175.94 | 0.10 |
+| 25-34 | 2016 | 40,088 | 20,671 | 201,571 | 34,067,413 | 117.67 | 178.35 | 0.10 |
+| 25-34 | 2017 | 39,637 | 20,029 | 201,348 | 34,465,837 | 115.00 | 173.12 | 0.10 |
+| 25-34 | 2018 | 49,985 | 17,186 | 197,221 | 34,735,609 | 143.90 | 193.38 | 0.09 |
+| 25-34 | 2019 | 47,052 | 15,921 | 181,253 | 34,979,152 | 134.51 | 180.03 | 0.09 |
+| 25-34 | 2020 | 37,141 | 11,924 | 141,877 | 34,913,177 | 106.38 | 140.53 | 0.08 |
+| 25-34 | 2021 | 29,277 | 11,233 | 129,065 | 34,786,941 | 84.16 | 116.45 | 0.09 |
+| 25-34 | 2022 | 24,528 | 9117 | 113,043 | 34,979,147 | 70.12 | 96.19 | 0.08 |
+| 25-34 | 2023 | 20,746 | 7497 | 97,968 | 35,373,650 | 58.65 | 79.84 | 0.08 |
+| 35-44 | 2015 | 17,030 | 9419 | 85,942 | 30,936,288 | 55.05 | 85.50 | 0.11 |
+| 35-44 | 2016 | 18,075 | 10,326 | 94,190 | 31,013,599 | 58.28 | 91.58 | 0.11 |
+| 35-44 | 2017 | 19,454 | 10,859 | 102,527 | 31,302,447 | 62.15 | 96.84 | 0.11 |
+| 35-44 | 2018 | 27,173 | 9937 | 109,647 | 31,719,276 | 85.67 | 117.00 | 0.09 |
+| 35-44 | 2019 | 26,994 | 10,092 | 110,785 | 32,115,258 | 84.05 | 115.48 | 0.09 |
+| 35-44 | 2020 | 22,014 | 7850 | 93,133 | 32,422,856 | 67.90 | 92.11 | 0.08 |
+| 35-44 | 2021 | 19,710 | 7766 | 93,278 | 32,805,013 | 60.08 | 83.76 | 0.08 |
+| 35-44 | 2022 | 18,190 | 7486 | 92,952 | 33,197,709 | 54.79 | 77.34 | 0.08 |
+| 35-44 | 2023 | 17,235 | 6969 | 90,492 | 33,717,279 | 51.12 | 71.79 | 0.08 |
+| 45-54 | 2015 | 10,078 | 7589 | 53,810 | 32,676,541 | 30.84 | 54.07 | 0.14 |
+| 45-54 | 2016 | 10,013 | 7945 | 56,953 | 32,492,059 | 30.82 | 55.27 | 0.14 |
+| 45-54 | 2017 | 10,420 | 7973 | 58,780 | 32,186,676 | 32.37 | 57.14 | 0.14 |
+| 45-54 | 2018 | 14,478 | 7090 | 58,804 | 31,757,566 | 45.59 | 67.91 | 0.12 |
+| 45-54 | 2019 | 14,026 | 6970 | 57,965 | 31,287,014 | 44.83 | 67.11 | 0.12 |
+| 45-54 | 2020 | 10,591 | 4732 | 45,150 | 30,857,711 | 34.32 | 49.66 | 0.10 |
+| 45-54 | 2021 | 8918 | 4094 | 42,575 | 30,501,822 | 29.24 | 42.66 | 0.10 |
+| 45-54 | 2022 | 8547 | 3968 | 41,396 | 30,357,425 | 28.15 | 41.23 | 0.10 |
+| 45-54 | 2023 | 7926 | 3453 | 40,753 | 30,343,743 | 26.12 | 37.50 | 0.08 |
+| 55+ | 2015 | 5213 | 3044 | 26,392 | 65,461,486 | 7.96 | 12.61 | 0.12 |
+| 55+ | 2016 | 5822 | 3484 | 29,432 | 67,171,962 | 8.67 | 13.85 | 0.12 |
+| 55+ | 2017 | 6710 | 3846 | 32,518 | 68,762,738 | 9.76 | 15.35 | 0.12 |
+| 55+ | 2018 | 11,844 | 3865 | 36,337 | 70,298,714 | 16.85 | 22.35 | 0.11 |
+| 55+ | 2019 | 11,689 | 4474 | 37,899 | 71,785,018 | 16.28 | 22.52 | 0.12 |
+| 55+ | 2020 | 8685 | 2987 | 30,230 | 72,835,933 | 11.92 | 16.03 | 0.10 |
+| 55+ | 2021 | 7319 | 3039 | 30,864 | 73,616,547 | 9.94 | 14.07 | 0.10 |
+| 55+ | 2022 | 6711 | 3262 | 31,395 | 74,372,162 | 9.02 | 13.41 | 0.10 |
+| 55+ | 2023 | 6056 | 2931 | 30,518 | 75,352,105 | 8.04 | 11.93 | 0.10 |
+
+
+### (d) Difference of declines: opioid deaths vs admissions
+
+| panel | role | measure | start | end | states | death_pct_change | admission_pct_change | d | ci_low | ci_high | p_boot | B | p_holm | estimand |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| P_deaths | main | primary_opioid | 2019 | 2023 | 28 | 61.6101 | -35.9200 | 0.9251 | 0.7007 | 1.1113 | 0.0000 | 9999 | 0.0000 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P_deaths | main | primary_heroin | 2019 | 2023 | 28 | 61.6101 | -57.6977 | 1.3403 | 1.0417 | 1.7005 | 0.0000 | 9999 | 0.0000 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P_deaths | main | primary_other_opiates | 2019 | 2023 | 28 | 61.6101 | 56.9300 | 0.0294 | -0.3211 | 0.3898 | 0.8357 | 9999 | 0.8357 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P_deaths | main | any_opioid | 2019 | 2023 | 28 | 61.6101 | -34.2356 | 0.8991 | 0.6671 | 1.0956 | 0.0000 | 9999 | 0.0000 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P_deaths | main | primary_opioid | 2021 | 2023 | 28 | -0.4240 | -14.8990 | 0.1571 | 0.0468 | 0.2385 | 0.0058 | 9999 | 0.0116 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P_deaths | main | primary_heroin | 2021 | 2023 | 28 | -0.4240 | -37.9453 | 0.4729 | 0.3144 | 0.7204 | 0.0000 | 9999 | 0.0000 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P_deaths | main | primary_other_opiates | 2021 | 2023 | 28 | -0.4240 | 47.9987 | -0.3963 | -0.6160 | -0.1857 | 0.0000 | 9999 | 0.0000 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P_deaths | main | any_opioid | 2021 | 2023 | 28 | -0.4240 | -13.0550 | 0.1356 | 0.0253 | 0.2228 | 0.0148 | 9999 | 0.0148 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P_deaths | main | primary_opioid | 2022 | 2023 | 28 | -2.3621 | -8.8391 | 0.0686 | -0.0051 | 0.1337 | 0.0686 | 9999 | 0.1372 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P_deaths | main | primary_heroin | 2022 | 2023 | 28 | -2.3621 | -22.4937 | 0.2309 | 0.1381 | 0.3900 | 0.0000 | 9999 | 0.0000 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P_deaths | main | primary_other_opiates | 2022 | 2023 | 28 | -2.3621 | 14.0927 | -0.1557 | -0.2387 | -0.0859 | 0.0000 | 9999 | 0.0000 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P_deaths | main | any_opioid | 2022 | 2023 | 28 | -2.3621 | -7.3086 | 0.0520 | -0.0202 | 0.1200 | 0.1690 | 9999 | 0.1690 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P15 | sensitivity | primary_opioid | 2015 | 2023 | 15 | 86.6971 | -51.1806 | 1.3414 | 1.1057 | 1.5243 | 0.0000 | 9999 | 0.0000 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P15 | sensitivity | primary_heroin | 2015 | 2023 | 15 | 86.6971 | -63.9013 | 1.6432 | 1.5238 | 1.8305 | 0.0000 | 9999 | 0.0000 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P15 | sensitivity | primary_other_opiates | 2015 | 2023 | 15 | 86.6971 | 0.4461 | 0.6199 | -0.0809 | 1.1429 | 0.0816 | 9999 | 0.0816 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P15 | sensitivity | any_opioid | 2015 | 2023 | 15 | 86.6971 | -46.2748 | 1.2456 | 0.9902 | 1.4427 | 0.0000 | 9999 | 0.0000 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P15 | sensitivity | primary_opioid | 2019 | 2023 | 15 | 50.9568 | -41.3230 | 0.9449 | 0.7216 | 1.1436 | 0.0000 | 9999 | 0.0000 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P15 | sensitivity | primary_heroin | 2019 | 2023 | 15 | 50.9568 | -57.2753 | 1.2622 | 1.1493 | 1.4705 | 0.0000 | 9999 | 0.0000 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P15 | sensitivity | primary_other_opiates | 2019 | 2023 | 15 | 50.9568 | 28.5308 | 0.1608 | -0.4644 | 0.6461 | 0.5351 | 9999 | 0.5351 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P15 | sensitivity | any_opioid | 2019 | 2023 | 15 | 50.9568 | -38.4501 | 0.8971 | 0.6615 | 1.1042 | 0.0000 | 9999 | 0.0000 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P15 | sensitivity | primary_opioid | 2021 | 2023 | 15 | -1.0615 | -16.4305 | 0.1688 | 0.0767 | 0.2668 | 0.0000 | 9999 | 0.0000 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P15 | sensitivity | primary_heroin | 2021 | 2023 | 15 | -1.0615 | -34.9187 | 0.4189 | 0.3250 | 0.6198 | 0.0000 | 9999 | 0.0000 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P15 | sensitivity | primary_other_opiates | 2021 | 2023 | 15 | -1.0615 | 41.8219 | -0.3601 | -0.7616 | -0.0579 | 0.0058 | 9999 | 0.0058 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P15 | sensitivity | any_opioid | 2021 | 2023 | 15 | -1.0615 | -13.6123 | 0.1357 | 0.0412 | 0.2336 | 0.0002 | 9999 | 0.0004 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P15 | sensitivity | primary_opioid | 2022 | 2023 | 15 | -3.7998 | -9.4954 | 0.0610 | 0.0184 | 0.1209 | 0.0042 | 9999 | 0.0084 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P15 | sensitivity | primary_heroin | 2022 | 2023 | 15 | -3.7998 | -19.9083 | 0.1833 | 0.1364 | 0.3322 | 0.0000 | 9999 | 0.0000 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P15 | sensitivity | primary_other_opiates | 2022 | 2023 | 15 | -3.7998 | 11.3248 | -0.1460 | -0.2176 | -0.0698 | 0.0012 | 9999 | 0.0036 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+| P15 | sensitivity | any_opioid | 2022 | 2023 | 15 | -3.7998 | -7.6427 | 0.0408 | -0.0041 | 0.0998 | 0.0744 | 9999 | 0.0744 | d = log(opioid death rate end/start) - log(admission rate end/start); d > 0: deaths rose relative to admissions |
+
+
+### Simulation coverage at the actual panel sizes
+
+| method | panel | clusters | years | sims | B | coverage_95 | null_rejection_5pct |
+|---|---|---|---|---|---|---|---|
+| wild cluster bootstrap (webb), TWFE slope | P_deaths | 28 | 5 | 300 | 199 | 0.957 | 0.057 |
+| wild cluster bootstrap (rademacher), TWFE slope | P_deaths | 28 | 5 | 300 | 199 | 0.917 | 0.037 |
+| wild cluster bootstrap (webb), TWFE slope | P15 | 15 | 9 | 300 | 199 | 0.927 | 0.060 |
+| wild cluster bootstrap (rademacher), TWFE slope | P15 | 15 | 9 | 300 | 199 | 0.937 | 0.060 |
+| state-cluster bootstrap, percentile CI of log ratio of totals | P35 | 35 | 2 | 1000 | 999 | 0.916 |  |
+| state-cluster bootstrap, percentile CI of log ratio of totals | P_deaths | 28 | 2 | 1000 | 999 | 0.918 |  |
+| state-cluster bootstrap, percentile CI of log ratio of totals | P15 | 15 | 2 | 1000 | 999 | 0.889 |  |
 
 
 Sources:
 
-- `source`: TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths, Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)
+- TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)

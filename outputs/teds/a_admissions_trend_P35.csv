@@ -1,0 +1,9 @@
+panel,measure,years,slope_log_per_year,pct_change_per_year,ci_low_pct,ci_high_pct,p_boot,states,B,method
+P35,primary_opioid,2015-2023,-0.07195275604791478,-6.942514119325409,-9.055693579617659,-4.28874767653947,0.0,35,9999,log-linear trend of panel admission rate; state-cluster bootstrap
+P35,primary_opioid,2015-2023 excluding 2020,-0.07100094025393089,-6.85389836827017,-8.974796683587844,-4.209184137929936,0.0,35,9999,log-linear trend of panel admission rate; state-cluster bootstrap
+P35,primary_heroin,2015-2023,-0.11229967837225702,-10.622362808569315,-12.992419702447359,-7.718586358553002,0.0,35,9999,log-linear trend of panel admission rate; state-cluster bootstrap
+P35,primary_heroin,2015-2023 excluding 2020,-0.11349949172280956,-10.72953498475188,-13.163434341525468,-7.815918616962871,0.0,35,9999,log-linear trend of panel admission rate; state-cluster bootstrap
+P35,primary_other_opiates,2015-2023,0.017549108950005884,1.7703999298411501,-3.2961930411990545,6.857984270470899,0.5132513251325133,35,9999,log-linear trend of panel admission rate; state-cluster bootstrap
+P35,primary_other_opiates,2015-2023 excluding 2020,0.023087773991420923,2.335635967755902,-2.8749119969362704,7.53001501922613,0.41164116411641166,35,9999,log-linear trend of panel admission rate; state-cluster bootstrap
+P35,any_opioid,2015-2023,-0.06343982738229295,-6.146940855590604,-7.999515128851724,-3.766556532404306,0.0,35,9999,log-linear trend of panel admission rate; state-cluster bootstrap
+P35,any_opioid,2015-2023 excluding 2020,-0.06249778792582706,-6.058485913285184,-7.911848029857242,-3.6721337818144733,0.0,35,9999,log-linear trend of panel admission rate; state-cluster bootstrap

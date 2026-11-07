@@ -1,0 +1,8 @@
+method,panel,clusters,years,sims,B,coverage_95,null_rejection_5pct
+"wild cluster bootstrap (webb), TWFE slope",P_deaths,28,5,300,199,0.9566666666666667,0.056666666666666664
+"wild cluster bootstrap (rademacher), TWFE slope",P_deaths,28,5,300,199,0.9166666666666666,0.03666666666666667
+"wild cluster bootstrap (webb), TWFE slope",P15,15,9,300,199,0.9266666666666666,0.06
+"wild cluster bootstrap (rademacher), TWFE slope",P15,15,9,300,199,0.9366666666666666,0.06
+"state-cluster bootstrap, percentile CI of log ratio of totals",P35,35,2,1000,999,0.916,
+"state-cluster bootstrap, percentile CI of log ratio of totals",P_deaths,28,2,1000,999,0.918,
+"state-cluster bootstrap, percentile CI of log ratio of totals",P15,15,2,1000,999,0.889,

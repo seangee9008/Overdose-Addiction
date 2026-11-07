@@ -276,28 +276,49 @@ TEDS_DIR = os.path.join(OUT_DIR, "teds")
 
 
 def sec_teds(used):
-    if not os.path.exists(os.path.join(TEDS_DIR, "a_meta.json")):
+    mp = os.path.join(TEDS_DIR, "meta.json")
+    if not os.path.exists(mp):
         return ""
     used.add("teds")
-    meta = json.load(open(os.path.join(TEDS_DIR, "a_meta.json")))
-    st = pd.read_csv(os.path.join(TEDS_DIR, "a_panel_states.csv"))
+    meta = json.load(open(mp))
+
+    def rd(f):
+        return pd.read_csv(os.path.join(TEDS_DIR, f))
+
+    summ, st = rd("panels_summary.csv"), rd("panels_states.csv")
     parts = ["## TEDS-A (Phase 4b): treatment admissions, area level\n",
              "Produced by `src/step_t.py` (`make teds`). TEDS-A counts treatment **admissions** (episodes, not people) at "
              "publicly funded facilities; it is not a prevalence measure and is never joined to NSDUH.\n",
-             "### (a) Opioid admissions vs opioid deaths: method (from the script)\n", "```\n" + meta["method"] + "\n```\n",
-             f"Completeness rule: {meta['completeness_rule']}. Main panel: {meta['main_panel_states']} of "
-             f"{meta['states_considered']} states.\n",
-             img("teds/a_trends.png"),
-             "### States excluded from the main panel\n",
-             table(st[~st.in_main_panel][["state_name", "main_panel_exclusion_reason", "years_reported", "years_with_deaths"]]),
-             "\n### State-year association (log admission rate on log opioid death rate)\n",
-             table(pd.read_csv(os.path.join(TEDS_DIR, "a_state_year_association.csv")), 4, drop=("model", "source")),
-             "\n### National series\n",
-             table(pd.read_csv(os.path.join(TEDS_DIR, "a_national_series.csv")), 2, drop=("source",)),
-             "\n### State changes, 2019 -> 2023 (main panel)\n",
-             table(pd.read_csv(os.path.join(TEDS_DIR, "a_state_changes_2019_2023.csv")), 3, drop=("source",)),
-             "\n### All states considered\n", table(st, 3),
-             "\nSources:\n", sources(pd.read_csv(os.path.join(TEDS_DIR, "a_national_series.csv")))]
+             f"> **Scope:** {meta['scope']}\n", f"> **TEDS-A 2024:** {meta['teds_2024']}\n",
+             "### Method (from the script)\n", "```\n" + meta["method"] + "\n```\n",
+             f"Completeness rule: {meta['completeness_rule']}.\n",
+             "### Panels, population share and regional mix\n", table(summ, 3),
+             "\n> **Caveat:** the panels are not random samples of the US. They contain only states whose TEDS reporting is "
+             "complete and stable (and, for P_deaths / P15, whose CDC opioid-specific death values are available); compare "
+             "the regional mix above with all 50 states + DC.\n",
+             "#### State membership and reasons\n",
+             table(st[["state_name", "region_name", "in_P35", "in_P_deaths", "in_P15", "teds_exclusion_reason",
+                       "opioid_deaths_missing_2019_2023", "opioid_deaths_missing_2015_2023", "population_2023"]]),
+             "\n### (a) Opioid admissions over time and versus opioid deaths\n", img("teds/a_trends.png"),
+             "#### Admission-rate trend, P35 (with and without 2020)\n", table(rd("a_admissions_trend_P35.csv"), 3),
+             "\n#### State-year association (log admission rate on log opioid death rate)\n",
+             table(rd("a_association.csv"), 4, drop=("model",)),
+             "\n#### Admission series, P35\n", table(rd("a_admissions_series_P35.csv"), 2),
+             "\n#### Admissions vs deaths series (P_deaths 2019-2023; P15 2015-2023 sensitivity)\n",
+             table(rd("a_admissions_vs_deaths_series.csv"), 2),
+             "\n### (b) Heroin vs other opiates/synthetics among primary-opioid admissions (P35)\n", img("teds/b_shares.png"),
+             "Code 7 ('other opiates and synthetics') combines fentanyl, prescription opioids and buprenorphine; the public "
+             "file has no fentanyl-specific code.\n",
+             table(rd("b_share_changes.csv"), 4), "\n#### Shares by year\n", table(rd("b_shares_P35.csv"), 4),
+             "\n### (c) First-time primary-opioid admissions by age (P35)\n", img("teds/c_first_time.png"),
+             "First-time admissions (no prior treatment episode) are not new cases of addiction: entry into treatment also "
+             "depends on access, capacity, referral and the years between onset and first treatment. Bounds treat missing "
+             "NOPRIOR as not first-time (lower) or first-time (upper).\n",
+             table(rd("c_first_time_changes.csv"), 3), "\n#### Rates by year\n", table(rd("c_first_time_by_age_P35.csv"), 2),
+             "\n### (d) Difference of declines: opioid deaths vs admissions\n",
+             table(rd("d_difference_of_declines.csv"), 4),
+             "\n### Simulation coverage at the actual panel sizes\n", table(rd("sim_coverage.csv"), 3),
+             "\nSources:\n", f"- {meta['source']}\n"]
     return "\n".join(parts)
 
 
