@@ -26,3 +26,5 @@ sources:
         description: CDC WONDER Provisional Mortality monthly death counts (manual exports in data/raw/wonder/), one series per file.
       - name: wonder_query_parameters
         description: The 'Query Parameters' block of each WONDER export (what each series filtered).
+      - name: wonder_annual
+        description: CDC WONDER annual (Group By Year) exports with population and crude / age-adjusted rates; may be empty.

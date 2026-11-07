@@ -93,29 +93,51 @@ def read_source(name, path):
     return df, extra
 
 
+WONDER_ANNUAL_COLUMNS = ["Year", "Year Code", "Deaths", "Population", "Crude Rate", "Age Adjusted Rate",
+                         "Age Adjusted Rate Lower 95% Confidence Interval", "Age Adjusted Rate Upper 95% Confidence Interval"]
+
+
 def read_wonder(raw_dir):
-    """All CDC WONDER exports in <raw_dir>/wonder/ (manual downloads; see README). One table with a
-    `series` column = file name without extension (e.g. wonder_drug_induced_monthly). Monthly rows only;
-    the 'Total' row and the footer are dropped. Month labels carry '(provisional)' / '(partial)' flags.
-    The 'Query Parameters' lines are kept so each series records what it filtered."""
+    """All CDC WONDER exports in <raw_dir>/wonder/ (manual downloads; see README). `series` = file name
+    without extension. Each file is classified by its layout:
+      * monthly exports (a 'Month Code' column) -> rows Month, Month Code, Deaths
+      * annual exports  (a 'Year Code' column)  -> rows Year, Year Code, Deaths, Population, rates
+    The 'Total' row and the footer are dropped. Labels carry '(provisional)' / '(partial)' flags.
+    The 'Query Parameters' lines are kept so each series records what it filtered.
+    Returns (monthly DataFrame, annual DataFrame, query-parameter DataFrame, files)."""
     files = sorted(glob.glob(os.path.join(raw_dir, "wonder", "*.csv")) + glob.glob(os.path.join(raw_dir, "wonder", "*.txt")))
     if not files:
         raise FileNotFoundError(f"no CDC WONDER exports in {raw_dir}/wonder/ (manual export; see README)")
-    frames, params = [], []
+    monthly, annual, params = [], [], []
     for f in files:
         series = os.path.splitext(os.path.basename(f))[0]
         sep = "\t" if f.endswith(".txt") else ","
         raw = pd.read_csv(f, sep=sep, dtype=str, keep_default_na=False)
-        rows = raw[raw["Month Code"].str.match(r"^\d{4}/\d{2}$", na=False)].copy()
-        rows = rows[["Month", "Month Code", "Deaths"]]
-        rows.insert(0, "series", series)
-        frames.append(rows)
+        if "Month Code" in raw.columns:
+            rows = raw[raw["Month Code"].str.match(r"^\d{4}/\d{2}$", na=False)][["Month", "Month Code", "Deaths"]].copy()
+            rows.insert(0, "series", series)
+            monthly.append(rows)
+            layout = "monthly"
+        elif "Year Code" in raw.columns:
+            rows = raw[raw["Year Code"].str.match(r"^\d{4}$", na=False)].copy()
+            for c in WONDER_ANNUAL_COLUMNS:
+                if c not in rows.columns:
+                    rows[c] = ""                          # e.g. no age-adjusted rate requested
+            rows = rows[WONDER_ANNUAL_COLUMNS]
+            rows.insert(0, "series", series)
+            annual.append(rows)
+            layout = "annual"
+        else:
+            raise ValueError(f"{f}: neither 'Month Code' nor 'Year Code' column; group the WONDER query by Month or Year")
         text = open(f, encoding="utf-8", errors="replace").read()
         q = text.split("Query Parameters:")[1].split("---")[0] if "Query Parameters:" in text else ""
         lines = [x.strip().strip('"').strip() for x in q.splitlines()]
         params.append(dict(series=series, query_parameters=" | ".join(x for x in lines if x),
-                           file=os.path.basename(f)))
-    return pd.concat(frames, ignore_index=True), pd.DataFrame(params), files
+                           file=os.path.basename(f), layout=layout))
+    m = pd.concat(monthly, ignore_index=True) if monthly else pd.DataFrame(columns=["series", "Month", "Month Code", "Deaths"], dtype=str)
+    a = (pd.concat(annual, ignore_index=True) if annual
+         else pd.DataFrame(columns=["series", *WONDER_ANNUAL_COLUMNS], dtype=str))
+    return m, a, pd.DataFrame(params), files
 
 
 def write(df, out_dir, table, raw_path, manifest):
@@ -144,11 +166,15 @@ def main():
         for t, edf in extra.items():
             schemas.validate(t, edf, raw_path)
             write(edf, a.out_dir, t, raw_path, manifest)
-    wonder, params, files = read_wonder(a.raw_dir)
+    wonder, wonder_annual, params, files = read_wonder(a.raw_dir)
     wonder = wonder.copy()
     wonder.insert(0, "src_row", range(len(wonder)))
     schemas.validate("wonder_monthly", wonder, os.path.join(a.raw_dir, "wonder"))
     write(wonder, a.out_dir, "wonder_monthly", files[0], manifest)
+    wonder_annual = wonder_annual.copy()
+    wonder_annual.insert(0, "src_row", range(len(wonder_annual)))
+    schemas.validate("wonder_annual", wonder_annual, os.path.join(a.raw_dir, "wonder"))
+    write(wonder_annual, a.out_dir, "wonder_annual", files[0], manifest)   # may be empty until an annual export exists
     write(params, a.out_dir, "wonder_query_parameters", files[0], manifest)
     manifest["wonder_monthly"]["raw_files"] = {os.path.basename(f): sha256(f) for f in files}
     with open(os.path.join(a.out_dir, "MANIFEST.json"), "w") as fh:

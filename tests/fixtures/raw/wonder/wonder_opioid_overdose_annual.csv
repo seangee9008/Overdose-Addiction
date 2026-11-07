@@ -1,0 +1,16 @@
+"Notes","Year","Year Code",Deaths,Population,Crude Rate,Age Adjusted Rate,"Age Adjusted Rate Lower 95% Confidence Interval","Age Adjusted Rate Upper 95% Confidence Interval"
+,"2018","2018",60463,330000000,18.3,18.7,18.5,18.9
+,"2019","2019",62533,331000000,18.9,19.3,19.1,19.5
+,"2020","2020",65491,332000000,19.7,20.1,19.9,20.3
+,"2021","2021",67636,333000000,20.3,20.7,20.5,20.9
+,"2022","2022",70277,334000000,21.0,21.5,21.3,21.7
+,"2023","2023",72867,335000000,21.8,22.2,22.0,22.4
+,"2024","2024",75257,336000000,22.4,22.8,22.6,23.1
+,"2025 (provisional)","2025",77629,337000000,23.0,23.5,23.3,23.7
+"Total",,,0,Not Applicable,Not Applicable,Not Applicable,,
+"---"
+"Dataset: SYNTHETIC fixture (not real data)"
+"Query Parameters:"
+"MCD - ICD-10 Codes: T40.0; T40.1; T40.2; T40.3; T40.4; T40.6"
+"Group By: Year"
+"---"

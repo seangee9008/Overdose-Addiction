@@ -136,6 +136,20 @@ def wonder(rng):
               '"Query Parameters:"', '"UCD - Drug/Alcohol Induced Causes: Drug-induced causes"', '"Group By: Month"', '"---"']
     with open(os.path.join(OUT, "wonder", "wonder_drug_induced_monthly.csv"), "w") as fh:
         fh.write("\n".join(lines) + "\n")
+    # annual export (Group By Year) with age-adjusted rates, as for the opioid R6 check
+    ann = ['"Notes","Year","Year Code",Deaths,Population,Crude Rate,Age Adjusted Rate,'
+           '"Age Adjusted Rate Lower 95% Confidence Interval","Age Adjusted Rate Upper 95% Confidence Interval"']
+    for y in range(2018, 2026):
+        d = int(60000 + 2500 * (y - 2018) + rng.integers(0, 500))
+        pop = 330_000_000 + 1_000_000 * (y - 2018)
+        lab = f"{y} (provisional)" if y >= 2025 else str(y)
+        aa = 100000 * d / pop
+        ann.append(f',"{lab}","{y}",{d},{pop},{aa:.1f},{aa * 1.02:.1f},{aa * 1.01:.1f},{aa * 1.03:.1f}')
+    ann += ['"Total",,,0,Not Applicable,Not Applicable,Not Applicable,,', '"---"',
+            '"Dataset: SYNTHETIC fixture (not real data)"', '"Query Parameters:"',
+            '"MCD - ICD-10 Codes: T40.0; T40.1; T40.2; T40.3; T40.4; T40.6"', '"Group By: Year"', '"---"']
+    with open(os.path.join(OUT, "wonder", "wonder_opioid_overdose_annual.csv"), "w") as fh:
+        fh.write("\n".join(ann) + "\n")
 
 
 def nsduh(rng):

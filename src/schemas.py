@@ -135,9 +135,24 @@ WONDER_MONTHLY = pa.DataFrameSchema({
     "Deaths": pa.Column(checks=Check.str_matches(r"^\d+$")),     # counts as text; 'Suppressed' would fail loudly
 }, strict=True, unique=["series", "Month Code"])
 
+RATE_TEXT = r"^(\d+(\.\d+)?( \(Unreliable\))?|Not Applicable|Unreliable|Suppressed|)$"
+WONDER_ANNUAL = pa.DataFrameSchema({
+    "src_row": pa.Column(checks=NUM, unique=True),
+    "series": pa.Column(checks=Check.str_matches(r"^[A-Za-z0-9_]+$")),
+    "Year": pa.Column(),
+    "Year Code": pa.Column(checks=Check.str_matches(r"^(19|20)\d{2}$")),
+    "Deaths": pa.Column(checks=Check.str_matches(r"^\d+$")),
+    "Population": pa.Column(checks=Check.str_matches(r"^(\d+|Not Applicable|)$")),
+    "Crude Rate": pa.Column(checks=Check.str_matches(RATE_TEXT)),
+    "Age Adjusted Rate": pa.Column(checks=Check.str_matches(RATE_TEXT)),
+    "Age Adjusted Rate Lower 95% Confidence Interval": pa.Column(checks=Check.str_matches(RATE_TEXT)),
+    "Age Adjusted Rate Upper 95% Confidence Interval": pa.Column(checks=Check.str_matches(RATE_TEXT)),
+}, strict=True, unique=["series", "Year Code"])
+
 SCHEMAS = {"cdc_state": CDC_STATE, "cdc_county": CDC_COUNTY, "svi_county": SVI_COUNTY,
            "nsduh_2021_2024": NSDUH_2124, "nsduh_2024": NSDUH_2024, "nsduh_value_labels": NSDUH_LABELS,
-           "census_pop": CENSUS_POP, "wonder_monthly": WONDER_MONTHLY}
+           "census_pop": CENSUS_POP, "wonder_monthly": WONDER_MONTHLY,
+           "wonder_annual": WONDER_ANNUAL}
 
 
 def validate(table, df, raw_path):

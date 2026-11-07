@@ -137,3 +137,13 @@ models:
         data_tests: [not_null]
       - name: query_parameters
         data_tests: [not_null]
+
+  - name: wonder_deaths_annual
+    description: CDC WONDER annual deaths, population and crude / age-adjusted rates by series (manual exports; may be empty).
+    columns:
+      - name: row_key
+        data_tests: [unique, not_null]
+      - name: deaths
+        data_tests: [not_null, non_negative]
+      - name: age_adjusted_rate
+        data_tests: [non_negative]
