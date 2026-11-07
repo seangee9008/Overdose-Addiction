@@ -1,10 +1,7 @@
 # Overdose-Addiction
 
-[![CI](https://github.com/seangee9008/Overdose-Addiction/actions/workflows/ci.yml/badge.svg)](https://github.com/seangee9008/Overdose-Addiction/actions/workflows/ci.yml)
 
-UCLA Statistics 199 directed research project (faculty sponsor: Prof. Dave Zes).
-
-**Question:** is addiction itself declining in the United States, or only overdose mortality?
+**Question:** Is addiction itself declining in the United States, or only overdose mortality?
 
 This repository holds the data pipeline and exploratory analysis tooling. It currently:
 
