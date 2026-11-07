@@ -82,32 +82,67 @@ def sha256(path):
     return h.hexdigest()
 
 
-def download(url, dest, force=False):
+def remote_size(url):
+    """Total size from a one-byte Range request ('Content-Range: bytes 0-0/<total>'); None if unavailable."""
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": UA, "Range": "bytes=0-0"})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            rng = r.headers.get("Content-Range", "")
+            return int(rng.rsplit("/", 1)[1]) if "/" in rng else None
+    except Exception:
+        return None
+
+
+def download(url, dest, force=False, attempts=10):
+    """Download url to dest via dest.part. If the server drops the connection mid-transfer, resume with an
+    HTTP Range request from the bytes already received (up to `attempts` times). The file is accepted only
+    if its size equals the server-reported total and, for .zip files, it opens as a valid zip."""
     if os.path.exists(dest) and not force:
         print(f"  skip (exists): {dest}")
         return True
-    req = urllib.request.Request(url, headers={"User-Agent": UA})
     tmp = dest + ".part"
-    try:
-        with urllib.request.urlopen(req, timeout=120) as r, open(tmp, "wb") as out:
-            expected = r.headers.get("Content-Length")
-            while True:
-                chunk = r.read(1 << 20)
-                if not chunk:
-                    break
-                out.write(chunk)
+    if force and os.path.exists(tmp):
+        os.remove(tmp)
+    total = remote_size(url)            # some servers send no Content-Length on a plain GET
+    for attempt in range(1, attempts + 1):
+        have = os.path.getsize(tmp) if os.path.exists(tmp) else 0
+        headers = {"User-Agent": UA}
+        if have:
+            headers["Range"] = f"bytes={have}-"
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=120) as r:
+                if have and r.status == 206:                       # resumed: append
+                    rng = r.headers.get("Content-Range", "")      # 'bytes start-end/total'
+                    total = int(rng.rsplit("/", 1)[1]) if "/" in rng else total
+                    mode = "ab"
+                else:                                             # fresh (or server ignored Range): restart
+                    have, mode = 0, "wb"
+                    cl = r.headers.get("Content-Length")
+                    total = int(cl) if cl is not None else total
+                with open(tmp, mode) as out:
+                    while True:
+                        chunk = r.read(1 << 20)
+                        if not chunk:
+                            break
+                        out.write(chunk)
+        except Exception as e:
+            print(f"  attempt {attempt}: {type(e).__name__}: {e} ({os.path.getsize(tmp) if os.path.exists(tmp) else 0:,} bytes so far)")
+            continue
         got = os.path.getsize(tmp)
-        # a dropped connection can end the stream early without raising: verify before accepting the file
-        if expected is not None and got != int(expected):
-            raise IOError(f"incomplete download: {got:,} of {int(expected):,} bytes")
-        if dest.endswith(".zip") and not zipfile.is_zipfile(tmp):
-            raise IOError(f"downloaded file is not a valid zip ({got:,} bytes); probably truncated")
-        os.replace(tmp, dest)
-    except Exception as e:
-        print(f"  FAILED: {type(e).__name__}: {e}")
-        if os.path.exists(tmp):
-            os.remove(tmp)
+        if total is not None and got < total:
+            print(f"  attempt {attempt}: connection ended at {got:,} of {total:,} bytes; resuming")
+            continue
+        break
+    got = os.path.getsize(tmp) if os.path.exists(tmp) else 0
+    problem = None
+    if total is not None and got != total:
+        problem = f"incomplete download: {got:,} of {total:,} bytes after {attempts} attempts"
+    elif dest.endswith(".zip") and not zipfile.is_zipfile(tmp):
+        problem = f"downloaded file is not a valid zip ({got:,} bytes)"
+    if problem:
+        print(f"  FAILED: {problem} (partial kept at {tmp} for a later resume)")
         return False
+    os.replace(tmp, dest)
     print(f"  ok: {dest} ({os.path.getsize(dest):,} bytes)")
     return True
 
