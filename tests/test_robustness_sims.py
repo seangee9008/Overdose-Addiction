@@ -168,3 +168,35 @@ def test_wild_cluster_bootstrap_ci_covers_planted_slope_and_null_rejects_about_5
     se_band = 3 * np.sqrt(0.95 * 0.05 / n)
     assert 0.95 - se_band <= cover / n <= 1.0, f"coverage {cover / n:.3f}"
     assert reject / n <= 0.05 + se_band, f"null rejection {reject / n:.3f}"
+
+
+def test_webb_weights_have_six_points_mean_zero_variance_one():
+    from src.panel import WEBB, _weights
+    w = _weights(np.random.default_rng(0), 200_000, "webb")
+    assert set(np.round(np.unique(w), 6)) == set(np.round(WEBB, 6))
+    assert abs(w.mean()) < 0.01 and abs(w.var() - 1) < 0.01
+
+
+def test_webb_bootstrap_covers_planted_slope_with_few_clusters():
+    from src.panel import simulate_panel, wild_cluster_bootstrap
+    rng = np.random.default_rng(606)
+    n = max(N_SIMS // 2, 40)
+    cover = 0
+    for s in range(n):
+        r = wild_cluster_bootstrap(simulate_panel(rng, G=15, T=9), "y", ["x"], "unit", "time", B=199, seed=s,
+                                   weights="webb")
+        cover += r["ci_low"] <= 0.6 <= r["ci_high"]
+    assert cover / n >= 0.95 - 3 * np.sqrt(0.95 * 0.05 / n) - 0.03, f"coverage {cover / n:.3f}"
+
+
+def test_state_cluster_bootstrap_covers_planted_log_ratio():
+    from src.panel import cluster_bootstrap_totals, simulate_state_totals, superpopulation_log_ratio
+    truth = superpopulation_log_ratio(n=400_000)
+    rng = np.random.default_rng(707)
+    n = max(N_SIMS, 100)
+    cover = 0
+    for s in range(n):
+        t = cluster_bootstrap_totals(simulate_state_totals(rng, 35), 499, s)
+        lo, hi = np.percentile(np.log(t[:, 1]) - np.log(t[:, 0]), [2.5, 97.5])
+        cover += lo <= truth <= hi
+    assert cover / n >= 0.95 - 3 * np.sqrt(0.95 * 0.05 / n) - 0.03, f"coverage {cover / n:.3f}"

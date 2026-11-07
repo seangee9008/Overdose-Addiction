@@ -179,6 +179,7 @@ TEDS_A = pa.DataFrameSchema({
 
 CENSUS_STATE_AGE = pa.DataFrameSchema({
     "src_row": pa.Column(checks=NUM, unique=True),
+    "REGION": pa.Column(checks=Check.isin([1, 2, 3, 4])),          # Census region: NE, MW, S, W
     "STATE": pa.Column(checks=Check.str_matches(r"^\d{2}$")),
     "NAME": pa.Column(),
     "RACE": pa.Column(checks=Check.isin([1, 2, 3, 4, 5, 6])),

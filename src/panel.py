@@ -44,9 +44,23 @@ def _cr1_se(X, resid, cluster_idx, n_clusters, XtX_inv):
     return np.sqrt(np.diag(V))
 
 
-def wild_cluster_bootstrap(df, y_col, x_cols, unit, time, j=0, B=9999, seed=0):
+WEBB = np.array([-np.sqrt(1.5), -1.0, -np.sqrt(0.5), np.sqrt(0.5), 1.0, np.sqrt(1.5)])
+
+
+def _weights(rng, G, kind):
+    """Cluster-level wild-bootstrap weights: Rademacher (+/-1) or Webb's 6-point distribution, which
+    gives many more distinct draws when there are few clusters (Webb 2023)."""
+    if kind == "rademacher":
+        return rng.choice([-1.0, 1.0], size=G)
+    if kind == "webb":
+        return rng.choice(WEBB, size=G)
+    raise ValueError(kind)
+
+
+def wild_cluster_bootstrap(df, y_col, x_cols, unit, time, j=0, B=9999, seed=0, weights="rademacher"):
     """Fit the TWFE model and bootstrap coefficient x_cols[j]. Returns dict with estimate, CR1 SE,
-    WCR bootstrap p-value (H0: b_j = 0), WCU percentile-t 95% CI, n, clusters."""
+    WCR bootstrap p-value (H0: b_j = 0), WCU percentile-t 95% CI, n, clusters. `weights`: 'rademacher'
+    or 'webb'."""
     y = df[y_col].to_numpy(float)
     X, names = twfe_design(df, x_cols, unit, time)
     clusters, cidx = np.unique(df[unit].to_numpy(), return_inverse=True)
@@ -66,7 +80,7 @@ def wild_cluster_bootstrap(df, y_col, x_cols, unit, time, j=0, B=9999, seed=0):
     t_wcr = np.empty(B)
     t_wcu = np.empty(B)
     for b in range(B):
-        v = rng.choice([-1.0, 1.0], size=G)[cidx]
+        v = _weights(rng, G, weights)[cidx]
         y_r = fit_r + ur * v
         b_r, e_r = _ols(X, y_r)
         t_wcr[b] = b_r[j] / _cr1_se(X, e_r, cidx, G, XtX_inv)[j]
@@ -77,7 +91,34 @@ def wild_cluster_bootstrap(df, y_col, x_cols, unit, time, j=0, B=9999, seed=0):
     q_lo, q_hi = np.quantile(t_wcu, [0.025, 0.975])
     return dict(term=names[j], estimate=float(beta[j]), se_cr1=float(se[j]), t=float(t_obs), p_wild=p,
                 ci_low=float(beta[j] - q_hi * se[j]), ci_high=float(beta[j] - q_lo * se[j]),
-                n=len(y), clusters=G, B=B, seed=seed)
+                n=len(y), clusters=G, B=B, seed=seed, weights=weights)
+
+
+def cluster_bootstrap_totals(values, B, seed):
+    """State-cluster bootstrap of panel totals. values: array [G clusters, ...]. Each replicate resamples
+    G clusters with replacement and sums them. Returns array [B, ...] of resampled totals."""
+    rng = np.random.default_rng(seed)
+    G = values.shape[0]
+    idx = rng.integers(0, G, size=(B, G))
+    return values[idx].sum(axis=1)
+
+
+def simulate_state_totals(rng, G, base_mean=5000.0, mu=-0.4, tau=0.25, noise=0.05, T=2):
+    """Synthetic state totals for a start and an end year: state sizes vary (lognormal); each state's log
+    change is mu + N(0, tau^2) + small year noise. Returns array [G, 2]."""
+    size = base_mean * np.exp(rng.normal(0, 0.8, G))
+    change = mu + rng.normal(0, tau, G)
+    start = size * np.exp(rng.normal(0, noise, G))
+    end = size * np.exp(change + rng.normal(0, noise, G))
+    return np.column_stack([start, end])
+
+
+def superpopulation_log_ratio(mu=-0.4, tau=0.25, noise=0.05, n=2_000_000, seed=0):
+    """Target of the ratio-of-totals estimator: log(E[end] / E[start]) over the state superpopulation."""
+    rng = np.random.default_rng(seed)
+    size = np.exp(rng.normal(0, 0.8, n))
+    return float(np.log((size * np.exp(mu + rng.normal(0, tau, n) + rng.normal(0, noise, n))).mean()
+                        / (size * np.exp(rng.normal(0, noise, n))).mean()))
 
 
 def simulate_panel(rng, G=40, T=9, beta=0.6, rho=0.5, sd=0.15):

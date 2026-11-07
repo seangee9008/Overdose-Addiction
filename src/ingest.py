@@ -207,10 +207,10 @@ def ingest_census_asr(raw_dir, out_dir, manifest):
         path = os.path.join(raw_dir, fname)
         if not os.path.exists(path):
             raise FileNotFoundError(f"{path} missing (run fetch_data.py --only {table})")
-        cols = ["SUMLEV", "STATE", "NAME", "SEX", "ORIGIN", "RACE", "AGE", *[f"POPESTIMATE{y}" for y in years]]
+        cols = ["SUMLEV", "REGION", "STATE", "NAME", "SEX", "ORIGIN", "RACE", "AGE", *[f"POPESTIMATE{y}" for y in years]]
         d = pd.read_csv(path, dtype={"STATE": str, "SUMLEV": str}, usecols=cols, encoding="latin-1")[cols]
         d = d[(d.SUMLEV == "040") & (d.SEX == 0) & (d.ORIGIN == 0)]
-        long = d.melt(id_vars=["STATE", "NAME", "RACE", "AGE"], value_vars=[f"POPESTIMATE{y}" for y in years],
+        long = d.melt(id_vars=["REGION", "STATE", "NAME", "RACE", "AGE"], value_vars=[f"POPESTIMATE{y}" for y in years],
                       var_name="year", value_name="population")
         long["year"] = long.year.str[-4:].astype(int)
         long["vintage"] = "intercensal 2010-2020" if "2010" in table else "Vintage 2025"
