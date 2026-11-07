@@ -1140,12 +1140,12 @@ Produced by `src/step_r.py` (`make robustness`). Each finding is re-estimated un
 
 ![robustness/break_dates.png](../outputs/robustness/break_dates.png)
 
-### Not done / pending
+### Not pursued / not done
 
 | item | status |
 |---|---|
-| r6 | not done: needs a CDC WONDER annual export (Group By Year, opioid filter, age-adjusted rates) in data/raw/wonder/ with 'opioid' in the file name |
-| r5 | not done: needs a CDC WONDER monthly export with the T40 multiple-cause filter in data/raw/wonder/ with 'opioid' in the file name |
+| r6.age_adjusted | not pursued (all-drug monthly series used; see caveat) |
+| r5.opioid_monthly | not pursued (all-drug monthly series used; see caveat) |
 
 
 ### Detailed tables
@@ -1179,8 +1179,8 @@ Produced by `src/step_r.py` (`make robustness`). Each finding is re-estimated un
 | F1-misuse | Opioid deaths fell faster than NSDUH past-year opioid misuse, 2021->2024 (deaths -32.1%, survey -18.3%). | holds | In 72/72 specifications the death decline was proportionally larger than the decline in past-year opioid misuse; the 95% CI for the difference excluded zero in 65/71 alternative specifications. | main d = -0.185 (-0.311, -0.058), Holm p = 0.0136; d ranges -0.322 to -0.083; least clear variant: all_drug, start 2021, count, rao_wu_bootstrap: d = -0.083 (-0.212, 0.046) | NSDUH measures mostly prescription pain-reliever misuse in household respondents; deaths are mostly illicitly made fentanyl (T40.4 in 88% of opioid deaths). Different behaviours and populations; no confounders controlled. |
 | F1-OUD | Opioid deaths fell faster than NSDUH past-year opioid use disorder, 2021->2024 (deaths -32.1%, survey -11.3%). | partial | In 72/72 specifications the death decline was proportionally larger than the decline in past-year opioid use disorder; the 95% CI for the difference excluded zero in 52/71 alternative specifications. | main d = -0.267 (-0.448, -0.087), Holm p = 0.0136; d ranges -0.300 to -0.098; least clear variant: all_drug, start 2022, count, shared_design: d = -0.098 (-0.312, 0.115) | NSDUH measures mostly prescription pain-reliever misuse in household respondents; deaths are mostly illicitly made fentanyl (T40.4 in 88% of opioid deaths). Different behaviours and populations; no confounders controlled. |
 | F2 | Heroin use fell about as fast as opioid deaths, 2021->2024 (heroin -49.7%, deaths -32.1%); not significantly different. | not distinguishable | The data do not distinguish whether heroin use or opioid deaths declined faster: the 95% CI for the difference included zero in 72/72 specifications, and the point estimate was positive in 48 and negative in 24. | main d = 0.301 (-0.140, 0.742), p = 0.1765; d ranges -0.227 to 0.403 | Heroin use is rare in NSDUH (0.19-0.39%); estimates are imprecise (subgroup RSE often > 0.3). |
-| F3a | The national death series has a real downturn break in 2023. | partial | A downturn break is statistically clear in every method; in true monthly counts (all-drug 'drug-induced') it is estimated at 2022-09 (one-break model), earlier than the 2023-06 estimate from rolling 12-month totals. | monthly: one-break 2022-09, profile CI 2022-06 to 2022-11, bootstrap CI 2022-03 to 2023-02, 1 vs 0 p = 0.0020; rolling opioids: 2023-06 (CI 2023-01 to 2024-01), 1 vs 0 p = 0.0010; 1 vs 0 significant in 26/26 rows; break-date CI overlaps 2023 in 18/20 rows with a CI. Annual rows map a bend at year Y to a change during Y+1. | Rolling 12-month totals spread a change over up to 12 months, so their break dates lag; the monthly series is all-drug 'drug-induced' and starts 2019-01. |
-| F3b | The 2020 break is not robust (2 breaks did not clearly beat 1 on the rolling series). | fails | In true monthly counts (all-drug 'drug-induced') a second trend change around 2020-07 is supported (2 vs 1 p = 0.0100); on rolling 12-month totals the evidence is mixed (p < 0.05 in 4/8 variants). | monthly two-break model: 2020-07, 2023-01; earlier-break profile CI 2020-05 to 2021-05; rolling 2 vs 1 p ranges 0.0240 to 0.1059 | Monthly series is all-drug 'drug-induced', starts 2019-01 (few months before 2020), and uses a continuous-kink model, unlike Step B's segment model. |
+| F3a | The national death series has a real downturn break in 2023. | partial | A downturn break is statistically clear in every method; in true monthly counts (all-drug 'drug-induced') it is estimated at 2022-09 (one-break model), earlier than the 2023-06 estimate from rolling 12-month totals. | monthly: one-break 2022-09, profile CI 2022-06 to 2022-11, bootstrap CI 2022-03 to 2023-02, 1 vs 0 p = 0.0020; rolling opioids: 2023-06 (CI 2023-01 to 2024-01), 1 vs 0 p = 0.0010; 1 vs 0 significant in 26/26 rows; break-date CI overlaps 2023 in 18/20 rows with a CI. Annual rows map a bend at year Y to a change during Y+1. | Rolling 12-month totals spread a change over up to 12 months, so their break dates lag; the monthly series is all-drug 'drug-induced' and starts 2019-01. Opioid-specific monthly counts: not pursued (all-drug monthly series used). |
+| F3b | The 2020 break is not robust (2 breaks did not clearly beat 1 on the rolling series). | fails | In true monthly counts (all-drug 'drug-induced') a second trend change around 2020-07 is supported (2 vs 1 p = 0.0100); on rolling 12-month totals the evidence is mixed (p < 0.05 in 4/8 variants). | monthly two-break model: 2020-07, 2023-01; earlier-break profile CI 2020-05 to 2021-05; rolling 2 vs 1 p ranges 0.0240 to 0.1059 | Monthly series is all-drug 'drug-induced', starts 2019-01 (few months before 2020), and uses a continuous-kink model, unlike Step B's segment model. Opioid-specific monthly counts: not pursued (all-drug monthly series used). |
 | F4 | The NSDUH declines happened within age/sex/race groups, not through shifts in population mix. | holds | Adjusting for age group, sex and race/ethnicity changed the start-year->2024 log odds ratio by at most 0.0027 across 9 measure x start-year contrasts, so these demographic shifts do not account for the changes. | misuse 2021->2024: crude OR 0.812 (0.712, 0.924), adjusted OR 0.811 (0.710, 0.926); adjusted ORs with CI excluding 1: 5/9 | Only age group (5 levels), sex and race/ethnicity are adjusted; finer or other compositional shifts are not examined. This says nothing about whether the declines themselves are significant. |
 | F5 | County deaths fell less in the most vulnerable SVI quartile (Q4 -34%) than in the least vulnerable (Q1 -41%), 2022->2025. | fails | The main county model estimates a smaller decline in the most vulnerable quartile, but the estimate is not robust to clustering, period choice and the handling of suppressed counts. | main gap ratio 1.121 (1.040, 1.208); state clusters 1.121 (0.992, 1.267); 2023->2025 1.052 (0.977, 1.131); suppressed = 9: 0.965; never-suppressed counties 1.104 (1.018, 1.196); with a state-baseline term: 1.110 (1.022, 1.206); gap > 1 in 15/17; CI excludes 1 in 11/16 variants (69%). Sign flips: suppressed set to 9 (no censoring), bound: gap minimised (Q4 base=9,end=1; others base=1,end=9). Baseline-adjusted variants excluded (not comparable). | About half of county cells are suppressed (1-9 deaths); all-drug deaths only; area-level association (no individual inference). The 940 never-suppressed counties are not a random subset: median population 134,364 vs 25,621 for all counties, 84% of the analysed population. |
 
@@ -1519,7 +1519,7 @@ Produced by `src/step_r.py` (`make robustness`). Each finding is re-estimated un
 
 | key | value |
 |---|---|
-| r6.age_adjusted | not done: needs a CDC WONDER annual export (Group By Year, opioid filter, age-adjusted rates) in data/raw/wonder/ with 'opioid' in the file name |
+| r6.age_adjusted | not pursued (all-drug monthly series used; see caveat) |
 | r12.seed | 20,261,103 |
 | r12.B | 2000 |
 | r12.starts | [2021, 2022, 2023] |
@@ -1531,6 +1531,6 @@ Produced by `src/step_r.py` (`make robustness`). Each finding is re-estimated un
 | r5.B_rolling | 1000 |
 | r5.B_monthly | 500 |
 | r5.block | 12 |
-| r5.opioid_monthly | not done: needs a CDC WONDER monthly export with the T40 multiple-cause filter in data/raw/wonder/ with 'opioid' in the file name |
+| r5.opioid_monthly | not pursued (all-drug monthly series used; see caveat) |
 | f4.rule | abs(adjusted log-OR - crude log-OR) <= 0.05 for the start-year -> 2024 contrast in every measure x start year (adjustment for age, sex, race/ethnicity moves the year odds ratio by less than about 5%): 'holds'; <= 0.05 in >= 75%: 'partial'; otherwise 'fails'. Written before the F4 re-test was run. |
 | f4.step_c_reproduced | True |

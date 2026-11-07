@@ -260,9 +260,9 @@ def sec_robustness(used):
              "includes 0, F3a break-date CI overlaps 2023, F3b p >= 0.05, F5 CI excludes 1.\n",
              table(var[["finding", "variant", "estimate_95ci", "p", "p_holm", "sign_ok", "ci_criterion_met"]], 4),
              "\n" + img("robustness/forest_d.png"), img("robustness/break_dates.png"),
-             "### Not done / pending\n",
-             table(pd.DataFrame([dict(item=k, status=v.get(x)) for k, v in meta.items() for x in v
-                                 if isinstance(v.get(x), str) and v.get(x).startswith("not done")])),
+             "### Not pursued / not done\n",
+             table(pd.DataFrame([dict(item=f"{k}.{x}", status=v.get(x)) for k, v in meta.items() for x in v
+                                 if isinstance(v.get(x), str) and v.get(x).startswith(("not done", "not pursued"))])),
              "\n### Detailed tables\n"]
     for f in sorted(os.listdir(ROB)):
         if f.endswith(".csv") and not f.startswith("summary_"):

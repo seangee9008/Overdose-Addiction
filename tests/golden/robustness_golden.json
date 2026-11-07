@@ -202,13 +202,13 @@
    "2.verdict": "not distinguishable",
    "3.finding": "F3a",
    "3.key_evidence": "monthly: one-break 2022-09, profile CI 2022-06 to 2022-11, bootstrap CI 2022-03 to 2023-02, 1 vs 0 p = 0.0020; rolling opioids: 2023-06 (CI 2023-01 to 2024-01), 1 vs 0 p = 0.0010; 1 vs 0 significant in 26/26 rows; break-date CI overlaps 2023 in 18/20 rows with a CI. Annual rows map a bend at year Y to a change during Y+1.",
-   "3.main_caveat": "Rolling 12-month totals spread a change over up to 12 months, so their break dates lag; the monthly series is all-drug 'drug-induced' and starts 2019-01.",
+   "3.main_caveat": "Rolling 12-month totals spread a change over up to 12 months, so their break dates lag; the monthly series is all-drug 'drug-induced' and starts 2019-01. Opioid-specific monthly counts: not pursued (all-drug monthly series used).",
    "3.original_claim": "The national death series has a real downturn break in 2023.",
    "3.supported_claim": "A downturn break is statistically clear in every method; in true monthly counts (all-drug 'drug-induced') it is estimated at 2022-09 (one-break model), earlier than the 2023-06 estimate from rolling 12-month totals.",
    "3.verdict": "partial",
    "4.finding": "F3b",
    "4.key_evidence": "monthly two-break model: 2020-07, 2023-01; earlier-break profile CI 2020-05 to 2021-05; rolling 2 vs 1 p ranges 0.0240 to 0.1059",
-   "4.main_caveat": "Monthly series is all-drug 'drug-induced', starts 2019-01 (few months before 2020), and uses a continuous-kink model, unlike Step B's segment model.",
+   "4.main_caveat": "Monthly series is all-drug 'drug-induced', starts 2019-01 (few months before 2020), and uses a continuous-kink model, unlike Step B's segment model. Opioid-specific monthly counts: not pursued (all-drug monthly series used).",
    "4.original_claim": "The 2020 break is not robust (2 breaks did not clearly beat 1 on the rolling series).",
    "4.supported_claim": "In true monthly counts (all-drug 'drug-induced') a second trend change around 2020-07 is supported (2 vs 1 p = 0.0100); on rolling 12-month totals the evidence is mixed (p < 0.05 in 4/8 variants).",
    "4.verdict": "fails",
@@ -8490,8 +8490,8 @@
    "r5.B_rolling": 1000,
    "r5.block": 12,
    "r5.monthly_series": "wonder_drug_induced_monthly",
-   "r5.opioid_monthly": "not done: needs a CDC WONDER monthly export with the T40 multiple-cause filter in data/raw/wonder/ with 'opioid' in the file name",
-   "r6.age_adjusted": "not done: needs a CDC WONDER annual export (Group By Year, opioid filter, age-adjusted rates) in data/raw/wonder/ with 'opioid' in the file name"
+   "r5.opioid_monthly": "not pursued (all-drug monthly series used; see caveat)",
+   "r6.age_adjusted": "not pursued (all-drug monthly series used; see caveat)"
   },
   "outputs/robustness/summary_variants.csv": {
    "0.ci_criterion_met": "True",

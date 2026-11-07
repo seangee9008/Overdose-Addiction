@@ -302,6 +302,7 @@ B_ROLL = 1000          # block-bootstrap replicates for the rolling-series tests
 B_MONTHLY = 500        # replicates for the monthly-count bootstrap tests
 BLOCK = 12
 WONDER_SERIES = "wonder_drug_induced_monthly"
+NOT_PURSUED = "not pursued (all-drug monthly series used; see caveat)"
 
 
 def rolling_break_tests(y, dates, seed):
@@ -869,7 +870,9 @@ def findings_ledger(vd, decl):
                       f"(CI {ro.break_2_ci_low} to {ro.break_2_ci_high}), 1 vs 0 p = {ro.p_1_vs_0:.4f}; "
                       f"{v.loc['F3a (2023 break)', 'notes']}"),
         main_caveat=("Rolling 12-month totals spread a change over up to 12 months, so their break dates lag; "
-                     f"the monthly series is {defn} and starts {mm.first}.")))
+                     f"the monthly series is {defn} and starts {mm.first}."
+                     + ("" if is_opioid_series(main_series) else
+                        " Opioid-specific monthly counts: not pursued (all-drug monthly series used)."))))
     rows.append(dict(
         finding="F3b", original_claim="The 2020 break is not robust (2 breaks did not clearly beat 1 on the rolling series).",
         verdict=word["F3b (2020 break not robust)"],
@@ -879,7 +882,9 @@ def findings_ledger(vd, decl):
         key_evidence=(f"monthly two-break model: {mm.two_breaks}; earlier-break profile CI {mm.two_break_1_profile_ci}; "
                       f"rolling 2 vs 1 p ranges {roll.p_2_vs_1.min():.4f} to {roll.p_2_vs_1.max():.4f}"),
         main_caveat=(f"Monthly series is {defn}, starts {mm.first} (few months before 2020), and uses a continuous-kink "
-                     "model, unlike Step B's segment model.")))
+                     "model, unlike Step B's segment model."
+                     + ("" if is_opioid_series(main_series) else
+                        " Opioid-specific monthly counts: not pursued (all-drug monthly series used)."))))
     f4f = f"{OUT}/f4_start_years.csv"
     if os.path.exists(f4f):
         f4t = pd.read_csv(f4f)
@@ -1045,9 +1050,8 @@ def main(checks):
             r12(ind, tag)
         r12(OPIOIDS, "opioids_predicted_value", value_col="Predicted Value")
         aa = r6_wonder_age_adjusted()
-        meta["r6"] = dict(age_adjusted=("done: outputs/robustness/r6_wonder_age_adjusted.csv" if aa is not None else
-                                        "not done: needs a CDC WONDER annual export (Group By Year, opioid filter, "
-                                        "age-adjusted rates) in data/raw/wonder/ with 'opioid' in the file name"))
+        meta.setdefault("r6", {})["age_adjusted"] = ("done: outputs/robustness/r6_wonder_age_adjusted.csv"
+                                                     if aa is not None else NOT_PURSUED)
     if "f4" in checks:
         out, chk = f4()
         meta["f4"] = dict(rule=F4_RULE, step_c_reproduced=bool(chk.match.all()))
@@ -1068,12 +1072,15 @@ def main(checks):
         print(hac.drop(columns=["note", "source"]).to_string(index=False))
         print(ann.drop(columns=["note", "source"]).to_string(index=False))
         print(mon.drop(columns=["model", "wonder_query", "source"]).T.to_string())
-        has_op = any(is_opioid_series(x) for x in mon.series.unique())
-        meta["r5"] = dict(monthly_series=WONDER_SERIES, B_rolling=B_ROLL, B_monthly=B_MONTHLY, block=BLOCK,
-                          opioid_monthly=("done: opioid series in outputs/robustness/r5_monthly_breaks.csv" if has_op else
-                                          "not done: needs a CDC WONDER monthly export with the T40 multiple-cause filter "
-                                          "in data/raw/wonder/ with 'opioid' in the file name"))
+        meta["r5"] = dict(monthly_series=WONDER_SERIES, B_rolling=B_ROLL, B_monthly=B_MONTHLY, block=BLOCK)
     if "summary" in checks:
+        # status of the opioid-specific CDC WONDER exports (decision: not pursued; all-drug monthly series used)
+        mon_series = pd.read_csv(f"{OUT}/r5_monthly_breaks.csv").series.unique()
+        has_op = any(is_opioid_series(x) for x in mon_series)
+        meta.setdefault("r5", {})["opioid_monthly"] = (
+            "done: opioid series in outputs/robustness/r5_monthly_breaks.csv" if has_op else NOT_PURSUED)
+        if not os.path.exists(f"{OUT}/r6_wonder_age_adjusted.csv"):
+            meta.setdefault("r6", {})["age_adjusted"] = NOT_PURSUED
         plot_forest()
         plot_break_dates()
         vd = summarize()
