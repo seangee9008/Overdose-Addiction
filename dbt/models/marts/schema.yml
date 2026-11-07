@@ -147,3 +147,47 @@ models:
         data_tests: [not_null, non_negative]
       - name: age_adjusted_rate
         data_tests: [non_negative]
+
+  - name: population_state_age
+    description: Census state population by year and TEDS-A age group (-1 = all ages; 0 = under 12).
+    columns:
+      - name: row_key
+        data_tests: [unique, not_null]
+      - name: population
+        data_tests: [not_null, non_negative]
+
+  - name: teds_state_year
+    description: TEDS-A admissions aggregated to state x year (area level), 2015-2023.
+    columns:
+      - name: row_key
+        data_tests: [unique, not_null]
+      - name: total_admissions
+        data_tests: [not_null, non_negative]
+      - name: primary_opioid
+        data_tests: [not_null, non_negative]
+
+  - name: teds_reporting_panel
+    description: State x year 2015-2023 reporting grid with the completeness rule (reports every year and no year-to-year change > 50%).
+    columns:
+      - name: row_key
+        data_tests: [unique, not_null]
+      - name: is_complete
+        data_tests: [not_null]
+      - name: total_admissions
+        data_tests: [not_null, non_negative]
+
+  - name: deaths_state_year
+    description: CDC VSRR state calendar-year opioid and all-drug overdose deaths (Dec 12-month-ending); NY = NY + NYC.
+    columns:
+      - name: row_key
+        data_tests: [unique, not_null]
+      - name: opioid_deaths
+        data_tests: [non_negative]
+
+  - name: teds_deaths_state_year
+    description: Area-level panel of TEDS-A admissions, CDC opioid deaths and Census population by state x year, 2015-2023.
+    columns:
+      - name: row_key
+        data_tests: [unique, not_null]
+      - name: population
+        data_tests: [not_null, non_negative]
