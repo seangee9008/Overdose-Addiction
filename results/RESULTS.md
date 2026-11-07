@@ -306,6 +306,8 @@ Sources:
 
 ## Step A: opioid deaths vs NSDUH opioid measures, 2021-2024
 
+> Robustness status (from `results/FINDINGS.md`): F1-misuse: **holds**; F1-OUD: **partial**; F2: **not distinguishable**. Read these estimates together with the ledger.
+
 Produced by `src/step_a.py`.
 
 > **Reminder:** NSDUH mostly captures prescription pain-reliever (pill) misuse, while opioid overdose deaths are mostly illicitly made fentanyl (synthetic opioids, T40.4). The two series measure different behaviors in different populations; a household survey also misses many people at highest risk (e.g. unhoused, incarcerated).
@@ -384,6 +386,8 @@ Sources:
 
 ## Step B: break-point inference (moving block bootstrap)
 
+> Robustness status (from `results/FINDINGS.md`): F3a: **partial**; F3b: **fails**. Read these estimates together with the ledger.
+
 Produced by `src/step_b.py`. B = 2000 resamples per test, seed 20261023, minimum segment 12 months, block lengths [12, 6, 24] (first = main analysis).
 
 ### Method (from the script)
@@ -458,6 +462,8 @@ Sources:
 ![step_b_bootstrap_opioids.png](../outputs/step_b_bootstrap_opioids.png)
 
 ## Step C: survey-weighted logistic regression (NSDUH only)
+
+> Robustness status (from `results/FINDINGS.md`): F4: **holds**. Read these estimates together with the ledger.
 
 Produced by `src/step_c.py` (models: `src/survey_glm.py`; R cross-check: `R/step_c_svyglm.R`). Crude = outcome ~ year; adjusted = + age group, sex, race/ethnicity. Reference: 2021, 12-17, male, NH White. Odds ratios with 95% CI.
 
@@ -649,6 +655,8 @@ Sources:
 
 ## Step D: county change in overdose deaths by social vulnerability (CDC county + SVI only)
 
+> Robustness status (from `results/FINDINGS.md`): F5: **fails**. Read these estimates together with the ledger.
+
 Produced by `src/step_d.py` (model: `src/count_models.py`).
 
 > All-drug deaths (county file has no opioid split). Area-level associations only; they do not describe individuals (ecological fallacy).
@@ -825,6 +833,7 @@ Produced by `src/step_r.py` (`make robustness`). Each finding is re-estimated un
 | F3a (2023 break) | 1 break beats 0 at p < 0.05 by every method AND every break-date CI overlaps calendar 2023 ('partially' if significant everywhere but some CI does not overlap 2023; 'no' if not significant by the main method). |
 | F3b (2020 break not robust) | '2020 break not robust' holds if 2 breaks vs 1 gives p >= 0.05 by the corrected method (true monthly counts); 'no' if p < 0.05. |
 | F5 (SVI gap) | Q4/Q1 gap ratio > 1 in every variant; 95% CI excludes 1 in the main specification and in >= 75% of variants ('partially' if signs hold but CI criterion fails; 'no' if any sign flips). |
+| F4 (within-group decline) | /adjusted log-OR - crude log-OR/ <= 0.05 for the start-year -> 2024 contrast in every measure x start year (adjustment for age, sex, race/ethnicity moves the year odds ratio by less than about 5%): 'holds'; <= 0.05 in >= 75%: 'partial'; otherwise 'fails'. Written before the F4 re-test was run. |
 
 
 ### Summary
@@ -837,7 +846,7 @@ Produced by `src/step_r.py` (`make robustness`). Each finding is re-estimated un
 | F3a (2023 break) | Step B (B=2000): opioids 1 vs 0 p = 0.0005, all-drug 0.0005; re-run reference here (B=1000): 0.0010 | 25 | partially | 1 vs 0 significant in 26/26 rows; break-date CI overlaps 2023 in 18/20 rows with a CI. Annual rows map a bend at year Y to a change during Y+1. |
 | F3b (2020 break not robust) | Step B (B=2000): 2 vs 1 p = 0.0645 (all-drug), 0.0415 (opioids) | 10 | no | corrected method (true monthly counts, all-drug drug-induced): 2 vs 1 p = 0.0100, earlier break 2020-07, 2023-01; earlier break CI 2020-05 to 2021-05; rolling series: p >= 0.05 in 4/8 variants. Opioid-specific monthly counts not yet available. |
 | F5 (SVI gap) | gap ratio = 1.121 (1.040, 1.208) | 16 | no | gap > 1 in 15/17; CI excludes 1 in 11/16 variants (69%). Sign flips: suppressed set to 9 (no censoring), bound: gap minimised (Q4 base=9,end=1; others base=1,end=9). Baseline-adjusted variants excluded (not comparable). |
-| F4 (within-group decline) | see Step C | 0 | not re-tested | Not part of R1-R6. |
+| F4 (within-group decline) | Step C: adjustment moved the 2024-vs-2021 log-OR by <= 0.003 | 9 | yes | /adjusted - crude log-OR/ <= 0.05 in 9/9 measure x start-year contrasts; max shift 0.0027 |
 
 
 ### Per-variant results
@@ -1116,6 +1125,15 @@ Produced by `src/step_r.py` (`make robustness`). Each finding is re-estimated un
 | F5 (SVI gap) | end = 12 months ending Jun 2025 (last 6 months dropped) | 1.089 (1.017, 1.166) | 0.0147 |  | True | True |
 | F5 (SVI gap) | end = 12 months ending Dec 2024 (last 12 months dropped) | 1.088 (1.019, 1.161) | 0.0114 |  | True | True |
 | F5 (SVI gap) | 2023 -> 2025 (Step D sensitivity) | 1.052 (0.977, 1.131) | 0.1794 |  | True | False |
+| F4 (within-group decline) | OPI_MISUSE; start 2021 | crude OR 0.812 (0.712, 0.924); adjusted OR 0.811 (0.710, 0.926) | 0.0028 |  |  | True |
+| F4 (within-group decline) | OPI_MISUSE; start 2022 | crude OR 0.878 (0.781, 0.988); adjusted OR 0.877 (0.781, 0.985) | 0.0276 |  |  | True |
+| F4 (within-group decline) | OPI_MISUSE; start 2023 | crude OR 0.867 (0.765, 0.981); adjusted OR 0.865 (0.763, 0.982) | 0.0258 |  |  | True |
+| F4 (within-group decline) | OPI_OUD; start 2021 | crude OR 0.885 (0.737, 1.064); adjusted OR 0.887 (0.736, 1.069) | 0.1996 |  |  | True |
+| F4 (within-group decline) | OPI_OUD; start 2022 | crude OR 0.812 (0.653, 1.010); adjusted OR 0.811 (0.651, 1.010) | 0.0609 |  |  | True |
+| F4 (within-group decline) | OPI_OUD; start 2023 | crude OR 0.876 (0.734, 1.046); adjusted OR 0.876 (0.732, 1.049) | 0.1449 |  |  | True |
+| F4 (within-group decline) | HERYR; start 2021 | crude OR 0.502 (0.322, 0.781); adjusted OR 0.501 (0.321, 0.784) | 0.0034 |  |  | True |
+| F4 (within-group decline) | HERYR; start 2022 | crude OR 0.540 (0.355, 0.823); adjusted OR 0.540 (0.354, 0.823) | 0.0053 |  |  | True |
+| F4 (within-group decline) | HERYR; start 2023 | crude OR 0.816 (0.529, 1.257); adjusted OR 0.814 (0.523, 1.266) | 0.3501 |  |  | True |
 
 
 ![robustness/forest_d.png](../outputs/robustness/forest_d.png)
@@ -1126,11 +1144,45 @@ Produced by `src/step_r.py` (`make robustness`). Each finding is re-estimated un
 
 | item | status |
 |---|---|
-| r6 | not done: needs a CDC WONDER annual export grouped by Year with age-adjusted rates |
-| r5 | not done: needs a CDC WONDER export with the T40 multiple-cause filter |
+| r6 | not done: needs a CDC WONDER annual export (Group By Year, opioid filter, age-adjusted rates) in data/raw/wonder/ with 'opioid' in the file name |
+| r5 | not done: needs a CDC WONDER monthly export with the T40 multiple-cause filter in data/raw/wonder/ with 'opioid' in the file name |
 
 
 ### Detailed tables
+
+#### `robustness/f4_check_vs_step_c.csv`
+
+| measure | crude_or_here | crude_or_step_c | adjusted_or_here | adjusted_or_step_c | match |
+|---|---|---|---|---|---|
+| OPI_MISUSE | 0.8116 | 0.8116 | 0.8106 | 0.8106 | True |
+| OPI_OUD | 0.8853 | 0.8853 | 0.8867 | 0.8867 | True |
+| HERYR | 0.5016 | 0.5016 | 0.5015 | 0.5015 | True |
+
+#### `robustness/f4_start_years.csv`
+
+| check | measure | label | start | end | crude_or | crude_ci_low | crude_ci_high | crude_p | adjusted_or | adjusted_ci_low | adjusted_ci_high | adjusted_p | adjustment_shift_log_or | df_crude | df_adjusted | source |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| F4 | OPI_MISUSE | Opioid misuse, past year (heroin use or Rx pain-reliever misuse; 2021-23 definition) | 2021 | 2024 | 0.8116 | 0.7124 | 0.9245 | 0.0023 | 0.8106 | 0.7097 | 0.9258 | 0.0028 | -0.0012 | 47 | 36 | NSDUH 2021-2024 combined PUF (+2024 single-year PUF for OUD), ANALWT2_C1, VESTR_C/VEREP, df=50; survey-weighted logistic, crude vs + CATAG3, IRSEX, NEWRACE2 |
+| F4 | OPI_MISUSE | Opioid misuse, past year (heroin use or Rx pain-reliever misuse; 2021-23 definition) | 2022 | 2024 | 0.8785 | 0.7812 | 0.9878 | 0.0311 | 0.8767 | 0.7806 | 0.9848 | 0.0276 | -0.0020 | 47 | 36 | NSDUH 2021-2024 combined PUF (+2024 single-year PUF for OUD), ANALWT2_C1, VESTR_C/VEREP, df=50; survey-weighted logistic, crude vs + CATAG3, IRSEX, NEWRACE2 |
+| F4 | OPI_MISUSE | Opioid misuse, past year (heroin use or Rx pain-reliever misuse; 2021-23 definition) | 2023 | 2024 | 0.8665 | 0.7654 | 0.9810 | 0.0246 | 0.8652 | 0.7626 | 0.9817 | 0.0258 | -0.0015 | 47 | 36 | NSDUH 2021-2024 combined PUF (+2024 single-year PUF for OUD), ANALWT2_C1, VESTR_C/VEREP, df=50; survey-weighted logistic, crude vs + CATAG3, IRSEX, NEWRACE2 |
+| F4 | OPI_OUD | Opioid use disorder, past year (heroin or Rx pain-reliever use disorder; 2021-23 definition) | 2021 | 2024 | 0.8853 | 0.7365 | 1.0643 | 0.1896 | 0.8867 | 0.7356 | 1.0687 | 0.1996 | 0.0015 | 47 | 36 | NSDUH 2021-2024 combined PUF (+2024 single-year PUF for OUD), ANALWT2_C1, VESTR_C/VEREP, df=50; survey-weighted logistic, crude vs + CATAG3, IRSEX, NEWRACE2 |
+| F4 | OPI_OUD | Opioid use disorder, past year (heroin or Rx pain-reliever use disorder; 2021-23 definition) | 2022 | 2024 | 0.8120 | 0.6529 | 1.0100 | 0.0609 | 0.8109 | 0.6510 | 1.0101 | 0.0609 | -0.0014 | 47 | 36 | NSDUH 2021-2024 combined PUF (+2024 single-year PUF for OUD), ANALWT2_C1, VESTR_C/VEREP, df=50; survey-weighted logistic, crude vs + CATAG3, IRSEX, NEWRACE2 |
+| F4 | OPI_OUD | Opioid use disorder, past year (heroin or Rx pain-reliever use disorder; 2021-23 definition) | 2023 | 2024 | 0.8763 | 0.7340 | 1.0462 | 0.1406 | 0.8762 | 0.7320 | 1.0489 | 0.1449 | -0.0001 | 47 | 36 | NSDUH 2021-2024 combined PUF (+2024 single-year PUF for OUD), ANALWT2_C1, VESTR_C/VEREP, df=50; survey-weighted logistic, crude vs + CATAG3, IRSEX, NEWRACE2 |
+| F4 | HERYR | Heroin use, past year | 2021 | 2024 | 0.5016 | 0.3220 | 0.7812 | 0.0030 | 0.5015 | 0.3209 | 0.7837 | 0.0034 | -0.0002 | 47 | 36 | NSDUH 2021-2024 combined PUF (+2024 single-year PUF for OUD), ANALWT2_C1, VESTR_C/VEREP, df=50; survey-weighted logistic, crude vs + CATAG3, IRSEX, NEWRACE2 |
+| F4 | HERYR | Heroin use, past year | 2022 | 2024 | 0.5402 | 0.3548 | 0.8225 | 0.0050 | 0.5398 | 0.3541 | 0.8228 | 0.0053 | -0.0009 | 47 | 36 | NSDUH 2021-2024 combined PUF (+2024 single-year PUF for OUD), ANALWT2_C1, VESTR_C/VEREP, df=50; survey-weighted logistic, crude vs + CATAG3, IRSEX, NEWRACE2 |
+| F4 | HERYR | Heroin use, past year | 2023 | 2024 | 0.8158 | 0.5293 | 1.2571 | 0.3484 | 0.8136 | 0.5229 | 1.2658 | 0.3501 | -0.0027 | 47 | 36 | NSDUH 2021-2024 combined PUF (+2024 single-year PUF for OUD), ANALWT2_C1, VESTR_C/VEREP, df=50; survey-weighted logistic, crude vs + CATAG3, IRSEX, NEWRACE2 |
+
+#### `robustness/findings_ledger.csv`
+
+| finding | original_claim | verdict | supported_claim | key_evidence | main_caveat |
+|---|---|---|---|---|---|
+| F1-misuse | Opioid deaths fell faster than NSDUH past-year opioid misuse, 2021->2024 (deaths -32.1%, survey -18.3%). | holds | In 72/72 specifications the death decline was proportionally larger than the decline in past-year opioid misuse; the 95% CI for the difference excluded zero in 65/71 alternative specifications. | main d = -0.185 (-0.311, -0.058), Holm p = 0.0136; d ranges -0.322 to -0.083; least clear variant: all_drug, start 2021, count, rao_wu_bootstrap: d = -0.083 (-0.212, 0.046) | NSDUH measures mostly prescription pain-reliever misuse in household respondents; deaths are mostly illicitly made fentanyl (T40.4 in 88% of opioid deaths). Different behaviours and populations; no confounders controlled. |
+| F1-OUD | Opioid deaths fell faster than NSDUH past-year opioid use disorder, 2021->2024 (deaths -32.1%, survey -11.3%). | partial | In 72/72 specifications the death decline was proportionally larger than the decline in past-year opioid use disorder; the 95% CI for the difference excluded zero in 52/71 alternative specifications. | main d = -0.267 (-0.448, -0.087), Holm p = 0.0136; d ranges -0.300 to -0.098; least clear variant: all_drug, start 2022, count, shared_design: d = -0.098 (-0.312, 0.115) | NSDUH measures mostly prescription pain-reliever misuse in household respondents; deaths are mostly illicitly made fentanyl (T40.4 in 88% of opioid deaths). Different behaviours and populations; no confounders controlled. |
+| F2 | Heroin use fell about as fast as opioid deaths, 2021->2024 (heroin -49.7%, deaths -32.1%); not significantly different. | not distinguishable | The data do not distinguish whether heroin use or opioid deaths declined faster: the 95% CI for the difference included zero in 72/72 specifications, and the point estimate was positive in 48 and negative in 24. | main d = 0.301 (-0.140, 0.742), p = 0.1765; d ranges -0.227 to 0.403 | Heroin use is rare in NSDUH (0.19-0.39%); estimates are imprecise (subgroup RSE often > 0.3). |
+| F3a | The national death series has a real downturn break in 2023. | partial | A downturn break is statistically clear in every method; in true monthly counts (all-drug 'drug-induced') it is estimated at 2022-09 (one-break model), earlier than the 2023-06 estimate from rolling 12-month totals. | monthly: one-break 2022-09, profile CI 2022-06 to 2022-11, bootstrap CI 2022-03 to 2023-02, 1 vs 0 p = 0.0020; rolling opioids: 2023-06 (CI 2023-01 to 2024-01), 1 vs 0 p = 0.0010; 1 vs 0 significant in 26/26 rows; break-date CI overlaps 2023 in 18/20 rows with a CI. Annual rows map a bend at year Y to a change during Y+1. | Rolling 12-month totals spread a change over up to 12 months, so their break dates lag; the monthly series is all-drug 'drug-induced' and starts 2019-01. |
+| F3b | The 2020 break is not robust (2 breaks did not clearly beat 1 on the rolling series). | fails | In true monthly counts (all-drug 'drug-induced') a second trend change around 2020-07 is supported (2 vs 1 p = 0.0100); on rolling 12-month totals the evidence is mixed (p < 0.05 in 4/8 variants). | monthly two-break model: 2020-07, 2023-01; earlier-break profile CI 2020-05 to 2021-05; rolling 2 vs 1 p ranges 0.0240 to 0.1059 | Monthly series is all-drug 'drug-induced', starts 2019-01 (few months before 2020), and uses a continuous-kink model, unlike Step B's segment model. |
+| F4 | The NSDUH declines happened within age/sex/race groups, not through shifts in population mix. | holds | Adjusting for age group, sex and race/ethnicity changed the start-year->2024 log odds ratio by at most 0.0027 across 9 measure x start-year contrasts, so these demographic shifts do not account for the changes. | misuse 2021->2024: crude OR 0.812 (0.712, 0.924), adjusted OR 0.811 (0.710, 0.926); adjusted ORs with CI excluding 1: 5/9 | Only age group (5 levels), sex and race/ethnicity are adjusted; finer or other compositional shifts are not examined. This says nothing about whether the declines themselves are significant. |
+| F5 | County deaths fell less in the most vulnerable SVI quartile (Q4 -34%) than in the least vulnerable (Q1 -41%), 2022->2025. | fails | The main county model estimates a smaller decline in the most vulnerable quartile, but the estimate is not robust to clustering, period choice and the handling of suppressed counts. | main gap ratio 1.121 (1.040, 1.208); state clusters 1.121 (0.992, 1.267); 2023->2025 1.052 (0.977, 1.131); suppressed = 9: 0.965; never-suppressed counties 1.104 (1.018, 1.196); with a state-baseline term: 1.110 (1.022, 1.206); gap > 1 in 15/17; CI excludes 1 in 11/16 variants (69%). Sign flips: suppressed set to 9 (no censoring), bound: gap minimised (Q4 base=9,end=1; others base=1,end=9). Baseline-adjusted variants excluded (not comparable). | About half of county cells are suppressed (1-9 deaths); all-drug deaths only; area-level association (no individual inference). The 940 never-suppressed counties are not a random subset: median population 134,364 vs 25,621 for all counties, 84% of the analysed population. |
 
 #### `robustness/r1_r2_declines_all_drug.csv`
 
@@ -1407,6 +1459,22 @@ Produced by `src/step_r.py` (`make robustness`). Each finding is re-estimated un
 | R3 | baseline-adjusted (2020-22 mean rate; suppressed baseline = 5) | baseline | Q4 vs Q1 end-period rate ratio at equal 2020-22 baseline rate (>1 = Q4 higher at end) | 1.5067 | 1.4160 | 1.6033 | 0.4100 | 0.0317 | 0.0000 | 3133 | 1628 | 3133 | True | NOT COMPARABLE, excluded from decision rule: log-baseline slope 0.594 (<1); 45.9% of baseline cells suppressed, so the noisy baseline lets the Q4 term absorb Q4's higher overall level (baseline measurement error) |  |  |  | CDC VSRR county file gb4e-yj24 (all-drug, 12-month-ending) x CDC/ATSDR SVI 2022 (RPL_THEMES, E_TOTPOP); Census Vintage 2025 county population where noted | excluded in every variant: 8 legacy CT counties have no SVI 2022 match (planning regions) |
 | R3 | baseline-adjusted (2020-22 mean rate; suppressed baseline = 9) | baseline | Q4 vs Q1 end-period rate ratio at equal 2020-22 baseline rate (>1 = Q4 higher at end) | 1.5580 | 1.4602 | 1.6624 | 0.4434 | 0.0331 | 0.0000 | 3133 | 1628 | 3133 | True | NOT COMPARABLE, excluded from decision rule: log-baseline slope 0.466 (<1); 45.9% of baseline cells suppressed, so the noisy baseline lets the Q4 term absorb Q4's higher overall level (baseline measurement error) |  |  |  | CDC VSRR county file gb4e-yj24 (all-drug, 12-month-ending) x CDC/ATSDR SVI 2022 (RPL_THEMES, E_TOTPOP); Census Vintage 2025 county population where noted | excluded in every variant: 8 legacy CT counties have no SVI 2022 match (planning regions) |
 
+#### `robustness/r3b_baseline_rtm.csv`
+
+| check | variant | group | estimand | gap_ratio | ci_low | ci_high | log_gap | se | p | n | n_censored | clusters | converged | note | wald_all_quartiles_p | q1_change_ratio | q4_change_ratio | usable_counties_single_2022_baseline | usable_counties_pooled_2021_2022_baseline | counties_pooled_baseline_one_year_suppressed | usable_counties_state_baseline | counties_in_main_analysis | source |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| R3 | main model, counties with exact 2021 and 2022 baseline only | rtm | ratio of change ratios, SVI Q4 vs Q1 (>1 = Q4 declined less) | 1.0981 | 1.0123 | 1.1912 | 0.0936 | 0.0415 | 0.0242 | 2830 | 313 | 1415 | True | 1415 of 3133 counties usable | 0.0099 | 0.5620 | 0.6172 | 1722 | 1415 | 627 | 3133 | 3133 | CDC VSRR county file gb4e-yj24 (all-drug, 12-month-ending) x CDC/ATSDR SVI 2022 (RPL_THEMES, E_TOTPOP); Census Vintage 2025 county population where noted; state baseline: CDC VSRR state file (all-drug) / Census state population |
+| R3 | + post x log(pooled 2021-22 county baseline rate), exact-baseline counties | rtm | ratio of change ratios, SVI Q4 vs Q1 (>1 = Q4 declined less) | 1.2722 | 1.1944 | 1.3552 | 0.2408 | 0.0322 | 0.0000 | 2830 | 313 | 1415 | True | 1415 of 3133 counties usable; post x log-baseline coefficient -0.306 (negative = higher-baseline counties declined more) | 0.0000 | 0.0461 | 0.0587 | 1722 | 1415 | 627 | 3133 | 3133 | CDC VSRR county file gb4e-yj24 (all-drug, 12-month-ending) x CDC/ATSDR SVI 2022 (RPL_THEMES, E_TOTPOP); Census Vintage 2025 county population where noted; state baseline: CDC VSRR state file (all-drug) / Census state population |
+| R3 | + post x log(state 2021-22 baseline rate), clusters=county | rtm | ratio of change ratios, SVI Q4 vs Q1 (>1 = Q4 declined less) | 1.1098 | 1.0217 | 1.2056 | 0.1042 | 0.0422 | 0.0136 | 6266 | 3039 | 3133 | True | 3133 of 3133 counties usable (0 without a state baseline); post x log-state-baseline coefficient 0.606 | 0.0006 | 78.7483 | 87.3955 | 1722 | 1415 | 627 | 3133 | 3133 | CDC VSRR county file gb4e-yj24 (all-drug, 12-month-ending) x CDC/ATSDR SVI 2022 (RPL_THEMES, E_TOTPOP); Census Vintage 2025 county population where noted; state baseline: CDC VSRR state file (all-drug) / Census state population |
+| R3 | + post x log(state 2021-22 baseline rate), clusters=state | rtm | ratio of change ratios, SVI Q4 vs Q1 (>1 = Q4 declined less) | 1.1098 | 0.9055 | 1.3601 | 0.1042 | 0.1038 | 0.3154 | 6266 | 3039 | 50 | True | 3133 of 3133 counties usable (0 without a state baseline); post x log-state-baseline coefficient 0.606 | 0.2572 | 78.7483 | 87.3955 | 1722 | 1415 | 627 | 3133 | 3133 | CDC VSRR county file gb4e-yj24 (all-drug, 12-month-ending) x CDC/ATSDR SVI 2022 (RPL_THEMES, E_TOTPOP); Census Vintage 2025 county population where noted; state baseline: CDC VSRR state file (all-drug) / Census state population |
+
+#### `robustness/r3c_never_suppressed_profile.csv`
+
+| group | counties | population_total | population_share | population_median | share_svi_Q1 | share_svi_Q2 | share_svi_Q3 | share_svi_Q4 | share_urban_rural_1 | share_urban_rural_2 | share_urban_rural_3 | share_urban_rural_4 | share_urban_rural_5 | share_urban_rural_6 | note | source |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| never suppressed (Dec 2020-2025) | 940 | 275,325,534 | 0.8407 | 134,364.5000 | 0.2128 | 0.2500 | 0.2862 | 0.2511 | 0.0713 | 0.2287 | 0.2340 | 0.1840 | 0.1574 | 0.1245 | NCHS 2013 urban-rural code: 1 = large central metro ... 6 = noncore (most rural); SVI quartile 4 = most vulnerable | CDC VSRR county file gb4e-yj24 (all-drug, 12-month-ending) x CDC/ATSDR SVI 2022 (RPL_THEMES, E_TOTPOP); Census Vintage 2025 county population where noted |
+| all analysed counties | 3133 | 327,476,662 | 1.0000 | 25,621.0000 | 0.2502 | 0.2499 | 0.2493 | 0.2506 | 0.0214 | 0.1168 | 0.1175 | 0.1143 | 0.2043 | 0.4258 | NCHS 2013 urban-rural code: 1 = large central metro ... 6 = noncore (most rural); SVI quartile 4 = most vulnerable | CDC VSRR county file gb4e-yj24 (all-drug, 12-month-ending) x CDC/ATSDR SVI 2022 (RPL_THEMES, E_TOTPOP); Census Vintage 2025 county population where noted |
+
 #### `robustness/r4_r5_r6_rolling_breaks.csv`
 
 | check | series | variant | indicator | value_col | months_dropped | break_1 | break_1_ci_low | break_1_ci_high | break_2 | break_2_ci_low | break_2_ci_high | p_1_vs_0 | p_2_vs_1 | B | block | seed | n_months | first | last | source |
@@ -1451,7 +1519,7 @@ Produced by `src/step_r.py` (`make robustness`). Each finding is re-estimated un
 
 | key | value |
 |---|---|
-| r6.age_adjusted | not done: needs a CDC WONDER annual export grouped by Year with age-adjusted rates |
+| r6.age_adjusted | not done: needs a CDC WONDER annual export (Group By Year, opioid filter, age-adjusted rates) in data/raw/wonder/ with 'opioid' in the file name |
 | r12.seed | 20,261,103 |
 | r12.B | 2000 |
 | r12.starts | [2021, 2022, 2023] |
@@ -1463,4 +1531,6 @@ Produced by `src/step_r.py` (`make robustness`). Each finding is re-estimated un
 | r5.B_rolling | 1000 |
 | r5.B_monthly | 500 |
 | r5.block | 12 |
-| r5.opioid_monthly | not done: needs a CDC WONDER export with the T40 multiple-cause filter |
+| r5.opioid_monthly | not done: needs a CDC WONDER monthly export with the T40 multiple-cause filter in data/raw/wonder/ with 'opioid' in the file name |
+| f4.rule | /adjusted log-OR - crude log-OR/ <= 0.05 for the start-year -> 2024 contrast in every measure x start year (adjustment for age, sex, race/ethnicity moves the year odds ratio by less than about 5%): 'holds'; <= 0.05 in >= 75%: 'partial'; otherwise 'fails'. Written before the F4 re-test was run. |
+| f4.step_c_reproduced | True |

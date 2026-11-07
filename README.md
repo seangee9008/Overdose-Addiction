@@ -157,7 +157,8 @@ combined in one model.
 counts, three variance methods, county model and suppression handling, provisional months, break timing on
 true monthly counts, alternative death definitions). The decision rule for "holds / partially / no" was
 fixed before the checks were run; the verdicts, every variant and both figures are in the Robustness
-section of `results/RESULTS.md`. The methods are validated on simulated data with planted truths
+section of `results/RESULTS.md`. **`results/FINDINGS.md`** (generated) is the findings ledger: one row per
+finding with its verdict, the claim the data currently support, key evidence and the main caveat. The methods are validated on simulated data with planted truths
 (`tests/test_robustness_sims.py`; set `ROBUST_SIMS` to change the number of simulations).
 Robustness numbers have their own exact-match snapshot (`tests/golden/robustness_golden.json`).
 
