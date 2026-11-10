@@ -29,6 +29,6 @@ sources:
       - name: wonder_annual
         description: CDC WONDER annual (Group By Year) exports with population and crude / age-adjusted rates; may be empty.
       - name: teds_a
-        description: SAMHSA TEDS-A combined 2006-2023 PUF, admissions 2015-2023, 19 variables (read from the zip by src/ingest.py).
+        description: SAMHSA TEDS-A combined 2006-2023 PUF (admissions 2015-2023) + 2024 single-year PUF (identical codes), 19 variables + source_file (read from the zips by src/ingest.py).
       - name: census_state_age
         description: Census state population by single year of age x race (both sexes, all origins); intercensal 2010-2019, Vintage 2025 2020-2025.

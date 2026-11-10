@@ -1,6 +1,7 @@
 -- AREA-LEVEL ONLY: TEDS-A state x year admission counts next to CDC state opioid deaths and Census state
--- population, 2015-2023, with the completeness flag. No individual-level data and nothing from NSDUH.
+-- population, 2015-2024, with the completeness flags (through 2024 main; through 2023 sensitivity). No individual-level data and nothing from NSDUH.
 select r.state_fips, r.state_name, r.year, r.reports, r.codebook_excluded, r.is_complete, r.exclusion_reason,
+       r.is_complete_2015_2023, r.exclusion_reason_2015_2023,
        t.total_admissions, t.primary_opioid, t.primary_heroin, t.primary_methadone_nonrx, t.primary_other_opiates,
        t.any_opioid, t.primary_substance_missing,
        d.state, d.opioid_deaths, d.all_drug_deaths,

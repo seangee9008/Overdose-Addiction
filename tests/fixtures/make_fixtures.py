@@ -14,7 +14,7 @@ data. Each fixture deliberately contains the edge cases the data layer must hand
   Census:     Latin-1 encoded (a 'Doña Ana' row), state (SUMLEV 40) and county (SUMLEV 50) rows.
   WONDER:     CDC WONDER-style export (quoted labels, '(provisional)' / '(provisional and partial)'
               month labels, a 'Total' row and a footer with 'Query Parameters').
-  TEDS-A:     CSV inside a zip like the SAMHSA bundle; 2014 rows (outside the window); -9 codes; an
+  TEDS-A:     CSVs inside zips like the SAMHSA bundles (2006-2023 combined + 2024 single-year); 2014 rows (outside the window); -9 codes; an
               extra column; Florida complete, Louisiana (no opioid deaths), Oregon missing in its
               codebook-excluded years (2015-2022), Alabama with a > 50% year-to-year jump.
   Census age: alldata5 layout (SEX/ORIGIN/RACE/AGE rows; only SEX 0 & ORIGIN 0 are used), two vintages.
@@ -161,9 +161,9 @@ def wonder(rng):
 TEDS_STATES = {12: ("Florida", 3000), 22: ("Louisiana", 1500), 41: ("Oregon", 1200), 1: ("Alabama", 800)}
 
 
-def teds(rng):
-    rows, caseid = [], 1
-    for y in range(2014, 2024):
+def teds(rng, years=range(2014, 2024), fname="teds_a_2006_2023_csv.zip", inner="tedsa_puf_2006_2023.csv", caseid=1):
+    rows = []
+    for y in years:
         for fips, (name, base) in TEDS_STATES.items():
             if fips == 41 and y <= 2022:
                 continue                                      # Oregon: codebook-excluded 2015-2022
@@ -182,8 +182,8 @@ def teds(rng):
                 caseid += 1
     buf = io.StringIO()
     pd.DataFrame(rows).to_csv(buf, index=False)
-    with zipfile.ZipFile(os.path.join(OUT, "teds_a_2006_2023_csv.zip"), "w", zipfile.ZIP_DEFLATED) as zf:
-        zf.writestr("tedsa_puf_2006_2023.csv", buf.getvalue())
+    with zipfile.ZipFile(os.path.join(OUT, fname), "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr(inner, buf.getvalue())
 
 
 def census_age():
@@ -244,6 +244,8 @@ def main():
     census()
     wonder(rng)
     teds(rng)
+    teds(np.random.default_rng(2024), years=[2024], fname="teds_a_2024_csv.zip", inner="tedsa_puf_2024.csv",
+         caseid=900_000)                                   # separate single-year 2024 file, own RNG stream
     census_age()
     nsduh(rng)
     with open(os.path.join(OUT, "README.md"), "w") as fh:

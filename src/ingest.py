@@ -144,55 +144,64 @@ def read_wonder(raw_dir):
 
 
 # ---------------------------------------------------------------------------------------------- TEDS-A
-TEDS_ZIP = "teds_a_2006_2023_csv.zip"
+# (file, admission years kept). The combined 2006-2023 file and the 2024 single-year file have identical
+# codes and labels for every variable used (src/teds_codebooks.py; the 2024 state list omits the two states
+# excluded in 2024), so rows are appended without recoding; source_file records the origin of each row.
+TEDS_FILES = [("teds_a_2006_2023_csv.zip", (2015, 2023)), ("teds_a_2024_csv.zip", (2024, 2024))]
 TEDS_COLUMNS = ["CASEID", "ADMYR", "STFIPS", "SUB1", "SUB2", "SUB3", "HERFLG", "METHFLG", "OPSYNFLG", "AGE", "SEX",
                 "RACE", "ETHNIC", "NOPRIOR", "METHUSE", "SERVICES", "PSOURCE", "ROUTE1", "IDU"]
-TEDS_YEARS = (2015, 2023)          # analysis window; the full 2006-2023 file stays in data/raw/
+TEDS_YEARS = (2015, 2024)          # analysis window; the full raw files stay in data/raw/
 CHUNK = 1_000_000
 
 
 def ingest_teds(raw_dir, out_dir, manifest):
-    """TEDS-A combined 2006-2023 CSV, read from the zip in chunks (never unzipped to disk). Keeps the
-    columns in TEDS_COLUMNS and admission years TEDS_YEARS; every chunk is pandera-validated before it is
-    appended to data/interim/teds_a.parquet. src_row = 0-based row number in the raw CSV."""
-    path = os.path.join(raw_dir, TEDS_ZIP)
-    if not os.path.exists(path):
-        raise FileNotFoundError(f"{path} missing (run fetch_data.py --only teds_a_2006_2023)")
+    """TEDS-A CSVs read from their zips in chunks (never unzipped to disk): the combined 2006-2023 file
+    (years 2015-2023) and the 2024 single-year file. Keeps TEDS_COLUMNS; every chunk is pandera-validated
+    before it is appended to data/interim/teds_a.parquet. src_row = 0-based row number within its raw CSV."""
     out = os.path.join(out_dir, "teds_a.parquet")
-    writer, n_in, n_kept, offset = None, 0, 0, 0
-    with zipfile.ZipFile(path) as zf:
-        member = [m for m in zf.namelist() if m.lower().endswith(".csv")]
-        if len(member) != 1:
-            raise ValueError(f"{path}: expected one CSV inside, found {member}")
-        with zf.open(member[0]) as fh:
-            header = pd.read_csv(fh, nrows=0).columns
-        actual = {c.upper(): c for c in header}
-        missing = [c for c in TEDS_COLUMNS if c not in actual]
-        if missing:
-            raise KeyError(f"{path}: columns not found: {missing}")
-        with zf.open(member[0]) as fh:
-            for chunk in pd.read_csv(fh, usecols=[actual[c] for c in TEDS_COLUMNS], chunksize=CHUNK):
-                chunk.columns = [c.upper() for c in chunk.columns]
-                chunk = chunk[TEDS_COLUMNS]
-                chunk.insert(0, "src_row", range(offset, offset + len(chunk)))
-                offset += len(chunk)
-                n_in += len(chunk)
-                keep = chunk[chunk.ADMYR.between(*TEDS_YEARS)]
-                if keep.empty:
-                    continue
-                schemas.validate("teds_a", keep, path)
-                table = pa_arrow.Table.from_pandas(keep, preserve_index=False)
-                if writer is None:
-                    writer = pq.ParquetWriter(out, table.schema)
-                writer.write_table(table)
-                n_kept += len(keep)
-    if writer is None:
-        raise ValueError(f"{path}: no admissions in {TEDS_YEARS}")
+    writer, files_info, n_kept_total = None, {}, 0
+    for fname, years in TEDS_FILES:
+        path = os.path.join(raw_dir, fname)
+        if not os.path.exists(path):
+            raise FileNotFoundError(f"{path} missing (run fetch_data.py)")
+        n_in = n_kept = offset = 0
+        with zipfile.ZipFile(path) as zf:
+            member = [m for m in zf.namelist() if m.lower().endswith(".csv")]
+            if len(member) != 1:
+                raise ValueError(f"{path}: expected one CSV inside, found {member}")
+            with zf.open(member[0]) as fh:
+                header = pd.read_csv(fh, nrows=0).columns
+            actual = {c.upper(): c for c in header}
+            missing = [c for c in TEDS_COLUMNS if c not in actual]
+            if missing:
+                raise KeyError(f"{path}: columns not found: {missing}")
+            with zf.open(member[0]) as fh:
+                for chunk in pd.read_csv(fh, usecols=[actual[c] for c in TEDS_COLUMNS], chunksize=CHUNK):
+                    chunk.columns = [c.upper() for c in chunk.columns]
+                    chunk = chunk[TEDS_COLUMNS]
+                    chunk.insert(0, "src_row", range(offset, offset + len(chunk)))
+                    chunk.insert(1, "source_file", fname)
+                    offset += len(chunk)
+                    n_in += len(chunk)
+                    keep = chunk[chunk.ADMYR.between(*years)]
+                    if keep.empty:
+                        continue
+                    schemas.validate("teds_a", keep, path)
+                    table = pa_arrow.Table.from_pandas(keep, preserve_index=False)
+                    if writer is None:
+                        writer = pq.ParquetWriter(out, table.schema)
+                    writer.write_table(table)
+                    n_kept += len(keep)
+        if n_kept == 0:
+            raise ValueError(f"{path}: no admissions in {years}")
+        files_info[fname] = dict(raw_sha256=sha256(path), raw_rows=n_in, rows_kept=n_kept, years=list(years),
+                                 csv_member=member[0])
+        n_kept_total += n_kept
+        print(f"  {'teds_a <- ' + fname:40} {n_kept:>10,} rows ({n_in:,} in raw)")
     writer.close()
-    manifest["teds_a"] = dict(file="teds_a.parquet", rows=n_kept, columns=len(TEDS_COLUMNS) + 1, sha256=sha256(out),
-                              raw_source=os.path.relpath(path), raw_sha256=sha256(path), raw_rows=n_in,
-                              years=list(TEDS_YEARS), csv_member=member[0])
-    print(f"  {'teds_a':22} {n_kept:>8,} rows ({n_in:,} in raw)  -> {out}")
+    manifest["teds_a"] = dict(file="teds_a.parquet", rows=n_kept_total, columns=len(TEDS_COLUMNS) + 2,
+                              sha256=sha256(out), years=list(TEDS_YEARS), raw_files=files_info)
+    print(f"  {'teds_a':22} {n_kept_total:>8,} rows -> {out}")
 
 
 CENSUS_ASR = {"census_state_asr_2010_2020": ("census_sc_est2020int_alldata5.csv", range(2010, 2020)),

@@ -157,7 +157,7 @@ models:
         data_tests: [not_null, non_negative]
 
   - name: teds_state_year
-    description: TEDS-A admissions aggregated to state x year (area level), 2015-2023.
+    description: TEDS-A admissions aggregated to state x year (area level), 2015-2024.
     columns:
       - name: row_key
         data_tests: [unique, not_null]
@@ -167,7 +167,7 @@ models:
         data_tests: [not_null, non_negative]
 
   - name: teds_reporting_panel
-    description: State x year 2015-2023 reporting grid with the completeness rule (reports every year and no year-to-year change > 50%).
+    description: State x year 2015-2024 reporting grid with the completeness rule (reports every year and no year-to-year change > 50%), applied over 2015-2024 (is_complete) and 2015-2023 (is_complete_2015_2023).
     columns:
       - name: row_key
         data_tests: [unique, not_null]
@@ -185,7 +185,7 @@ models:
         data_tests: [non_negative]
 
   - name: teds_deaths_state_year
-    description: Area-level panel of TEDS-A admissions, CDC opioid deaths and Census population by state x year, 2015-2023.
+    description: Area-level panel of TEDS-A admissions, CDC opioid deaths and Census population by state x year, 2015-2024.
     columns:
       - name: row_key
         data_tests: [unique, not_null]

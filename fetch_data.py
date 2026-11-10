@@ -21,6 +21,8 @@ STATUS OF EACH SOURCE
                states (SUMLEV 040) and counties (SUMLEV 050). National = sum of 50 states + DC.
   teds_a_2006_2023  SAMHSA TEDS-A combined 2006-2023 public-use file (CSV in zip, ~651 MB) + codebook.
                Kept whole in raw; ingestion reads it from the zip and keeps 2015-2023.
+  teds_a_2024  SAMHSA TEDS-A 2024 single-year public-use file (CSV in zip, ~30 MB) + codebook; codes harmonized
+               to the combined 2006-2023 file (src/teds_codebooks.py documents the comparison).
   census_state_asr_*  Census state population by single year of age, sex, race, Hispanic origin:
                intercensal 2010-2020 (used for 2015-2019) and Vintage 2025 (used for 2020-2023).
   svi_2022     VERIFIED 2026-10-10. Official ATSDR CSV from svi.cdc.gov (no geometry; join on FIPS).
@@ -64,6 +66,10 @@ FILES = {
                          "teds_a_2006_2023_csv.zip"),
     "teds_a_2006_2023_codebook": ("https://www.samhsa.gov/data/system/files/media-puf-file/teds-a-2006_2023-ds0001-info-codebook_v1.pdf",
                                   "teds_a_2006_2023_codebook.pdf"),
+    "teds_a_2024": ("https://www.samhsa.gov/data/system/files/media-puf-file/TEDS-A-2024-DS0001-bndl-data-csv_v1_0.zip",
+                    "teds_a_2024_csv.zip"),
+    "teds_a_2024_codebook": ("https://www.samhsa.gov/data/system/files/media-puf-file/TEDS-A-2024-DS0001-info-codebook_v1_0.pdf",
+                             "teds_a_2024_codebook.pdf"),
     "census_state_asr_2010_2020": ("https://www2.census.gov/programs-surveys/popest/datasets/2010-2020/intercensal/state/asrh/sc-est2020int-alldata5.csv",
                                    "census_sc_est2020int_alldata5.csv"),
     "census_state_asr_2020_2025": ("https://www2.census.gov/programs-surveys/popest/datasets/2020-2025/state/asrh/sc-est2025-alldata5.csv",

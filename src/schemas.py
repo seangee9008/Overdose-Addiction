@@ -157,6 +157,7 @@ def _codes(*vals):
 SUBST = _codes(*range(1, 20))
 TEDS_A = pa.DataFrameSchema({
     "src_row": pa.Column(checks=NUM),
+    "source_file": pa.Column(checks=Check.isin(["teds_a_2006_2023_csv.zip", "teds_a_2024_csv.zip"])),
     "CASEID": pa.Column(checks=[NUM, Check.gt(0)]),
     "ADMYR": pa.Column(checks=Check.in_range(2006, 2030)),
     "STFIPS": pa.Column(checks=Check.isin([1, 2, 4, 5, 6, 8, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
