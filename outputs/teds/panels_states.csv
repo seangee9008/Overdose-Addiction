@@ -1,52 +1,103 @@
-state_fips,state_name,is_complete,teds_exclusion_reason,region_name,deaths_2019_2023,deaths_2015_2023,in_P35,in_P_deaths,in_P15,population_2023,opioid_deaths_missing_2019_2023,opioid_deaths_missing_2015_2023,source
-01,Alabama,True,,South,False,False,True,False,False,5322187.0,"2019, 2020, 2021","2015, 2016, 2017, 2018, 2019, 2020, 2021","TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-02,Alaska,True,,West,True,False,True,True,False,819747.0,,2015,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-04,Arizona,False,"year-to-year change > 50%: 2017 (x1.95), 2018 (x2.49)",West,True,False,False,False,False,7858252.0,,"2015, 2016","TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-05,Arkansas,True,,South,False,False,True,False,False,3231727.0,"2019, 2020, 2021","2015, 2016, 2017, 2018, 2019, 2020, 2021","TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-06,California,True,,West,True,False,True,True,False,41984111.0,,"2015, 2016, 2017, 2018","TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-08,Colorado,True,,West,True,False,True,True,False,6262591.0,,"2015, 2016, 2017","TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-09,Connecticut,True,,Northeast,True,True,True,True,True,3804167.0,,,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-10,Delaware,False,"not reported in: 2022, 2023",South,True,False,False,False,False,1088013.0,,"2015, 2016, 2017","TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-11,District of Columbia,True,,South,True,True,True,True,True,720204.0,,,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-12,Florida,False,"year-to-year change > 50%: 2017 (x1.64), 2018 (x2.0)",South,False,False,False,False,False,23889197.0,2020,"2015, 2016, 2017, 2018, 2020","TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-13,Georgia,True,,South,True,True,True,True,True,11548832.0,,,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-15,Hawaii,True,,West,True,False,True,True,False,1934308.0,,"2015, 2017","TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-16,Idaho,False,"not reported in: 2020, 2021",West,False,False,False,False,False,2064432.0,"2019, 2020","2015, 2016, 2017, 2018, 2019, 2020","TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-17,Illinois,False,"year-to-year change > 50%: 2017 (x1.59), 2021 (x0.43), 2023 (x2.77)",Midwest,True,True,False,False,False,13148656.0,,,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-18,Indiana,True,,Midwest,True,False,True,True,False,7175763.0,,"2015, 2016, 2017, 2018","TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-19,Iowa,True,,Midwest,True,True,True,True,True,3328986.0,,,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-20,Kansas,False,year-to-year change > 50%: 2016 (x2.09),Midwest,True,False,False,False,False,3121602.0,,"2015, 2016, 2017, 2018","TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-21,Kentucky,True,,South,True,False,True,True,False,4739657.0,,"2015, 2016, 2017","TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-22,Louisiana,True,,South,False,False,True,False,False,4771142.0,"2019, 2020, 2021, 2022, 2023","2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023","TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-23,Maine,True,,Northeast,True,True,True,True,True,1451063.0,,,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-24,Maryland,False,year-to-year change > 50%: 2017 (x1.58),South,True,True,False,False,False,6549068.0,,,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-25,Massachusetts,True,,Northeast,True,True,True,True,True,7362603.0,,,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-26,Michigan,True,,Midwest,False,False,True,False,False,10514358.0,2019,"2015, 2016, 2017, 2019","TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-27,Minnesota,True,,Midwest,False,False,True,False,False,6008006.0,"2019, 2020","2015, 2016, 2017, 2018, 2019, 2020","TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-28,Mississippi,True,,South,True,False,True,True,False,3032249.0,,"2015, 2016, 2017, 2018","TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-29,Missouri,True,,Midwest,True,False,True,True,False,6522122.0,,"2015, 2016, 2017","TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-30,Montana,False,year-to-year change > 50%: 2017 (x0.49),West,False,False,False,False,False,1186035.0,2019,"2015, 2016, 2017, 2018, 2019","TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-31,Nebraska,True,,Midwest,False,False,True,False,False,2076956.0,"2019, 2020, 2022","2015, 2016, 2017, 2018, 2019, 2020, 2022","TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-32,Nevada,True,,West,True,True,True,True,True,3485249.0,,,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-33,New Hampshire,False,year-to-year change > 50%: 2021 (x0.46),Northeast,True,True,False,False,False,1450313.0,,,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-34,New Jersey,True,,Northeast,True,False,True,True,False,9780707.0,,"2015, 2016, 2017","TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-35,New Mexico,False,"year-to-year change > 50%: 2017 (x1.63), 2018 (x1.82), 2020 (x0.48)",West,True,True,False,False,False,2219832.0,,,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-36,New York,True,,Northeast,True,True,True,True,True,20691467.0,,,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-37,North Carolina,False,year-to-year change > 50%: 2016 (x1.59),South,False,False,False,False,False,11397402.0,2023,2023,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-38,North Dakota,False,year-to-year change > 50%: 2016 (x2.05),Midwest,False,False,False,False,False,820052.0,"2019, 2020, 2021, 2022","2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022","TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-39,Ohio,True,,Midwest,True,True,True,True,True,12350591.0,,,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-40,Oklahoma,True,,South,True,True,True,True,True,4514159.0,,,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-41,Oregon,False,"not reported in: 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022",West,True,True,False,False,False,4554846.0,,,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-42,Pennsylvania,True,,Northeast,False,False,True,False,False,13525535.0,"2019, 2020, 2021, 2022, 2023","2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023","TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-44,Rhode Island,True,,Northeast,True,True,True,True,True,1154269.0,,,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-45,South Carolina,False,"not reported in: 2015, 2023",South,True,True,False,False,False,5618482.0,,,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-46,South Dakota,True,,Midwest,True,False,True,True,False,956499.0,,2015,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-47,Tennessee,True,,South,True,True,True,True,True,7463724.0,,,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-48,Texas,True,,South,True,False,True,True,False,32015407.0,,"2015, 2016, 2017, 2018","TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-49,Utah,True,,West,True,True,True,True,True,3616428.0,,,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-50,Vermont,True,,Northeast,True,True,True,True,True,673792.0,,,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-51,Virginia,True,,South,True,True,True,True,True,9242682.0,,,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-53,Washington,False,"year-to-year change > 50%: 2016 (x2.72), 2018 (x0.32)",West,True,True,False,False,False,8482473.0,,,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-54,West Virginia,False,"not reported in: 2022, 2023",South,True,True,False,False,False,1839835.0,,,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-55,Wisconsin,True,,Midwest,True,False,True,True,False,6152559.0,,2015,"TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
-56,Wyoming,True,,West,True,False,True,True,False,611371.0,,"2015, 2016","TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)"
+spec,state_fips,state_name,is_complete,teds_exclusion_reason,region_name,deaths_death_window,deaths_all_years,in_P35,in_P_deaths,in_P15,population_end,opioid_deaths_missing_death_window
+main,01,Alabama,True,,South,False,False,True,False,False,5373071.0,"2019, 2020, 2021"
+main,02,Alaska,True,,West,True,False,True,True,False,823266.0,
+main,04,Arizona,False,"year-to-year change > 50%: 2017 (x1.95), 2018 (x2.49)",West,True,False,False,False,False,7976260.0,
+main,05,Arkansas,True,,South,False,False,True,False,False,3261139.0,"2019, 2020, 2021"
+main,06,California,True,,West,True,False,True,True,False,42218500.0,
+main,08,Colorado,True,,West,True,False,True,True,False,6348095.0,
+main,09,Connecticut,True,,Northeast,True,True,True,True,True,3843601.0,
+main,10,Delaware,False,"not reported in: 2022, 2023",South,True,False,False,False,False,1104581.0,
+main,11,District of Columbia,True,,South,True,True,True,True,True,730251.0,
+main,12,Florida,False,"year-to-year change > 50%: 2017 (x1.64), 2018 (x2.0)",South,False,False,False,False,False,24255146.0,"2020, 2024"
+main,13,Georgia,True,,South,True,True,True,True,True,11705473.0,
+main,15,Hawaii,True,,West,True,False,True,True,False,1937236.0,
+main,16,Idaho,False,"not reported in: 2020, 2021",West,False,False,False,False,False,2098168.0,"2019, 2020"
+main,17,Illinois,False,"year-to-year change > 50%: 2017 (x1.59), 2021 (x0.43), 2023 (x2.77)",Midwest,True,True,False,False,False,13232038.0,
+main,18,Indiana,True,,Midwest,True,False,True,True,False,7236483.0,
+main,19,Iowa,True,,Midwest,True,True,True,True,True,3348965.0,
+main,20,Kansas,False,year-to-year change > 50%: 2016 (x2.09),Midwest,True,False,False,False,False,3139915.0,
+main,21,Kentucky,True,,South,True,False,True,True,False,4779534.0,
+main,22,Louisiana,True,,South,False,False,True,False,False,4790635.0,"2019, 2020, 2021, 2022, 2023, 2024"
+main,23,Maine,True,,Northeast,True,True,True,True,True,1458529.0,
+main,24,Maryland,False,year-to-year change > 50%: 2017 (x1.58),South,True,True,False,False,False,6598822.0,
+main,25,Massachusetts,True,,Northeast,True,True,True,True,True,7441782.0,
+main,26,Michigan,True,,Midwest,False,False,True,False,False,10563194.0,2019
+main,27,Minnesota,True,,Midwest,False,False,True,False,False,6061162.0,"2019, 2020"
+main,28,Mississippi,True,,South,True,False,True,True,False,3042057.0,
+main,29,Missouri,True,,Midwest,True,False,True,True,False,6566822.0,
+main,30,Montana,False,year-to-year change > 50%: 2017 (x0.49),West,False,False,False,False,False,1194640.0,2019
+main,31,Nebraska,True,,Midwest,False,False,True,False,False,2098181.0,"2019, 2020, 2022, 2024"
+main,32,Nevada,True,,West,True,True,True,True,True,3536964.0,
+main,33,New Hampshire,False,year-to-year change > 50%: 2021 (x0.46),Northeast,True,True,False,False,False,1458314.0,
+main,34,New Jersey,True,,Northeast,True,False,True,True,False,9905116.0,
+main,35,New Mexico,False,"year-to-year change > 50%: 2017 (x1.63), 2018 (x1.82), 2020 (x0.48)",West,True,True,False,False,False,2229566.0,
+main,36,New York,True,,Northeast,True,True,True,True,True,20933442.0,
+main,37,North Carolina,False,year-to-year change > 50%: 2016 (x1.59),South,False,False,False,False,False,11597128.0,2023
+main,38,North Dakota,False,year-to-year change > 50%: 2016 (x2.05),Midwest,False,False,False,False,False,827355.0,"2019, 2020, 2021, 2022, 2024"
+main,39,Ohio,True,,Midwest,True,True,True,True,True,12418731.0,
+main,40,Oklahoma,True,,South,True,True,True,True,True,4558263.0,
+main,41,Oregon,False,"not reported in: 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022",West,True,True,False,False,False,4576659.0,
+main,42,Pennsylvania,True,,Northeast,False,False,True,False,False,13579784.0,"2019, 2020, 2021, 2022, 2023"
+main,44,Rhode Island,True,,Northeast,True,True,True,True,True,1165957.0,
+main,45,South Carolina,False,"not reported in: 2015, 2023, 2024",South,True,True,False,False,False,5726864.0,
+main,46,South Dakota,True,,Midwest,True,False,True,True,False,967109.0,
+main,47,Tennessee,True,,South,True,True,True,True,True,7571167.0,
+main,48,Texas,True,,South,True,False,True,True,False,32658084.0,
+main,49,Utah,True,,West,True,True,True,True,True,3676982.0,
+main,50,Vermont,True,,Northeast,True,True,True,True,True,672759.0,
+main,51,Virginia,True,,South,True,True,True,True,True,9346802.0,
+main,53,Washington,False,not reported in: 2024,West,True,True,False,False,False,8587945.0,
+main,54,West Virginia,False,"not reported in: 2022, 2023",South,True,True,False,False,False,1838752.0,
+main,55,Wisconsin,True,,Midwest,True,False,True,True,False,6185390.0,
+main,56,Wyoming,True,,West,True,False,True,True,False,614110.0,
+through_2023,01,Alabama,True,,South,False,False,True,False,False,5322187.0,"2019, 2020, 2021"
+through_2023,02,Alaska,True,,West,True,False,True,True,False,819747.0,
+through_2023,04,Arizona,False,"year-to-year change > 50%: 2017 (x1.95), 2018 (x2.49)",West,True,False,False,False,False,7858252.0,
+through_2023,05,Arkansas,True,,South,False,False,True,False,False,3231727.0,"2019, 2020, 2021"
+through_2023,06,California,True,,West,True,False,True,True,False,41984111.0,
+through_2023,08,Colorado,True,,West,True,False,True,True,False,6262591.0,
+through_2023,09,Connecticut,True,,Northeast,True,True,True,True,True,3804167.0,
+through_2023,10,Delaware,False,"not reported in: 2022, 2023",South,True,False,False,False,False,1088013.0,
+through_2023,11,District of Columbia,True,,South,True,True,True,True,True,720204.0,
+through_2023,12,Florida,False,"year-to-year change > 50%: 2017 (x1.64), 2018 (x2.0)",South,False,False,False,False,False,23889197.0,2020
+through_2023,13,Georgia,True,,South,True,True,True,True,True,11548832.0,
+through_2023,15,Hawaii,True,,West,True,False,True,True,False,1934308.0,
+through_2023,16,Idaho,False,"not reported in: 2020, 2021",West,False,False,False,False,False,2064432.0,"2019, 2020"
+through_2023,17,Illinois,False,"year-to-year change > 50%: 2017 (x1.59), 2021 (x0.43), 2023 (x2.77)",Midwest,True,True,False,False,False,13148656.0,
+through_2023,18,Indiana,True,,Midwest,True,False,True,True,False,7175763.0,
+through_2023,19,Iowa,True,,Midwest,True,True,True,True,True,3328986.0,
+through_2023,20,Kansas,False,year-to-year change > 50%: 2016 (x2.09),Midwest,True,False,False,False,False,3121602.0,
+through_2023,21,Kentucky,True,,South,True,False,True,True,False,4739657.0,
+through_2023,22,Louisiana,True,,South,False,False,True,False,False,4771142.0,"2019, 2020, 2021, 2022, 2023"
+through_2023,23,Maine,True,,Northeast,True,True,True,True,True,1451063.0,
+through_2023,24,Maryland,False,year-to-year change > 50%: 2017 (x1.58),South,True,True,False,False,False,6549068.0,
+through_2023,25,Massachusetts,True,,Northeast,True,True,True,True,True,7362603.0,
+through_2023,26,Michigan,True,,Midwest,False,False,True,False,False,10514358.0,2019
+through_2023,27,Minnesota,True,,Midwest,False,False,True,False,False,6008006.0,"2019, 2020"
+through_2023,28,Mississippi,True,,South,True,False,True,True,False,3032249.0,
+through_2023,29,Missouri,True,,Midwest,True,False,True,True,False,6522122.0,
+through_2023,30,Montana,False,year-to-year change > 50%: 2017 (x0.49),West,False,False,False,False,False,1186035.0,2019
+through_2023,31,Nebraska,True,,Midwest,False,False,True,False,False,2076956.0,"2019, 2020, 2022"
+through_2023,32,Nevada,True,,West,True,True,True,True,True,3485249.0,
+through_2023,33,New Hampshire,False,year-to-year change > 50%: 2021 (x0.46),Northeast,True,True,False,False,False,1450313.0,
+through_2023,34,New Jersey,True,,Northeast,True,False,True,True,False,9780707.0,
+through_2023,35,New Mexico,False,"year-to-year change > 50%: 2017 (x1.63), 2018 (x1.82), 2020 (x0.48)",West,True,True,False,False,False,2219832.0,
+through_2023,36,New York,True,,Northeast,True,True,True,True,True,20691467.0,
+through_2023,37,North Carolina,False,year-to-year change > 50%: 2016 (x1.59),South,False,False,False,False,False,11397402.0,2023
+through_2023,38,North Dakota,False,year-to-year change > 50%: 2016 (x2.05),Midwest,False,False,False,False,False,820052.0,"2019, 2020, 2021, 2022"
+through_2023,39,Ohio,True,,Midwest,True,True,True,True,True,12350591.0,
+through_2023,40,Oklahoma,True,,South,True,True,True,True,True,4514159.0,
+through_2023,41,Oregon,False,"not reported in: 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022",West,True,True,False,False,False,4554846.0,
+through_2023,42,Pennsylvania,True,,Northeast,False,False,True,False,False,13525535.0,"2019, 2020, 2021, 2022, 2023"
+through_2023,44,Rhode Island,True,,Northeast,True,True,True,True,True,1154269.0,
+through_2023,45,South Carolina,False,"not reported in: 2015, 2023",South,True,True,False,False,False,5618482.0,
+through_2023,46,South Dakota,True,,Midwest,True,False,True,True,False,956499.0,
+through_2023,47,Tennessee,True,,South,True,True,True,True,True,7463724.0,
+through_2023,48,Texas,True,,South,True,False,True,True,False,32015407.0,
+through_2023,49,Utah,True,,West,True,True,True,True,True,3616428.0,
+through_2023,50,Vermont,True,,Northeast,True,True,True,True,True,673792.0,
+through_2023,51,Virginia,True,,South,True,True,True,True,True,9242682.0,
+through_2023,53,Washington,False,"year-to-year change > 50%: 2016 (x2.72), 2018 (x0.32)",West,True,True,False,False,False,8482473.0,
+through_2023,54,West Virginia,False,"not reported in: 2022, 2023",South,True,True,False,False,False,1839835.0,
+through_2023,55,Wisconsin,True,,Midwest,True,False,True,True,False,6152559.0,
+through_2023,56,Wyoming,True,,West,True,False,True,True,False,611371.0,

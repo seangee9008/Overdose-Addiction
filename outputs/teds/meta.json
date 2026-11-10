@@ -1,17 +1,24 @@
 {
-  "seed": 20261107,
+  "seed": 20261109,
   "B": 9999,
-  "years": [
-    2015,
-    2023
+  "specs": {
+    "main": "2015-2024 (main)",
+    "through_2023": "2015-2023 (sensitivity)"
+  },
+  "completeness_rule": "TEDS admissions in every year of the window and total admissions never change by more than 50% year to year (ratio within [0.5, 1.5])",
+  "scope": "TEDS-A now runs through 2024, so 2023 -> 2024 overlaps part of the decline in overdose deaths (late 2022 onward); earlier years describe treatment admissions before that decline.",
+  "coding_shift_rule": "first-time share changes by more than 25% points year to year",
+  "coding_shift_states": [
+    "California",
+    "District of Columbia",
+    "Hawaii"
   ],
-  "death_window": [
-    2019,
-    2023
-  ],
-  "completeness_rule": "TEDS admissions in every year 2015-2023 and total admissions never change by more than 50% year to year (ratio within [0.5, 1.5])",
-  "teds_2024": "TEDS-A 2024 is available from SAMHSA as a single-year file (released 2026; no combined 2006-2024 file) but is NOT included: these analyses use the combined 2006-2023 file and end in 2023.",
-  "scope": "TEDS-A data here end in 2023, so they cover the period before the main decline in overdose deaths (late 2022 onward); they describe treatment admissions before and at the start of that decline and do not test the decline itself.",
-  "source": "TEDS-A 2006-2023 combined PUF (SAMHSA), admissions 2015-2023; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2023)",
-  "method": "Phase 4b: TEDS-A treatment admissions as an independent, AREA-LEVEL signal on opioid addiction.\n\n    python -m src.step_t            # panels, (a), (b), (c), (d), simulation coverage at actual panel sizes\n\nAdmissions are not prevalence: they count treatment episodes (not people) at publicly funded facilities,\ndepend on funding, capacity and referral practice, and miss office-based buprenorphine. Never joined to\nNSDUH. TEDS-A here ends in 2023 (combined 2006-2023 file), so it covers the period BEFORE the main\ndecline in overdose deaths (late 2022 onward) and cannot test that decline itself."
+  "rules": {
+    "T1": "Heroin's share of primary-opioid admissions fell and 'other opiates & synthetics' rose 2019 -> end year: 'holds' if both share changes have 95% CIs excluding 0 in the main specification AND in the through-2023 specification AND both log-odds trends excluding 2020 have CIs excluding 0; 'partial' if the main specification meets this but a sensitivity does not; 'fails' otherwise.",
+    "T2": "First-time primary-opioid admissions per 100k aged 18-24 fell 2019 -> end year: 'holds' if the log change CI excludes 0 (negative) for both bounds (missing NOPRIOR as not first-time / first-time) in the main specification, the through-2023 specification and the coding-shift-excluded sensitivity; 'partial' if the main specification meets this but a sensitivity does not; 'fails' if the main CI includes 0.",
+    "T3": "From 2019, opioid deaths rose relative to primary-opioid admissions (d > 0): 'holds' if d's CI excludes 0 (positive) for start 2019 in the main and the through-2023 specifications; 'partial' if only one; 'fails' if neither.",
+    "T4": "2023 -> 2024 (first overlap with the death decline), primary-opioid admissions vs opioid deaths: 'not distinguishable' if d's CI includes 0; otherwise 'holds' for the observed direction (d > 0: deaths rose relative to admissions; d < 0: deaths fell relative to admissions)."
+  },
+  "source": "TEDS-A (SAMHSA): combined 2006-2023 PUF (2015-2023) + 2024 single-year PUF; CDC VSRR state file (xkb8-kh2a) opioid deaths 'Opioids (T40.0-T40.4,T40.6)', Dec 12-month-ending; Census state population (intercensal 2015-2019, Vintage 2025 2020-2024)",
+  "method": "Phase 4b: TEDS-A treatment admissions as an independent, AREA-LEVEL signal on opioid addiction.\n\n    python -m src.step_t            # harmonization check, panels, (a)-(d), coverage sims, ledger rows T1-T4\n\nAdmissions are not prevalence: they count treatment episodes (not people) at publicly funded facilities,\ndepend on funding, capacity and referral practice, and miss office-based buprenorphine. Never joined to\nNSDUH. TEDS-A now runs through 2024 (combined 2006-2023 file + 2024 single-year file, identical codes),\nso 2023 -> 2024 overlaps part of the decline in overdose deaths (which began in late 2022)."
 }

@@ -1,8 +1,12 @@
-method,panel,clusters,years,sims,B,coverage_95,null_rejection_5pct
-"wild cluster bootstrap (webb), TWFE slope",P_deaths,28,5,300,199,0.9566666666666667,0.056666666666666664
-"wild cluster bootstrap (rademacher), TWFE slope",P_deaths,28,5,300,199,0.9166666666666666,0.03666666666666667
-"wild cluster bootstrap (webb), TWFE slope",P15,15,9,300,199,0.9266666666666666,0.06
-"wild cluster bootstrap (rademacher), TWFE slope",P15,15,9,300,199,0.9366666666666666,0.06
-"state-cluster bootstrap, percentile CI of log ratio of totals",P35,35,2,1000,999,0.916,
-"state-cluster bootstrap, percentile CI of log ratio of totals",P_deaths,28,2,1000,999,0.918,
-"state-cluster bootstrap, percentile CI of log ratio of totals",P15,15,2,1000,999,0.889,
+method,statistic,panel,clusters,sims,B,coverage_95,mc_se,null_rejection_5pct,meets_94pct_target
+"symmetric bootstrap-t, jackknife SE (state clusters)",log_ratio,P35,35,2000,499,0.9415,0.004873397172404482,,True
+"symmetric bootstrap-t, jackknife SE (state clusters)",d,P35,35,2000,499,0.95,0.004873397172404482,,True
+"symmetric bootstrap-t, jackknife SE (state clusters)",trend,P35,35,2000,499,0.9455,0.004873397172404482,,True
+"symmetric bootstrap-t, jackknife SE (state clusters)",log_ratio,P_deaths,28,2000,499,0.9575,0.004873397172404482,,True
+"symmetric bootstrap-t, jackknife SE (state clusters)",d,P_deaths,28,2000,499,0.956,0.004873397172404482,,True
+"symmetric bootstrap-t, jackknife SE (state clusters)",trend,P_deaths,28,2000,499,0.9455,0.004873397172404482,,True
+"symmetric bootstrap-t, jackknife SE (state clusters)",log_ratio,P15,15,2000,499,0.945,0.004873397172404482,,True
+"symmetric bootstrap-t, jackknife SE (state clusters)",d,P15,15,2000,499,0.9555,0.004873397172404482,,True
+"symmetric bootstrap-t, jackknife SE (state clusters)",trend,P15,15,2000,499,0.947,0.004873397172404482,,True
+"wild cluster bootstrap (WCR, Webb weights), test-inversion CI (TWFE slope)",association slope,P_deaths,28,1000,399,0.948,0.006892024376045111,0.057,True
+"wild cluster bootstrap (WCR, Webb weights), test-inversion CI (TWFE slope)",association slope,P15,15,1000,399,0.953,0.006892024376045111,0.044,True

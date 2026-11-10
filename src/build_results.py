@@ -286,25 +286,44 @@ def sec_teds(used):
         return pd.read_csv(os.path.join(TEDS_DIR, f))
 
     summ, st = rd("panels_summary.csv"), rd("panels_states.csv")
+    chg = rd("panels_changes_2023_vs_2024.csv")
+    hc, hd = rd("harmonization_codebook_2024.csv"), rd("harmonization_data_2024.csv")
+    cov = rd("sim_coverage.csv")
     parts = ["## TEDS-A (Phase 4b): treatment admissions, area level\n",
              "Produced by `src/step_t.py` (`make teds`). TEDS-A counts treatment **admissions** (episodes, not people) at "
              "publicly funded facilities; it is not a prevalence measure and is never joined to NSDUH.\n",
-             f"> **Scope:** {meta['scope']}\n", f"> **TEDS-A 2024:** {meta['teds_2024']}\n",
+             f"> **Scope:** {meta['scope']}\n",
+             "> **Specifications:** " + "; ".join(f"`{k}` = {v}" for k, v in meta["specs"].items())
+             + ". The main specification includes 2024; the 2015-2023 results are kept as sensitivity rows (column "
+               "`spec` in every table).\n",
              "### Method (from the script)\n", "```\n" + meta["method"] + "\n```\n",
              f"Completeness rule: {meta['completeness_rule']}.\n",
+             "### Harmonization: TEDS-A 2024 single-year file vs the combined 2006-2023 file\n",
+             "Value labels parsed from both codebooks for every variable the pipeline uses. Status counts:\n",
+             table(hc.groupby(["variable", "status"]).size().rename("codes").reset_index()),
+             "\nCodes that are not identical in both codebooks:\n",
+             table(hc[hc.status != "same"].drop(columns=["source"])),
+             "\nCodes observed in the data in only one of 2023 / 2024:\n",
+             table(hd[hd.status != "both years"].drop(columns=["source"])),
+             f"\nSources: `{hc.source.iloc[0]}`; `{hd.source.iloc[0]}`.\n",
              "### Panels, population share and regional mix\n", table(summ, 3),
+             "\n#### States whose panel membership changes when 2024 is added\n",
+             (table(chg) if len(chg) else "None: every state is in the same P35, P_deaths and P15 panels through 2023 and "
+              "through 2024.\n"),
              "\n> **Caveat:** the panels are not random samples of the US. They contain only states whose TEDS reporting is "
              "complete and stable (and, for P_deaths / P15, whose CDC opioid-specific death values are available); compare "
              "the regional mix above with all 50 states + DC.\n",
-             "#### State membership and reasons\n",
-             table(st[["state_name", "region_name", "in_P35", "in_P_deaths", "in_P15", "teds_exclusion_reason",
-                       "opioid_deaths_missing_2019_2023", "opioid_deaths_missing_2015_2023", "population_2023"]]),
+             "#### State membership and reasons (main specification)\n",
+             table(st[st.spec == "main"][["state_name", "region_name", "in_P35", "in_P_deaths", "in_P15",
+                                          "teds_exclusion_reason", "opioid_deaths_missing_death_window", "population_end"]]),
              "\n### (a) Opioid admissions over time and versus opioid deaths\n", img("teds/a_trends.png"),
-             "#### Admission-rate trend, P35 (with and without 2020)\n", table(rd("a_admissions_trend_P35.csv"), 3),
-             "\n#### State-year association (log admission rate on log opioid death rate)\n",
-             table(rd("a_association.csv"), 4, drop=("model",)),
+             "#### Admission-rate trend, P35 (with and without 2020; symmetric bootstrap-t)\n",
+             table(rd("a_admissions_trend_P35.csv"), 3),
+             "\n#### State-year association (log admission rate on log opioid death rate; WCR wild cluster bootstrap, "
+             "Webb weights, test-inversion CI)\n",
+             table(rd("a_association.csv"), 4),
              "\n#### Admission series, P35\n", table(rd("a_admissions_series_P35.csv"), 2),
-             "\n#### Admissions vs deaths series (P_deaths 2019-2023; P15 2015-2023 sensitivity)\n",
+             "\n#### Admissions vs deaths series (P_deaths from 2019; P15 from 2015)\n",
              table(rd("a_admissions_vs_deaths_series.csv"), 2),
              "\n### (b) Heroin vs other opiates/synthetics among primary-opioid admissions (P35)\n", img("teds/b_shares.png"),
              "Code 7 ('other opiates and synthetics') combines fentanyl, prescription opioids and buprenorphine; the public "
@@ -314,10 +333,26 @@ def sec_teds(used):
              "First-time admissions (no prior treatment episode) are not new cases of addiction: entry into treatment also "
              "depends on access, capacity, referral and the years between onset and first treatment. Bounds treat missing "
              "NOPRIOR as not first-time (lower) or first-time (upper).\n",
-             table(rd("c_first_time_changes.csv"), 3), "\n#### Rates by year\n", table(rd("c_first_time_by_age_P35.csv"), 2),
+             "#### The 2018 jump in first-time admissions: per-state contribution (2017 -> 2018, P35)\n",
+             table(rd("c_2018_jump_by_state.csv"), 3),
+             "\nNeither the 2006-2023 nor the 2024 codebook contains a note on NOPRIOR coding changes for any state; the "
+             "only NOPRIOR text is the generic variable definition. "
+             "**Because the 2018 jump comes from a change in prior-treatment coding in specific states rather than a "
+             "panel-wide change, 2019 is the baseline for (c).** 2019 itself lies inside California's 2018-2020 elevation, "
+             "so (c) is also reported without the states flagged by the data rule "
+             f"({meta['coding_shift_rule']}: {', '.join(meta['coding_shift_states'])}) and with a 2015 baseline. Indiana's "
+             "lasting 2018 step (first-time share about 0.02 to about 0.25) falls below the 25-point rule and stays in "
+             "both variants.\n",
+             "#### First-time share by state and year (coding check)\n", table(rd("c_noprior_coding_check.csv"), 3),
+             "\n#### Changes (2019 baseline; 2015 baseline as comparison)\n", table(rd("c_first_time_changes.csv"), 3),
+             "\n#### Rates by year\n", table(rd("c_first_time_by_age.csv"), 2),
              "\n### (d) Difference of declines: opioid deaths vs admissions\n",
              table(rd("d_difference_of_declines.csv"), 4),
-             "\n### Simulation coverage at the actual panel sizes\n", table(rd("sim_coverage.csv"), 3),
+             "\n### Simulated 95% CI coverage at each panel size (target >= 94%)\n",
+             "Bootstrap-t: 2,000 simulated panels per row (B = 499 per panel); wild cluster bootstrap: 1,000 simulated "
+             "panels per row (B = 399). `mc_se` is the Monte Carlo standard error of a 95% coverage estimate. Simulated "
+             "data come from `src/panel.py` generators, not TEDS.\n",
+             table(cov, 3),
              "\nSources:\n", f"- {meta['source']}\n"]
     return "\n".join(parts)
 
@@ -352,18 +387,25 @@ def write_findings():
         return
     led = pd.read_csv(LEDGER)
     vd = pd.read_csv(os.path.join(OUT_DIR, "robustness", "summary_verdicts.csv"))
+    rules = vd[vd.rule.notna() & (vd.rule != "")][["finding", "rule"]]
+    teds_rows = os.path.join(TEDS_DIR, "findings_rows.csv")
+    if os.path.exists(teds_rows):
+        led = pd.concat([led, pd.read_csv(teds_rows)[led.columns]], ignore_index=True)
+        tr = json.load(open(os.path.join(TEDS_DIR, "meta.json")))["rules"]
+        rules = pd.concat([rules, pd.DataFrame(list(tr.items()), columns=["finding", "rule"])], ignore_index=True)
     text = ["# Findings ledger\n",
             "Generated by `python -m src.build_results` from `outputs/robustness/findings_ledger.csv` (written by "
-            "`src/step_r.py`). Every number is filled in from the output files; the wording is templated and "
+            "`src/step_r.py`, rows F*) and `outputs/teds/findings_rows.csv` (written by `src/step_t.py`, rows T*, "
+            "area-level TEDS-A). Every number is filled in from the output files; the wording is templated and "
             "descriptive. Verdicts apply the decision rules fixed before the robustness checks were run (listed below); "
             "'holds' means the rule is met, not that the claim is established.\n",
             "## Ledger\n",
             table(led.rename(columns={"original_claim": "original claim", "supported_claim": "what the data support now",
                                       "key_evidence": "key evidence", "main_caveat": "main caveat"})),
             "\n## Decision rules\n",
-            table(vd[vd.rule.notna() & (vd.rule != "")][["finding", "rule"]]),
+            table(rules),
             "\nFull per-variant results, figures and detailed tables: `results/RESULTS.md`, section "
-            "\"Robustness (Phase 4a)\".\n"]
+            "\"Robustness (Phase 4a)\" (F rows) and \"TEDS-A (Phase 4b)\" (T rows).\n"]
     with open(FINDINGS, "w") as fh:
         fh.write("\n".join(text).rstrip() + "\n")
 
