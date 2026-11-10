@@ -200,3 +200,59 @@ def test_state_cluster_bootstrap_covers_planted_log_ratio():
         lo, hi = np.percentile(np.log(t[:, 1]) - np.log(t[:, 0]), [2.5, 97.5])
         cover += lo <= truth <= hi
     assert cover / n >= 0.95 - 3 * np.sqrt(0.95 * 0.05 / n) - 0.03, f"coverage {cover / n:.3f}"
+
+
+def test_jackknife_se_matches_closed_form_for_a_total():
+    from src.panel import jackknife_se
+    v = np.random.default_rng(1).normal(10, 2, size=(30,))
+    # leave-one-out estimates are means of G-1 = 29 states; the jackknife SE of a mean is sd / sqrt(G) exactly
+    se = jackknife_se(v[None], lambda T: T / 29)[0]
+    assert abs(se - v.std(ddof=1) / np.sqrt(30)) < 1e-9
+
+
+@pytest.mark.parametrize("G", [15, 35])
+def test_studentized_cluster_bootstrap_covers_planted_log_ratio(G):
+    from src.panel import simulate_state_totals, studentized_cluster_bootstrap, superpopulation_log_ratio
+    truth = superpopulation_log_ratio(n=400_000)
+    rng = np.random.default_rng([808, G])
+    n = max(N_SIMS, 100)
+    cover = 0
+    for s in range(n):
+        r = studentized_cluster_bootstrap(simulate_state_totals(rng, G), lambda T: np.log(T[..., 1] / T[..., 0]),
+                                          B=299, seed=s)
+        cover += r["ci_low"] <= truth <= r["ci_high"]
+    assert cover / n >= 0.95 - 3 * np.sqrt(0.95 * 0.05 / n), f"coverage {cover / n:.3f} at G={G}"
+
+
+def test_studentized_cluster_bootstrap_covers_planted_trend():
+    from src.panel import simulate_state_series, studentized_cluster_bootstrap, superpopulation_trend
+    years = list(range(2015, 2025))
+    t = np.arange(len(years), dtype=float) - (len(years) - 1) / 2
+    truth = superpopulation_trend(years)
+    rng = np.random.default_rng(909)
+    n = max(N_SIMS, 100)
+    cover = 0
+    for s in range(n):
+        v = simulate_state_series(rng, 28, years)
+
+        def f(T):
+            ly = np.log(T[..., 0] / T[..., 1])
+            return ((ly - ly.mean(axis=-1, keepdims=True)) * t).sum(axis=-1) / (t ** 2).sum()
+        r = studentized_cluster_bootstrap(v, f, B=299, seed=s)
+        cover += r["ci_low"] <= truth <= r["ci_high"]
+    assert cover / n >= 0.95 - 3 * np.sqrt(0.95 * 0.05 / n), f"coverage {cover / n:.3f}"
+
+
+def test_inverted_wild_cluster_ci_matches_estimate_and_covers_with_15_clusters():
+    from src.panel import simulate_panel, wild_cluster_bootstrap, wild_cluster_ci_inverted
+    rng = np.random.default_rng(1010)
+    d = simulate_panel(rng, G=15, T=10)
+    a = wild_cluster_ci_inverted(d, "y", ["x"], "unit", "time", B=199, seed=1)
+    b = wild_cluster_bootstrap(d, "y", ["x"], "unit", "time", B=199, seed=1, weights="webb")
+    assert abs(a["estimate"] - b["estimate"]) < 1e-10 and abs(a["se_cr1"] - b["se_cr1"]) < 1e-10
+    n = max(N_SIMS, 100)
+    cover = 0
+    for s in range(n):
+        r = wild_cluster_ci_inverted(simulate_panel(rng, G=15, T=10), "y", ["x"], "unit", "time", B=199, seed=s)
+        cover += r["ci_low"] <= 0.6 <= r["ci_high"]
+    assert cover / n >= 0.95 - 3 * np.sqrt(0.95 * 0.05 / n), f"coverage {cover / n:.3f}"

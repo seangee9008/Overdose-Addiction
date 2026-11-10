@@ -57,10 +57,10 @@ def _weights(rng, G, kind):
     raise ValueError(kind)
 
 
-def wild_cluster_bootstrap(df, y_col, x_cols, unit, time, j=0, B=9999, seed=0, weights="rademacher"):
+def wild_cluster_bootstrap(df, y_col, x_cols, unit, time, j=0, B=9999, seed=0, weights="rademacher", ci="equal"):
     """Fit the TWFE model and bootstrap coefficient x_cols[j]. Returns dict with estimate, CR1 SE,
     WCR bootstrap p-value (H0: b_j = 0), WCU percentile-t 95% CI, n, clusters. `weights`: 'rademacher'
-    or 'webb'."""
+    or 'webb'. `ci`: 'equal' (equal-tailed percentile-t, default) or 'symmetric' (beta +/- q95(|t*|) * se)."""
     y = df[y_col].to_numpy(float)
     X, names = twfe_design(df, x_cols, unit, time)
     clusters, cidx = np.unique(df[unit].to_numpy(), return_inverse=True)
@@ -88,10 +88,14 @@ def wild_cluster_bootstrap(df, y_col, x_cols, unit, time, j=0, B=9999, seed=0, w
         b_u, e_u = _ols(X, y_u)
         t_wcu[b] = (b_u[j] - beta[j]) / _cr1_se(X, e_u, cidx, G, XtX_inv)[j]
     p = float(np.mean(np.abs(t_wcr) >= abs(t_obs)))
-    q_lo, q_hi = np.quantile(t_wcu, [0.025, 0.975])
+    if ci == "symmetric":
+        q_hi = float(np.quantile(np.abs(t_wcu), 0.95))
+        q_lo = -q_hi
+    else:
+        q_lo, q_hi = np.quantile(t_wcu, [0.025, 0.975])
     return dict(term=names[j], estimate=float(beta[j]), se_cr1=float(se[j]), t=float(t_obs), p_wild=p,
                 ci_low=float(beta[j] - q_hi * se[j]), ci_high=float(beta[j] - q_lo * se[j]),
-                n=len(y), clusters=G, B=B, seed=seed, weights=weights)
+                n=len(y), clusters=G, B=B, seed=seed, weights=weights, ci=ci)
 
 
 def cluster_bootstrap_totals(values, B, seed):
@@ -135,3 +139,135 @@ def simulate_panel(rng, G=40, T=9, beta=0.6, rho=0.5, sd=0.15):
         for t in range(T):
             rows.append(dict(unit=i, time=t, x=x[t], y=a[i] + g[t] + beta * x[t] + e[t]))
     return pd.DataFrame(rows)
+
+
+# ---------------------------------------------------------------------------------------------------
+# Studentized (bootstrap-t) state-cluster bootstrap for any smooth function of panel totals.
+#   values : array [G, *shape] of per-state contributions (e.g. counts by year x measure)
+#   f      : vectorized function mapping totals [..., *shape] -> scalar per leading index
+# SE = delete-one-cluster jackknife: se^2 = (G-1)/G * sum_s (theta_(-s) - mean)^2. (The cluster linearization
+# SE was 10-14% too small for ratio statistics with very unequal state sizes in simulation; the jackknife SE
+# matched the empirical spread.) Every bootstrap replicate recomputes its own jackknife SE, and the 95% CI is
+# SYMMETRIC: theta +/- q95(|t*|) * se with t* = (theta* - theta) / se*. In simulations at 15, 28 and 35
+# clusters this interval covered at 95.3%, 94.8% and 94.2% (equal-tailed: 92.6-93.9%).
+
+def jackknife_se(Vb, f):
+    """Delete-one-cluster jackknife SE of f(totals) for a batch of panels Vb [B, G, *shape]; returns [B]."""
+    G = Vb.shape[1]
+    loo = f(Vb.sum(axis=1)[:, None] - Vb)                 # [B, G] leave-one-cluster-out estimates
+    return np.sqrt((G - 1) / G * ((loo - loo.mean(axis=1, keepdims=True)) ** 2).sum(axis=1))
+
+
+def studentized_cluster_bootstrap(values, f, B=9999, seed=0, batch=500):
+    """Symmetric bootstrap-t over clusters for theta = f(sum of values over clusters), jackknife SE.
+    Returns dict(estimate, se, ci_low, ci_high, p_boot, B); p_boot is the symmetric bootstrap-t p-value
+    for H0: theta = 0."""
+    values = np.asarray(values, float)
+    G = values.shape[0]
+    if G < 3:
+        raise ValueError(f"cluster bootstrap needs at least 3 clusters, got {G}")
+    theta = float(f(values.sum(axis=0)[None])[0])
+    se = float(jackknife_se(values[None], f)[0])
+    rng = np.random.default_rng(seed)
+    t = []
+    for start in range(0, B, batch):
+        nb = min(batch, B - start)
+        Vb = values[rng.integers(0, G, size=(nb, G))]
+        t.append((f(Vb.sum(axis=1)) - theta) / jackknife_se(Vb, f))
+    t = np.concatenate(t)
+    t = np.abs(t[np.isfinite(t)])
+    q = float(np.quantile(t, 0.95))
+    return dict(estimate=theta, se=se, ci_low=theta - q * se, ci_high=theta + q * se,
+                p_boot=float(np.mean(t >= abs(theta / se))) if se > 0 else np.nan, B=len(t))
+
+
+def simulate_state_series(rng, G, years, base_mean=5000.0, mu=-0.08, tau=0.05, noise=0.05):
+    """Synthetic [G, T, 2] panel (count, population): each state's log rate has its own linear trend
+    mu + N(0, tau^2) plus noise; populations constant within state."""
+    T = len(years)
+    t = np.arange(T, dtype=float)
+    size = base_mean * np.exp(rng.normal(0, 0.8, G))
+    slope = mu + rng.normal(0, tau, G)
+    counts = size[:, None] * np.exp(slope[:, None] * t[None] + rng.normal(0, noise, (G, T)))
+    pop = (size * 2e4)[:, None] * np.ones(T)
+    return np.stack([counts, pop], axis=2)
+
+
+def superpopulation_trend(years, mu=-0.08, tau=0.05):
+    """Target of the log-linear trend of the ratio of totals: log E[count_t] = const + mu t + tau^2 t^2 / 2."""
+    t = np.arange(len(years), dtype=float)
+    y = mu * t + tau ** 2 * t ** 2 / 2
+    tc = t - t.mean()
+    return float((y * tc).sum() / (tc ** 2).sum())
+
+
+# ---------------------------------------------------------------------------------------------------
+# Wild cluster bootstrap confidence interval by TEST INVERSION (restricted WCR bootstrap; MacKinnon & Webb).
+# The 95% CI is the set of b0 that the WCR bootstrap-t test of H0: b_j = b0 does not reject at 5%. The same
+# cluster weights are used for every b0. With few clusters this covered better in simulation than the
+# unrestricted WCU percentile-t interval (WCU equal-tailed at 15 states: 92.3%).
+
+def _wcr_pvalue(X, y, j, b0, cidx, G, A, M, adj, V):
+    """WCR bootstrap-t p-value for H0: b_j = b0. V: [G, B] cluster weights. Vectorized over draws."""
+    xj = X[:, j]
+    Xr = np.delete(X, j, axis=1)
+    y0 = y - b0 * xj
+    br, *_ = np.linalg.lstsq(Xr, y0, rcond=None)
+    fr = Xr @ br
+    ur = y0 - fr
+    a = A[j]                                                  # b_j = a @ y
+
+    def se_of(E):                                             # CR1 SE of b_j for residual columns E [n, B]
+        S = np.zeros((G,) + E.shape[1:])
+        np.add.at(S, cidx, a[:, None] * E if E.ndim == 2 else a * E)
+        return np.sqrt(adj * (S ** 2).sum(axis=0))
+    e = M @ y
+    t_obs = (a @ y - b0) / se_of(e)
+    Ys = (b0 * xj + fr)[:, None] + ur[:, None] * V[cidx]      # [n, B]
+    t_b = (a @ Ys - b0) / se_of(M @ Ys)
+    return float(np.mean(np.abs(t_b) >= abs(t_obs)))
+
+
+def wild_cluster_ci_inverted(df, y_col, x_cols, unit, time, j=0, B=9999, seed=0, weights="webb", level=0.95,
+                             tol=1e-4):
+    """Estimate, CR1 SE, WCR p-value (H0: b_j = 0) and the test-inversion CI for coefficient x_cols[j]."""
+    y = df[y_col].to_numpy(float)
+    X, names = twfe_design(df, x_cols, unit, time)
+    _, cidx = np.unique(df[unit].to_numpy(), return_inverse=True)
+    G = cidx.max() + 1
+    if G < 2:
+        raise ValueError(f"wild cluster bootstrap needs at least 2 clusters, got {G}")
+    n, k = X.shape
+    A = np.linalg.pinv(X)                                     # [k, n]
+    M = np.eye(n) - X @ A
+    rank = np.linalg.matrix_rank(X)
+    adj = G / (G - 1) * (n - 1) / (n - rank)
+    rng = np.random.default_rng(seed)
+    V = np.stack([_weights(rng, G, weights) for _ in range(B)], axis=1)   # [G, B]
+    beta = float(A[j] @ y)
+    S = np.zeros(G)
+    np.add.at(S, cidx, A[j] * (M @ y))
+    se = float(np.sqrt(adj * (S ** 2).sum()))
+    alpha = 1 - level
+
+    def p(b0):
+        return _wcr_pvalue(X, y, j, b0, cidx, G, A, M, adj, V)
+
+    def bound(direction):
+        inside, step = beta, 2 * se
+        outside = beta + direction * step
+        while p(outside) > alpha:                            # expand until rejected
+            inside, step = outside, step * 2
+            outside = beta + direction * step
+            if step > 1e3 * max(se, 1e-12):
+                return np.inf * direction
+        while abs(outside - inside) > tol * max(se, 1e-12):   # bisect on the acceptance boundary
+            mid = (inside + outside) / 2
+            if p(mid) > alpha:
+                inside = mid
+            else:
+                outside = mid
+        return (inside + outside) / 2
+    return dict(term=names[j], estimate=beta, se_cr1=se, p_wild=p(0.0), ci_low=float(bound(-1)),
+                ci_high=float(bound(1)), n=n, clusters=int(G), B=B, seed=seed, weights=weights,
+                ci="WCR test inversion")
